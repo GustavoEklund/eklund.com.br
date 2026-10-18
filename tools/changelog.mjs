@@ -12,6 +12,8 @@ import { promisify } from 'node:util';
 
 const PROJECT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const REPOSITORY = 'https://github.com/GustavoEklund/eklund.com.br';
+const KEEP_A_CHANGELOG = 'https://keepachangelog.com/en/1.1.0/';
+const SEMANTIC_VERSIONING = 'https://semver.org/spec/v2.0.0.html';
 const run = promisify(execFile);
 
 /** A Semantic Versioning 2.0.0 version, and the order the specification gives versions. */
@@ -145,7 +147,10 @@ export class Changelog {
     const found = [];
     if (!this.preface.startsWith('# Changelog'))
       found.push('the file must start with "# Changelog"');
-    if (!this.preface.includes('keepachangelog.com') || !this.preface.includes('semver.org'))
+    const linked = new Set(
+      [...this.preface.matchAll(/\]\((https:\/\/[^)\s]+)\)/g)].map(([, address]) => address),
+    );
+    if (!linked.has(KEEP_A_CHANGELOG) || !linked.has(SEMANTIC_VERSIONING))
       found.push('the introduction must link Keep a Changelog and Semantic Versioning');
     if (this.releases[0]?.name !== 'Unreleased')
       found.push('the first section must be "## [Unreleased]"');

@@ -1,0 +1,6 @@
+# What CodeQL analyzes. The tests are left out: they read this repository's own files with regular expressions (HTML,
+# URLs, headers), and nothing in them ships or runs on a visitor's machine. The code that ships (source/) and the code that
+# builds, serves, audits and releases it (tools/, the workflows) is analyzed.
+name: CodeQL configuration
+paths-ignore:
+  - tests

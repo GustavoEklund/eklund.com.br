@@ -246,12 +246,17 @@ describe('the workflows', () => {
     const required = JSON.parse(RepositoryFiles.read('.github/rulesets/main.json'))
       .rules.find((rule) => rule.type === 'required_status_checks')
       .parameters.required_status_checks.map(({ context }) => context);
-    const languages = ['actions', 'javascript-typescript'];
-    const names = workflows.flatMap(({ jobNames }) =>
+    const names = workflows.flatMap(({ jobNames, matrix }) =>
       jobNames.flatMap((name) =>
-        name.includes('${{ matrix.language }}')
-          ? languages.map((language) => name.replace('${{ matrix.language }}', language))
-          : [name],
+        Object.entries(matrix).reduce(
+          (all, [key, values]) =>
+            all.flatMap((one) =>
+              one.includes(`\${{ matrix.${key} }}`)
+                ? values.map((value) => one.replace(`\${{ matrix.${key} }}`, value))
+                : [one],
+            ),
+          [name],
+        ),
       ),
     );
     expect(required.filter((context) => !names.includes(context))).toStrictEqual([]);

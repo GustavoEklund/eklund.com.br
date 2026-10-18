@@ -75,9 +75,13 @@ jobs:
           if-no-files-found: ignore
 
   e2e:
-    name: End-to-end, accessibility and layout stability
+    name: End-to-end, accessibility and layout stability (${{ matrix.shard }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ['1/2', '2/2'] # the suite on one runner takes 26 minutes, two halves take about 13 each
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -85,11 +89,13 @@ jobs:
       - uses: ./.github/actions/setup
         with:
           browser: 'true'
-      - run: vp run test:e2e
+      - run: vp exec playwright test --shard="$SHARD"
+        env:
+          SHARD: ${{ matrix.shard }}
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
-          name: playwright-report
+          name: playwright-report-${{ strategy.job-index }}
           path: reports/playwright
           if-no-files-found: ignore
 
@@ -110,9 +116,34 @@ jobs:
       - run: vp run contrast
 
   build:
-    name: Production build, its checks and its end-to-end run
+    name: Production build and its checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - run: vp run build
+      - run: vp run test:build
+      - run: java -version # the W3C Nu HTML Checker (vnu-jar) runs on the runner's JDK
+      - run: node tools/validate-html.mjs --only-static dist/index.html
+      - run: node tools/validate-html.mjs --only-static dist/en/index.html
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: site
+          path: dist
+          include-hidden-files: true # the .htaccess files are part of the site
+          if-no-files-found: error
+
+  e2e-dist:
+    name: End-to-end against the production build (${{ matrix.shard }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ['1/2', '2/2']
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -121,23 +152,14 @@ jobs:
         with:
           browser: 'true'
       - run: vp run build
-      - run: vp run test:build
-      - run: java -version # the W3C Nu HTML Checker (vnu-jar) runs on the runner's JDK
-      - run: node tools/validate-html.mjs --only-static dist/index.html
-      - run: node tools/validate-html.mjs --only-static dist/en/index.html
-      - run: vp exec playwright test
+      - run: vp exec playwright test --shard="$SHARD"
         env:
           SITE_ROOT: dist # the whole end-to-end suite, against the build and not against source/
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: site
-          path: dist
-          include-hidden-files: true # the .htaccess files are part of the site
-          if-no-files-found: error
+          SHARD: ${{ matrix.shard }}
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
-          name: playwright-report-build
+          name: playwright-report-dist-${{ strategy.job-index }}
           path: reports/playwright
           if-no-files-found: ignore
 

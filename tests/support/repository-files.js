@@ -58,6 +58,13 @@ export class RepositoryFiles {
           text,
           jobNames: [...jobs.matchAll(/^ {4}name: (.+)$/gm)].map(([, name]) => name.trim()),
           jobCount: [...jobs.matchAll(/^ {2}[\w-]+:$/gm)].length,
+          /** The lists of a matrix, as { shard: ['1/2', '2/2'] }: what a job name with ${{ matrix.shard }} stands for. */
+          matrix: Object.fromEntries(
+            [...jobs.matchAll(/^ {8}(\w+): \[(.+?)\]/gm)].map(([, key, list]) => [
+              key,
+              list.split(',').map((value) => value.trim().replace(/^'|'$/g, '')),
+            ]),
+          ),
         };
       });
   }

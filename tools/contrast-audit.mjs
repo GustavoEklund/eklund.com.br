@@ -89,7 +89,7 @@ try {
       viewport: { width: 1280, height: 800 },
       locale: options.lang,
     });
-    await context.route(/fonts\.(googleapis|gstatic)\.com/, (route) =>
+    await context.route(/^https?:\/\/fonts\.(googleapis|gstatic)\.com\//, (route) =>
       route.fulfill({ status: 200, contentType: 'text/css', body: '' }),
     );
     const page = await context.newPage();

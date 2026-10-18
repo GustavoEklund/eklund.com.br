@@ -26,6 +26,8 @@ const chrome = spawn(
   { stdio: 'ignore' },
 );
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+/** A message from the page, on one line: what the page prints cannot add lines to this tool's output. */
+const oneLine = (text) => String(text).replace(/[\r\n]+/g, ' ');
 let info;
 for (let i = 0; i < 60; i++) {
   try {
@@ -57,13 +59,13 @@ ws.onmessage = (e) => {
   if (m.method === 'Runtime.exceptionThrown')
     console.log(
       'EXCEPTION:',
-      m.params.exceptionDetails.exception?.description || m.params.exceptionDetails.text,
+      oneLine(m.params.exceptionDetails.exception?.description || m.params.exceptionDetails.text),
     );
   if (m.method === 'Runtime.consoleAPICalled')
     console.log(
       'CONSOLE',
-      m.params.type + ':',
-      m.params.args.map((a) => a.value ?? a.description).join(' '),
+      oneLine(m.params.type) + ':',
+      oneLine(m.params.args.map((a) => a.value ?? a.description).join(' ')),
     );
 };
 await send('Runtime.enable');
