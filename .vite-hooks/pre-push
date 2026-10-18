@@ -1,0 +1,5 @@
+# The commits being pushed keep the convention even when commit-msg was skipped (--no-verify, a rebase, an amend), then
+# everything that is quick enough to wait for: format, lint, spelling, i18n audit, every Vitest project and the BDD suite.
+# The end-to-end suite and the mutation run happen in CI.
+node tools/commit-gate.mjs pre-push "$@"
+vp run verify

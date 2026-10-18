@@ -1,0 +1,82 @@
+@layer effects {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 38%;
+    }
+  }
+
+  @keyframes reveal {
+    from {
+      opacity: 0;
+      translate: 0 32px;
+    }
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .hero.is-revealed .hero-name {
+      animation: hero-out linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 90vh;
+    }
+
+    .globe.is-revealed {
+      animation: globe-out linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 90vh;
+    }
+  }
+
+  @keyframes hero-out {
+    to {
+      translate: 0 14vh;
+      opacity: 0;
+    }
+  }
+
+  @keyframes globe-out {
+    to {
+      translate: 0 -6vh;
+    }
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
+
+  ::view-transition-old(root) {
+    z-index: 1;
+  }
+
+  ::view-transition-new(root) {
+    z-index: 2;
+  }
+
+  /*
+   * The system asks for less motion. This only matters until the page has set data-motion (before its first paint, from the
+   * visitor's saved choice or this very setting) or where scripts do not run: afterwards the header button decides, and its
+   * paused state has the same rules in accessibility.css, so playing again works for a visitor whose system asks for less.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    :root:not([data-motion]) *,
+    :root:not([data-motion]) *::before,
+    :root:not([data-motion]) *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+
+    :root:not([data-motion]) :is(.hero-name, .hero .eyebrow, .hero-copy, .globe, .chip) {
+      opacity: 1;
+      translate: 0;
+      scale: 1;
+    }
+
+    :root:not([data-motion]) :is(.reveal, .hero.is-revealed .hero-name, .globe.is-revealed) {
+      animation: none;
+    }
+  }
+}

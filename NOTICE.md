@@ -1,0 +1,25 @@
+# Licenses
+
+This repository holds code, writing, images and a few things that belong to other people. They do not share one license, so this file says which is which. [`LICENSE`](LICENSE) is the MIT text on its own, which is what GitHub reads to name the license of the repository.
+
+| What                                                                                                                                                                                                                                                                                                        | License                                                                                                    |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| The code: `source/js`, `source/css`, the markup of `source/index.html`, `tools`, `tests`, the configuration files and the workflows                                                                                                                                                                         | [MIT](LICENSE)                                                                                             |
+| The documentation: `README.md`, `README.pt-BR.md`, `CONTRIBUTING.md`, `SECURITY.md`, `SUPPORT.md`, `CHANGELOG.md` and `docs/`                                                                                                                                                                               | [MIT](LICENSE)                                                                                             |
+| My words and images: the copy in `source/js/i18n/locales` and the text that `source/index.html` and `source/en/index.html` generate from it, the mark `source/icon.svg` and what is drawn from it (`favicon.ico`, `apple-touch-icon.png` and `source/assets/brand`: the manifest icons and the social card) | [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/), see below                           |
+| The fonts Bricolage Grotesque, Instrument Serif and JetBrains Mono in `source/fonts`                                                                                                                                                                                                                        | SIL Open Font License 1.1 (each license text sits beside its font)                                         |
+| The technology icons in `source/assets/icons.svg`                                                                                                                                                                                                                                                           | [Simple Icons](https://simpleicons.org), CC0 1.0                                                           |
+| The logos of OKTO Payments, G8 Finance, Esatto, Anhanguera and Fatec in `source/assets`                                                                                                                                                                                                                     | Not licensed. They are trademarks of their owners, shown only to say where I worked or studied.            |
+| `CODE_OF_CONDUCT.md`                                                                                                                                                                                                                                                                                        | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/), adapted from the Contributor Covenant 3.0 |
+
+## My words and images
+
+The text about me and the images I made are under [Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/). You may copy and share them, with credit and a link to this repository, for non-commercial purposes, and without changing them. If you want to use my text or my mark any other way, write to me first.
+
+This is the reason the code is MIT and the words are not: take the code, learn from it and build your own site with it, and write your own text. A copy of this site that says my name, my employers and my career as if they were yours is not what the license is for.
+
+Corrections to this text (a typo, a wrong translation) sent as a pull request are accepted under the same license.
+
+## Third-party trademarks
+
+The names and logos of the technologies shown in the marquee (Go, TypeScript, PostgreSQL, Kafka, Kubernetes, AWS and the others), of GitHub and of the companies above belong to their owners. Their use here points at the owner, and no endorsement is implied.

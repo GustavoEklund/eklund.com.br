@@ -1,0 +1,43 @@
+$schema: https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json
+version: '0.2'
+# The site is bilingual: Brazilian Portuguese is the default language of the page, English is the language of the code, the
+# comments and the documents. Code and tests mention both, so they accept both dictionaries; the English documents and the
+# English copy are checked against the English one alone.
+language: en-US,pt-BR
+import:
+  - '@cspell/dict-pt-br/cspell-ext.json'
+dictionaryDefinitions:
+  - name: project-words
+    path: ./.cspell/project-words.txt
+    addWords: true
+dictionaries:
+  - project-words
+useGitignore: true
+# Advisory identifiers (GHSA-xxxx-xxxx-xxxx) and label colors are random letters and digits.
+ignoreRegExpList:
+  - /GHSA(-[a-z0-9]{4}){3}/g
+  - /--color [0-9A-Fa-f]{6}/g
+ignorePaths:
+  - node_modules/**
+  - dist/**
+  - reports/**
+  - pnpm-lock.yaml
+  - tools/land.json
+  - source/js/globe/land-bitset.js
+  - source/fonts/**
+  - source/assets/**/*.svg
+  - tests/contract/fixtures/**
+  # Hidden folders that hold what tools write, never what a person wrote.
+  - .git/**
+  - .idea/**
+  - .stryker-tmp/**
+  - .vitest/**
+  - .lighthouseci/**
+  - .vite-hooks/_/**
+  - .cspellcache
+overrides:
+  - filename: '**/*.md'
+    language: en-US
+  - filename:
+      - README.pt-BR.md
+    language: pt-BR,en-US

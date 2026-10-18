@@ -1,0 +1,12 @@
+# Who reviews what. A pull request that touches a path needs the owner's review once branch protection asks for code owner
+# review (docs/repository-settings.md). The repository has one maintainer, so one owner covers everything, and the
+# lines below make the sensitive paths visible: what ships to visitors, and what decides what ships.
+*                               @GustavoEklund
+/.github/                       @GustavoEklund
+/source/.htaccess               @GustavoEklund
+/tools/site-headers.mjs         @GustavoEklund
+/tools/site-build.mjs           @GustavoEklund
+/pnpm-workspace.yaml            @GustavoEklund
+/SECURITY.md                    @GustavoEklund
+/LICENSE                        @GustavoEklund
+/NOTICE.md                      @GustavoEklund

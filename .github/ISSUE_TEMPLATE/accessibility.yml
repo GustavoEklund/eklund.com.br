@@ -1,0 +1,32 @@
+name: Accessibility barrier
+description: Something that a person using a keyboard, a screen reader, zoom or reduced motion cannot do.
+title: 'a11y: '
+labels: [accessibility]
+body:
+  - type: textarea
+    id: barrier
+    attributes:
+      label: The barrier
+      description: What you tried to do, and what stopped you.
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Where
+      description: The page, the section and the control.
+      placeholder: https://eklund.com.br/#carga, the Run button
+    validations:
+      required: true
+  - type: textarea
+    id: setup
+    attributes:
+      label: Your setup
+      description: Browser, system, assistive technology and its version, zoom level, settings such as reduced motion or forced colors.
+    validations:
+      required: true
+  - type: input
+    id: criterion
+    attributes:
+      label: WCAG criterion, if you know it
+      placeholder: 2.4.7 Focus Visible

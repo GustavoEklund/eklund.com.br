@@ -1,0 +1,95 @@
+/*
+ * Self-hosted WOFF2 fonts, all under the SIL Open Font License 1.1 (license text next to each file in fonts/).
+ * Each file is the Latin subset of the family as Google Fonts publishes it, unmodified. Only Latin is shipped
+ * because every character of the pt-BR and en-US text is in it, apart from the Greek sigma that the load test
+ * terminal prints, which has its own small file for the monospace face. unicode-range makes the browser fetch
+ * a file only when the page draws a character from it.
+ * A file that changes must change its name too: the server marks fonts as cacheable for a year.
+ */
+
+@layer base {
+  /* Variable on three axes: optical size, width and weight. The hero name uses the narrow end of the width axis. */
+  @font-face {
+    font-family: 'Bricolage Grotesque';
+    font-style: normal;
+    font-weight: 200 800;
+    font-stretch: 75% 100%;
+    font-display: swap;
+    src: url('../../fonts/bricolage-grotesque-latin.woff2') format('woff2');
+    unicode-range:
+      U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+      U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+
+  /* The accent words in the headings; the family has no upright style that the site uses. */
+  @font-face {
+    font-family: 'Instrument Serif';
+    font-style: italic;
+    font-weight: 400;
+    font-display: swap;
+    src: url('../../fonts/instrument-serif-italic-latin.woff2') format('woff2');
+    unicode-range:
+      U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+      U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+
+  /* One variable file covers the 400, 500 and 600 the site uses. */
+  @font-face {
+    font-family: 'JetBrains Mono';
+    font-style: normal;
+    font-weight: 400 800;
+    font-display: swap;
+    src: url('../../fonts/jetbrains-mono-latin.woff2') format('woff2');
+    unicode-range:
+      U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+      U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+
+  @font-face {
+    font-family: 'JetBrains Mono';
+    font-style: normal;
+    font-weight: 400 800;
+    font-display: swap;
+    src: url('../../fonts/jetbrains-mono-greek.woff2') format('woff2');
+    unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+  }
+
+  /*
+   * Stand-ins shown during the swap period, scaled so the text takes the same room as in the real font and the
+   * swap moves nothing. size-adjust is the ratio of the mean advance width of the site's own text (both
+   * languages) in the web font and in the system font; the vertical overrides are the web font's hhea ascent and
+   * descent divided by size-adjust. Measured against Arial (Liberation Sans, Arimo and Helvetica share its widths),
+   * Times New Roman italic and Courier New, with Bricolage at weight 700, width 88 and optical size 96.
+   */
+  @font-face {
+    font-family: 'Bricolage Grotesque Fallback';
+    font-weight: 200 800;
+    src: local('Arial'), local('Liberation Sans'), local('Arimo'), local('Helvetica');
+    size-adjust: 82.95%;
+    ascent-override: 112.11%;
+    descent-override: 32.55%;
+    line-gap-override: 0%;
+  }
+
+  @font-face {
+    font-family: 'Instrument Serif Fallback';
+    font-style: italic;
+    src:
+      local('Times New Roman Italic'), local('Liberation Serif Italic'), local('Tinos Italic'),
+      local('Times Italic');
+    size-adjust: 86.32%;
+    ascent-override: 114.69%;
+    descent-override: 35.91%;
+    line-gap-override: 0%;
+  }
+
+  @font-face {
+    font-family: 'JetBrains Mono Fallback';
+    font-weight: 400 800;
+    src: local('Courier New'), local('Liberation Mono'), local('Cousine'), local('Courier');
+    size-adjust: 99.98%;
+    ascent-override: 102.02%;
+    descent-override: 30%;
+    line-gap-override: 0%;
+  }
+}

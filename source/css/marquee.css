@@ -1,0 +1,136 @@
+@layer components {
+  /* Two tilted rows running in opposite directions: logos on top, outlined concepts below. */
+  .marquee-clip {
+    overflow: hidden;
+    width: 100%;
+    padding-block: 2rem;
+  }
+
+  .marquee {
+    width: 112vw;
+    margin: 0 0 0 -6vw;
+    rotate: -1.6deg;
+    border-block: 1px solid var(--line);
+    background: var(--bg);
+    user-select: none;
+  }
+
+  .marquee-row {
+    display: flex;
+    align-items: center;
+    overflow: clip;
+    height: calc(clamp(2.4rem, 6vw, 5.6rem) + 1.1rem);
+    transform: skewX(var(--skew, 0deg));
+    transition: transform 0.25s ease-out;
+    contain: paint;
+  }
+
+  /* Text waits for the display fonts, like the hero: the fallback font would reflow the band on swap. */
+  .js:not(.fonts-ready) .marquee-track {
+    visibility: hidden;
+  }
+
+  .marquee-row + .marquee-row {
+    border-top: 1px solid var(--line);
+  }
+
+  .marquee-track {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 1.6rem;
+    padding-right: 1.6rem;
+    white-space: nowrap;
+    will-change: transform;
+    backface-visibility: hidden;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(2.4rem, 6vw, 5.6rem);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    font-variation-settings:
+      'opsz' 96,
+      'wdth' 82;
+  }
+
+  .marquee-track i {
+    font-style: normal;
+    color: var(--accent-text);
+    font-size: 0.45em;
+  }
+
+  .marquee-row-outline .marquee-track {
+    color: transparent;
+    -webkit-text-stroke: 1.2px color-mix(in oklch, var(--fg) 75%, transparent);
+    font-weight: 600;
+  }
+
+  .marquee-row-outline .marquee-track i {
+    -webkit-text-stroke: 0;
+    color: var(--accent-text);
+  }
+
+  .marquee-track span {
+    transition:
+      color 0.25s,
+      -webkit-text-stroke-color 0.25s,
+      translate 0.35s var(--spring);
+  }
+
+  .marquee-track span:hover {
+    color: var(--accent);
+    translate: 0 -0.06em;
+  }
+
+  .marquee-row-outline .marquee-track span:hover {
+    -webkit-text-stroke-color: var(--accent);
+  }
+
+  .tech {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.32em;
+  }
+
+  .tech svg {
+    width: 0.78em;
+    height: 0.78em;
+    fill: currentcolor;
+    flex: none;
+    transition:
+      rotate 0.5s var(--spring),
+      scale 0.5s var(--spring);
+  }
+
+  .tech:hover svg {
+    rotate: -12deg;
+    scale: 1.12;
+  }
+
+  .tech:hover {
+    color: var(--brand);
+  }
+
+  .tech[data-gradient='google']:hover svg {
+    fill: url('#gradient-google');
+  }
+
+  .tech[data-gradient='otel']:hover svg {
+    fill: url('#gradient-otel');
+  }
+
+  .tech[data-gradient]:hover {
+    background: linear-gradient(90deg, #4285f4, #ea4335, #fbbc05, #34a853);
+    background-clip: text;
+    color: transparent;
+  }
+
+  .tech[data-gradient='otel']:hover {
+    background-image: linear-gradient(90deg, #f5a800, #425cc7);
+  }
+
+  .marquee.is-dragging .marquee-row {
+    transition: none;
+  }
+}

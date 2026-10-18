@@ -1,0 +1,16 @@
+# Settings for lychee (https://lychee.cli.rs), which checks the links in the Markdown files.
+include_fragments = "full"
+max_retries = 3
+retry_wait_time = 5
+timeout = 30
+accept = ["200..=299", "429"]
+exclude_path = ["node_modules", "dist", "reports", ".stryker-tmp", "tests/contract/fixtures"]
+exclude = [
+  # They answer a script with a login wall or a rate limit, whatever the address.
+  '^https://www\.linkedin\.com/',
+  # They need a signed-in user, so an anonymous request gets a 404.
+  '^https://github\.com/GustavoEklund/eklund\.com\.br/security/advisories/new$',
+  # The page exists after the first release and not before it.
+  '^https://github\.com/GustavoEklund/eklund\.com\.br/releases/tag/',
+  '^https://github\.com/GustavoEklund/eklund\.com\.br/compare/',
+]

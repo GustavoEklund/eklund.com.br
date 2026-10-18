@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://eklund.com.br/contracts/worker/command-tick.json",
+  "title": "tick command",
+  "description": "Sent repeatedly while the scenario runs. fraction is the share of the warm-up throughput to run for this tick (RampScenario.fractionAt). The worker answers with reply-tick.",
+  "type": "object",
+  "required": ["command", "fraction"],
+  "properties": {
+    "command": { "const": "tick" },
+    "fraction": { "type": "number", "minimum": 0, "maximum": 1 }
+  }
+}

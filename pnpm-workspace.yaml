@@ -1,0 +1,28 @@
+# Keep every tool on the Vite and Vitest copies that Vite+ ships (see https://viteplus.dev/guide/local-cli).
+overrides:
+  vite@*: npm:@voidzero-dev/vite-plus-core@1.3.0
+  vitest@*: 5.0.5
+  # Stryker's HTTP client asks for a qs that has denial-of-service advisories (GHSA-q8mj-m7cp-5q26, GHSA-x5fp-wj9c-mxmx,
+  # GHSA-4mjr-xmp4-gh2g); the fixed line is a drop-in.
+  qs@<6.16.0: ^6.16.0
+
+# Supply chain: a version is installed only when it has been public for two days, which is about how long the registry and the
+# community need to pull a compromised release (Dependabot waits longer, see .github/dependabot.yml). A package may not lose the
+# provenance evidence an older version had, and a dependency of a dependency may not come from a git URL or a tarball address.
+minimumReleaseAge: 2880
+minimumReleaseAgeStrict: true
+trustPolicy: no-downgrade
+blockExoticSubdeps: true
+
+# No install script runs unless it is listed here. vnu-jar's would download a Java runtime, and the validator uses the Java on the PATH.
+allowBuilds:
+  vnu-jar: false
+
+# `pnpm audit` fails the build on a high or critical advisory. This one has no fixed version yet: braces, which stylelint
+# reaches through fast-glob and micromatch, can exhaust the stack on a malicious brace pattern. Stylelint runs on this
+# repository's own globs, in CI and on the developer's machine, and nothing here passes it a pattern from outside. Remove
+# the line when braces has a fix.
+audit:
+  level: high
+  ignore:
+    - GHSA-vfj7-8cjw-p6xm

@@ -1,0 +1,113 @@
+@layer components {
+  /* Dot plus a difference-blend ring that snaps to buttons, turns into a label, or into a text caret. */
+
+  /* Both are popovers only to live in the top layer, above modal dialogs; the rules below undo the popover defaults. */
+  .cursor-dot,
+  .cursor-ring {
+    position: fixed;
+    inset: auto;
+    top: 0;
+    left: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    overflow: visible;
+    pointer-events: none;
+    display: none;
+  }
+
+  .cursor-dot {
+    z-index: 96;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    translate: -50% -50%;
+    transition:
+      opacity 0.25s,
+      scale 0.25s;
+  }
+
+  .cursor-ring {
+    z-index: 95;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #fff;
+    mix-blend-mode: difference;
+    opacity: 0.9;
+    place-items: center;
+    will-change: transform;
+    transition:
+      width 0.4s var(--spring),
+      height 0.4s var(--spring),
+      border-radius 0.35s var(--ease-out),
+      opacity 0.3s,
+      background 0.3s;
+  }
+
+  .cursor-ring span {
+    font-size: 0.58rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink);
+    opacity: 0;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+  }
+
+  .cursor-ring.is-link {
+    width: 60px;
+    height: 60px;
+    opacity: 1;
+  }
+
+  .cursor-ring.is-text {
+    width: 3px;
+    height: 30px;
+    border-radius: 2px;
+  }
+
+  .cursor-ring.is-label {
+    width: 92px;
+    height: 92px;
+    mix-blend-mode: normal;
+    background: var(--accent);
+    opacity: 1;
+  }
+
+  .cursor-ring.is-label span {
+    opacity: 1;
+    transition-delay: 0.15s;
+  }
+
+  .cursor-ring.is-stuck {
+    opacity: 1;
+  }
+
+  .cursor-dot.is-hidden {
+    opacity: 0;
+    scale: 0;
+  }
+
+  @media (pointer: fine) {
+    html.has-custom-cursor,
+    html.has-custom-cursor a,
+    html.has-custom-cursor button,
+    html.has-custom-cursor canvas,
+    html.has-custom-cursor input,
+    html.has-custom-cursor summary,
+    html.has-custom-cursor label {
+      cursor: none;
+    }
+
+    html.has-custom-cursor .cursor-dot {
+      display: block;
+    }
+
+    html.has-custom-cursor .cursor-ring {
+      display: grid;
+    }
+  }
+}

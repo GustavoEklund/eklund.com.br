@@ -1,0 +1,82 @@
+# The conventions a change has to follow before it merges: the title of the pull request and every commit message follow
+# Conventional Commits and are spelled right, and a change that visitors will notice has a line in CHANGELOG.md. The same
+# code runs in the git hooks (tools/commit-gate.mjs), so a developer sees these failures before CI does.
+name: Conventions
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, labeled, unlabeled]
+  push:
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: conventions-${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+env:
+  CI: 'true'
+  VP_GIT_HOOKS: '0'
+
+jobs:
+  title:
+    name: Pull request title
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - run: node tools/commit-gate.mjs title "$PR_TITLE"
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+
+  messages:
+    name: Commit messages
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: The commits of the pull request
+        if: github.event_name == 'pull_request'
+        run: node tools/commit-gate.mjs range "$BASE" "$HEAD"
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+      - name: The commits of the push
+        if: github.event_name == 'push'
+        run: node tools/commit-gate.mjs range "$BEFORE" "$AFTER"
+        env:
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+
+  changelog:
+    name: Changelog entry
+    if: github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip-changelog')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - run: node tools/changelog.mjs require "$PR_TITLE" "$BASE" "$HEAD"
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+      - run: node tools/changelog.mjs check

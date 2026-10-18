@@ -1,0 +1,310 @@
+@layer components {
+  .architecture-header .btn-outline {
+    margin-left: auto;
+  }
+
+  .architecture-caption[hidden] {
+    display: none;
+  }
+
+  .architecture-caption {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem 0.8rem;
+    padding: 0.6rem var(--panel-padding);
+    border-bottom: 1px solid var(--line);
+    background: color-mix(in oklch, var(--accent) 8%, transparent);
+    font-size: 0.7rem;
+    color: var(--fg);
+    min-height: 2.4rem;
+  }
+
+  .architecture-caption b {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent-text);
+  }
+
+  .architecture-caption i {
+    font-style: normal;
+    font-size: 0.58rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.4rem;
+    border-radius: 0.3rem;
+    background: var(--accent);
+    color: var(--ink);
+  }
+
+  .architecture-canvas {
+    position: relative;
+    overflow: auto clip;
+    padding: 0.75rem 0.5rem;
+    background-image: radial-gradient(
+      color-mix(in oklch, var(--fg) 7%, transparent) 1px,
+      transparent 1px
+    );
+    background-size: 24px 24px;
+  }
+
+  .architecture-canvas svg {
+    display: block;
+    width: 100%;
+    min-width: 1320px;
+    height: auto;
+    font-family: var(--font-mono);
+  }
+
+  .zone {
+    fill: none;
+    stroke: var(--line);
+    stroke-dasharray: 5 5;
+    rx: 14px;
+  }
+
+  .zone-cluster {
+    stroke: color-mix(in oklch, var(--accent) 30%, transparent);
+    stroke-dasharray: none;
+  }
+
+  .zone-label {
+    fill: var(--fg-2);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .zone-label.is-dim {
+    font-weight: 500;
+  }
+
+  .zone-label.is-vertical {
+    text-anchor: middle;
+    fill: var(--fg);
+  }
+
+  .network-band {
+    fill: color-mix(in oklch, var(--fg) 4%, transparent);
+    stroke: var(--line);
+    rx: 10px;
+  }
+
+  .edge {
+    fill: none;
+    stroke: color-mix(in oklch, var(--fg) 50%, transparent);
+    stroke-width: 1.3;
+    transition:
+      stroke 0.2s,
+      stroke-width 0.2s,
+      opacity 0.2s;
+  }
+
+  .edge.sync {
+    stroke: color-mix(in oklch, var(--accent-text) 85%, transparent);
+  }
+
+  .edge.event {
+    stroke: color-mix(in oklch, var(--accent-2-text) 85%, transparent);
+  }
+
+  .edge.data {
+    stroke-dasharray: 3 4;
+  }
+
+  .edge.rsfn {
+    stroke: color-mix(in oklch, var(--fg) 70%, transparent);
+    stroke-width: 1.6;
+  }
+
+  .edge.is-active {
+    stroke-width: 2.4;
+    stroke: var(--accent);
+  }
+
+  .edge.is-highlighted {
+    stroke-width: 2.6;
+    stroke: var(--accent);
+    filter: drop-shadow(0 0 6px var(--accent));
+  }
+
+  .node rect {
+    fill: var(--bg);
+    stroke: var(--line);
+    rx: 10px;
+    transition:
+      stroke 0.2s,
+      filter 0.3s;
+  }
+
+  .node-external rect,
+  .node-central-bank rect {
+    stroke-dasharray: 4 3;
+  }
+
+  .node-storage rect,
+  .node-platform rect {
+    fill: color-mix(in oklch, var(--bg-2) 70%, var(--bg));
+  }
+
+  .node-central-bank rect {
+    fill: color-mix(in oklch, var(--bg-2) 40%, var(--bg));
+  }
+
+  .node:hover rect,
+  .node.is-active rect {
+    stroke: var(--accent);
+    filter: drop-shadow(0 0 10px color-mix(in oklch, var(--accent) 35%, transparent));
+  }
+
+  .node-title {
+    fill: var(--fg);
+    font-size: 14.5px;
+    font-weight: 600;
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+
+  .node-subtitle {
+    fill: var(--fg-2);
+    font-size: 10.5px;
+  }
+
+  .node-health {
+    fill: var(--ok);
+  }
+
+  .node-health.is-warning {
+    fill: var(--warn);
+  }
+
+  .node-sparkline {
+    fill: none;
+    stroke: var(--accent-text);
+    stroke-width: 1.3;
+    stroke-linejoin: round;
+    opacity: 0.9;
+  }
+
+  .node-sparkline-fill {
+    fill: var(--accent);
+    opacity: 0.12;
+  }
+
+  .node-replicas {
+    fill: var(--bg-2);
+    stroke: var(--line);
+    rx: 7px;
+  }
+
+  .node-replicas-text {
+    fill: var(--fg);
+    font-size: 9.5px;
+    font-weight: 600;
+    text-anchor: middle;
+  }
+
+  .event-bus rect {
+    fill: color-mix(in oklch, var(--accent-2) 10%, var(--bg));
+    stroke: color-mix(in oklch, var(--accent-2) 45%, transparent);
+    rx: 9px;
+  }
+
+  .event-bus .node-title {
+    font-size: 13px;
+  }
+
+  .bus-topic {
+    fill: var(--fg-2);
+    font-size: 9px;
+  }
+
+  .bus-topic-bar {
+    fill: var(--accent-2);
+    opacity: 0.6;
+    rx: 2px;
+  }
+
+  .packet {
+    pointer-events: none;
+  }
+
+  .packet.sync {
+    fill: var(--accent);
+  }
+
+  .packet.event {
+    fill: var(--accent-2);
+  }
+
+  .packet.data {
+    fill: var(--fg-2);
+  }
+
+  .packet.rsfn {
+    fill: var(--fg);
+  }
+
+  .packet-tracked {
+    fill: var(--accent);
+    stroke: var(--bg);
+    stroke-width: 2;
+    pointer-events: none;
+  }
+
+  .packet-halo {
+    fill: var(--accent);
+    opacity: 0.25;
+    pointer-events: none;
+  }
+
+  .architecture-tooltip {
+    position: absolute;
+    z-index: 3;
+    max-width: 320px;
+    padding: 0.6rem 0.8rem;
+    border-radius: 0.6rem;
+    background: var(--fg);
+    color: var(--bg);
+    font-size: 0.64rem;
+    line-height: 1.5;
+    box-shadow: 0 10px 30px -10px oklch(0% 0 0deg / 50%);
+    text-wrap: pretty;
+  }
+
+  .architecture-tooltip b {
+    font-weight: 600;
+    display: block;
+    font-size: 0.74rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .architecture-tooltip span {
+    display: block;
+    margin-top: 0.3rem;
+    opacity: 0.7;
+  }
+
+  .architecture-list dl {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+    gap: 1rem 1.5rem;
+    padding: 0.4rem var(--panel-padding) 1.4rem;
+    font-size: 0.66rem;
+    line-height: 1.55;
+  }
+
+  .architecture-list dt {
+    color: var(--fg);
+    font-weight: 600;
+    font-size: 0.74rem;
+  }
+
+  .architecture-list dd {
+    color: var(--fg-2);
+    margin-top: 0.15rem;
+    text-wrap: pretty;
+  }
+}

@@ -1,0 +1,56 @@
+name: Bug report
+description: Something on the site or in the tooling does not work as it should.
+title: 'bug: '
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting it. For a security problem, use the [private form](https://github.com/GustavoEklund/eklund.com.br/security/advisories/new) instead.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you saw, and what you expected to see instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to reproduce it
+      description: The address, the clicks or keys, the language and the theme.
+      placeholder: |
+        1. Open https://eklund.com.br/en/
+        2. Press Ctrl K and type "theme"
+        3. ...
+    validations:
+      required: true
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser
+      options: [Chrome or Chromium, Edge, Firefox, Safari, Another]
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Browser version, system and screen
+      placeholder: Chrome 130, Android 15, 390 x 844
+  - type: dropdown
+    id: language
+    attributes:
+      label: Language of the page
+      options: [Portuguese (/), English (/en/), Both]
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Screenshots or console output
+      description: Drag files in, or paste the text of the console.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before sending
+      options:
+        - label: I looked for an issue that already reports this.
+          required: true

@@ -1,0 +1,94 @@
+/* Text for assistive technology, room for the keyboard focus under the fixed header, and the paused state of the motion button. */
+@layer components {
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* WCAG 2.4.11: the fixed header must not cover the control that has the keyboard focus. Equal above and below, so centering a control still centers it. */
+  :is(a, button, summary, input, [tabindex]:not([tabindex='-1'])) {
+    scroll-margin-block: 5.5rem;
+  }
+
+  /* Larger text must not push the header or the globe controls off the screen: they wrap instead (WCAG 1.4.4). */
+  .site-header {
+    flex-wrap: wrap;
+    row-gap: 0.4rem;
+  }
+
+  .site-nav {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .globe-controls {
+    flex-wrap: wrap;
+    justify-content: center;
+    white-space: normal;
+    max-width: calc(100vw - 2 * var(--gutter));
+  }
+
+  /* Focus that script moves to a section or to main after a link (no control there to outline). */
+  [tabindex='-1']:focus {
+    outline: none;
+  }
+
+  .motion-toggle .icon-play {
+    display: none;
+  }
+
+  .motion-toggle[aria-pressed='true'] .icon-pause {
+    display: none;
+  }
+
+  .motion-toggle[aria-pressed='true'] .icon-play {
+    display: block;
+  }
+
+  .motion-toggle[aria-pressed='true'] {
+    background: var(--bg-2);
+  }
+}
+
+/* The visitor paused motion with the header button: the same rules the system "reduce motion" setting gets in effects.css. */
+@layer effects {
+  :root[data-motion='paused'] *,
+  :root[data-motion='paused'] *::before,
+  :root[data-motion='paused'] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  :root[data-motion='paused'] :is(.hero-name, .hero .eyebrow, .hero-copy, .globe, .chip) {
+    opacity: 1;
+    translate: 0;
+    scale: 1;
+  }
+
+  /* Ambient loops stop outright: shortening a running loop is not reliable in every browser, and no end state matters for them. */
+  :root[data-motion='paused']
+    :is(
+      .live-dot,
+      .status-dot,
+      .rotating-text-roll,
+      .globe.is-revealed .chip,
+      .job-card.is-open .job-event,
+      .terminal-cursor.is-blinking
+    ),
+  :root[data-motion='paused'] .scroll-cue::after,
+  :root[data-motion='paused'] .load-test.is-running .load-test-state::before {
+    animation: none !important;
+  }
+
+  :root[data-motion='paused'] :is(.reveal, .hero.is-revealed .hero-name, .globe.is-revealed) {
+    animation: none;
+  }
+}

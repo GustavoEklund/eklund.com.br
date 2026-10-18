@@ -1,0 +1,7 @@
+# The manifest icons and the social card keep their names, because the manifest and the og:image tag spell them out: they are
+# not kept for a year like the hashed files of the folder above.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(png|svg|ico)$">
+    Header set Cache-Control "public, max-age=86400, stale-while-revalidate=604800"
+  </FilesMatch>
+</IfModule>

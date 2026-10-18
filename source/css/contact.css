@@ -1,0 +1,98 @@
+@layer components {
+  .contact {
+    position: relative;
+    text-align: center;
+    display: grid;
+    justify-items: center;
+    gap: 1.25rem;
+  }
+
+  .contact > :not(.chevron-field) {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Field of chevrons pointing at the cursor; spans the full viewport width. */
+  .chevron-field {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 100vw;
+    translate: -50% 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .contact .eyebrow {
+    justify-content: center;
+  }
+
+  .contact .eyebrow::before {
+    display: none;
+  }
+
+  .contact .lead {
+    text-align: center;
+  }
+
+  .email-link {
+    display: inline-block;
+    margin-top: 0.5rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.7rem, 6.6vw, 7rem);
+    font-weight: 700;
+    letter-spacing: -0.045em;
+    line-height: 1.05;
+    font-variation-settings:
+      'opsz' 96,
+      'wdth' 78;
+    text-decoration: underline;
+    text-decoration-thickness: 0.05em;
+    text-underline-offset: 0.14em;
+    text-decoration-color: color-mix(in oklch, var(--accent) 50%, transparent);
+    transition:
+      text-decoration-color 0.3s,
+      translate 0.2s ease-out;
+    will-change: translate;
+    overflow-wrap: anywhere;
+  }
+
+  .email-link:hover {
+    text-decoration-color: var(--accent);
+  }
+
+  .social-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1.75rem;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .social-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0;
+    color: var(--fg-2);
+    transition: color 0.25s;
+  }
+
+  .social-links a:hover {
+    color: var(--fg);
+  }
+
+  .social-links a:hover svg {
+    translate: 2px -2px;
+  }
+
+  .social-links svg {
+    width: 0.8rem;
+    height: 0.8rem;
+    transition: translate 0.3s var(--ease-out);
+  }
+}

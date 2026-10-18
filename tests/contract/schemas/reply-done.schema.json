@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://eklund.com.br/contracts/worker/reply-done.json",
+  "title": "final report",
+  "description": "LoadTest reads conserved, minimumBalance, journalEntries and chain. The counters are also sent and typed here, but no consumer requires them.",
+  "type": "object",
+  "required": ["conserved", "minimumBalance", "journalEntries", "chain"],
+  "properties": {
+    "conserved": {
+      "type": "boolean",
+      "description": "The sum of all balances equals the opening sum."
+    },
+    "minimumBalance": { "type": "number" },
+    "journalEntries": { "type": "integer", "minimum": 0 },
+    "chain": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}$",
+      "description": "Hash of the journal as eight lowercase hex digits."
+    },
+    "accepted": { "type": "integer", "minimum": 0 },
+    "insufficientFunds": { "type": "integer", "minimum": 0 },
+    "duplicates": { "type": "integer", "minimum": 0 },
+    "invalid": { "type": "integer", "minimum": 0 },
+    "negativeBalances": { "type": "integer", "minimum": 0 }
+  }
+}

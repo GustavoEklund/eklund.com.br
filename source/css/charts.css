@@ -1,0 +1,266 @@
+@layer components {
+  /* Shared chart anatomy: thin marks, recessive grid, hover layer and a tooltip. */
+  .chart-panel {
+    background: var(--bg-2);
+    margin: 0;
+    padding: 1rem clamp(1rem, 2.5vw, 1.6rem);
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .chart-panel figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem 1rem;
+    align-items: baseline;
+    font-size: 0.62rem;
+    color: var(--fg-2);
+  }
+
+  .chart-panel figcaption b {
+    font-size: 0.78rem;
+    color: var(--fg);
+    font-weight: 600;
+  }
+
+  .chart-legend {
+    margin-left: auto;
+    display: flex;
+    gap: 0.9rem;
+  }
+
+  .chart-legend i {
+    display: inline-block;
+    width: 0.9rem;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--c);
+    vertical-align: middle;
+    margin-right: 0.35rem;
+  }
+
+  .chart-legend i.is-dashed-series {
+    background: repeating-linear-gradient(90deg, var(--c) 0 5px, transparent 5px 8px);
+  }
+
+  .chart-legend i.is-dashed {
+    background: repeating-linear-gradient(90deg, var(--fg-2) 0 3px, transparent 3px 6px);
+  }
+
+  .chart-plot {
+    position: relative;
+    touch-action: pan-y;
+  }
+
+  .chart-plot svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    font-family: var(--font-mono);
+  }
+
+  .chart-grid {
+    stroke: var(--line);
+  }
+
+  .axis-y,
+  .axis-x,
+  .axis-ref {
+    fill: var(--fg-2);
+    font-size: 10px;
+  }
+
+  .axis-y {
+    text-anchor: end;
+  }
+
+  .axis-x {
+    text-anchor: middle;
+  }
+
+  .axis-ref {
+    text-anchor: end;
+  }
+
+  .series-label {
+    fill: var(--fg);
+    font-size: 10px;
+    font-weight: 600;
+    text-anchor: end;
+  }
+
+  .reference-line {
+    stroke: var(--fg-2);
+    stroke-dasharray: 4 4;
+    opacity: 0.7;
+  }
+
+  .series-line {
+    fill: none;
+    stroke: var(--c);
+    stroke-width: 2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+
+  .series-line.is-dashed {
+    stroke-dasharray: 7 4;
+  }
+
+  .series-line.is-drawn-in {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 1.8s var(--ease-out);
+  }
+
+  .is-revealed .series-line.is-drawn-in {
+    stroke-dashoffset: 0;
+  }
+
+  .series-area {
+    fill: var(--c);
+    opacity: 0.12;
+  }
+
+  .series-area.is-faded-in {
+    opacity: 0;
+    transition: opacity 1s ease 1s;
+  }
+
+  .is-revealed .series-area.is-faded-in {
+    opacity: 0.12;
+  }
+
+  .hover-layer {
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .chart-plot:hover .hover-layer {
+    opacity: 1;
+  }
+
+  .hover-line {
+    stroke: var(--fg);
+    opacity: 0.45;
+  }
+
+  .hover-layer circle {
+    fill: var(--c);
+    stroke: var(--bg-2);
+    stroke-width: 2;
+  }
+
+  .uptime-strip {
+    display: flex;
+    gap: 3px;
+    height: 2.4rem;
+  }
+
+  .uptime-strip i {
+    flex: 1;
+    border-radius: 3px;
+    background: var(--ok);
+    opacity: 0.8;
+    transform-origin: bottom;
+    transition:
+      opacity 0.2s,
+      scale 0.25s var(--spring);
+    scale: 1 0;
+  }
+
+  .is-revealed .uptime-strip i {
+    scale: 1 1;
+    transition-delay: calc(var(--i) * 25ms);
+  }
+
+  .uptime-strip i.is-warning {
+    background: var(--warn);
+  }
+
+  .uptime-strip i:hover {
+    opacity: 1;
+    scale: 1 1.12;
+  }
+
+  .chart-tooltip {
+    position: absolute;
+    top: 0.4rem;
+    left: 0;
+    translate: -50% 0;
+    padding: 0.4rem 0.6rem;
+    border-radius: 0.45rem;
+    background: var(--fg);
+    color: var(--bg);
+    font-size: 0.62rem;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 2;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .chart-tooltip.is-visible {
+    opacity: 1;
+  }
+
+  .histogram rect {
+    fill: var(--series-1);
+  }
+
+  .stage-line {
+    fill: none;
+    stroke: var(--fg-2);
+    stroke-dasharray: 4 4;
+    opacity: 0.6;
+  }
+
+  .data-table {
+    border-top: 1px solid var(--line);
+  }
+
+  .data-table summary {
+    padding: 0.8rem var(--panel-padding);
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    color: var(--fg-2);
+    list-style: none;
+  }
+
+  .data-table summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .data-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.66rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .data-table th,
+  .data-table td {
+    text-align: right;
+    padding: 0.3rem var(--panel-padding) 0.3rem 0.5rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .data-table th:first-child,
+  .data-table td:first-child {
+    text-align: left;
+    padding-left: var(--panel-padding);
+  }
+
+  .data-table th {
+    color: var(--fg-2);
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-size: 0.54rem;
+  }
+}

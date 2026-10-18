@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en-US" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gustavo Eklund | Backend developer, Pix and payments</title>
+<meta name="description" content="Gustavo Eklund is a backend developer in Taubaté, Brazil. He develops payment systems, mostly with Pix, that handle more than 2 million transactions a day." data-i18n-attr="content:meta.description">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#111318">
+<link rel="canonical" href="https://eklund.com.br/en/">
+<link rel="alternate" hreflang="pt-BR" href="https://eklund.com.br/">
+<link rel="alternate" hreflang="en" href="https://eklund.com.br/en/">
+<link rel="alternate" hreflang="x-default" href="https://eklund.com.br/">
+<meta property="og:type" content="profile">
+<meta property="og:site_name" content="eklund.com.br">
+<meta property="og:title" content="Gustavo Eklund | Backend developer, Pix and payments" data-i18n-attr="content:meta.title">
+<meta property="og:description" content="Gustavo Eklund is a backend developer in Taubaté, Brazil. He develops payment systems, mostly with Pix, that handle more than 2 million transactions a day." data-i18n-attr="content:meta.description">
+<meta property="og:url" content="https://eklund.com.br/en/">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="pt_BR">
+<meta property="og:image" content="https://eklund.com.br/assets/brand/social-card.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Gustavo Eklund in large letters on a dark background, with the green &quot;e&quot; mark, the words Backend and Pix, and the address eklund.com.br." data-i18n-attr="content:meta.imageAlt">
+<meta property="profile:first_name" content="Gustavo">
+<meta property="profile:last_name" content="Eklund">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+
+<!-- Theme, hue and motion before first paint, so nothing flashes. The script has no whitespace before or after it, which the markup minifier of the build would otherwise change, and with it the hash the Content-Security-Policy allows it by. On the Portuguese page it also sends English readers to /en/: those who chose English, or who have not chosen and whose browser prefers it. Crawlers stay. -->
+<script>document.documentElement.classList.add('js');
+let motion, language;
+try {
+  const theme = localStorage.getItem('theme');
+  if (theme) document.documentElement.dataset.theme = theme;
+  const hue = localStorage.getItem('hue');
+  if (hue) document.documentElement.style.setProperty('--hue', hue);
+  motion = localStorage.getItem('motion');
+  language = localStorage.getItem('lang');
+} catch {}
+document.documentElement.dataset.motion = motion === 'paused' || motion === 'full' ? motion : matchMedia('(prefers-reduced-motion: reduce)').matches ? 'paused' : 'full';
+if (location.pathname === '/' || location.pathname === '/index.html') {
+  const query = new URLSearchParams(location.search);
+  const crawler = /bot|crawl|spider|slurp|facebookexternalhit|preview/i.test(navigator.userAgent);
+  const translated = (tags) => {
+    for (const tag of tags) {
+      const language = String(tag || '').toLowerCase().split(/[-_]/)[0];
+      if (language === 'en' || language === 'pt') return language;
+    }
+    return '';
+  };
+  const wants = translated([query.get('lang')]) || translated([language]) || (crawler ? '' : translated(navigator.languages || [navigator.language]));
+  if (wants === 'en') {
+    query.delete('lang');
+    location.replace('/en/' + (query.toString() ? '?' + query : '') + location.hash);
+  }
+}</script>
+
+<!-- The three faces of the first screen; the Greek sigma file loads on demand. -->
+<link rel="preload" as="font" type="font/woff2" href="/fonts/bricolage-grotesque-latin.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/fonts/instrument-serif-italic-latin.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/fonts/jetbrains-mono-latin.woff2" crossorigin>
+
+<link rel="stylesheet" href="/css/foundation/tokens.css">
+<link rel="stylesheet" href="/css/foundation/fonts.css">
+<link rel="stylesheet" href="/css/foundation/layout.css">
+<link rel="stylesheet" href="/css/locale-switcher.css">
+<link rel="stylesheet" href="/css/foundation/shared-components.css">
+<link rel="stylesheet" href="/css/scrollbar.css">
+<link rel="stylesheet" href="/css/cursor.css">
+<link rel="stylesheet" href="/css/hero.css">
+<link rel="stylesheet" href="/css/marquee.css">
+<link rel="stylesheet" href="/css/status-page.css">
+<link rel="stylesheet" href="/css/trace-viewer.css">
+<link rel="stylesheet" href="/css/profile.css">
+<link rel="stylesheet" href="/css/charts.css">
+<link rel="stylesheet" href="/css/dashboard.css">
+<link rel="stylesheet" href="/css/architecture-map.css">
+<link rel="stylesheet" href="/css/load-test.css">
+<link rel="stylesheet" href="/css/history.css">
+<link rel="stylesheet" href="/css/contact.css">
+<link rel="stylesheet" href="/css/command-palette.css">
+<link rel="stylesheet" href="/css/foundation/effects.css">
+<link rel="stylesheet" href="/css/accessibility.css">
+
+<link rel="modulepreload" href="/js/accessibility/live-announcer.js">
+<link rel="modulepreload" href="/js/accessibility/motion-toggle.js">
+<link rel="modulepreload" href="/js/architecture-map/architecture-map.js">
+<link rel="modulepreload" href="/js/architecture-map/diagram.js">
+<link rel="modulepreload" href="/js/architecture-map/orthogonal-path.js">
+<link rel="modulepreload" href="/js/architecture-map/pix-walkthrough.js">
+<link rel="modulepreload" href="/js/architecture-map/traffic-simulation.js">
+<link rel="modulepreload" href="/js/command-palette/command-palette.js">
+<link rel="modulepreload" href="/js/command-palette/fuzzy-match.js">
+<link rel="modulepreload" href="/js/contact/chevron-field.js">
+<link rel="modulepreload" href="/js/contact/email-actions.js">
+<link rel="modulepreload" href="/js/cursor/custom-cursor.js">
+<link rel="modulepreload" href="/js/dashboard/observability-dashboard.js">
+<link rel="modulepreload" href="/js/dashboard/panels.js">
+<link rel="modulepreload" href="/js/dashboard/synthetic-day-series.js">
+<link rel="modulepreload" href="/js/globe/destinations.js">
+<link rel="modulepreload" href="/js/globe/geometry.js">
+<link rel="modulepreload" href="/js/globe/globe-controls.js">
+<link rel="modulepreload" href="/js/globe/globe.js">
+<link rel="modulepreload" href="/js/globe/land-bitset.js">
+<link rel="modulepreload" href="/js/globe/land-decoder.js">
+<link rel="modulepreload" href="/js/globe/shader-dialog.js">
+<link rel="modulepreload" href="/js/globe/shaders.js">
+<link rel="modulepreload" href="/js/globe/webgl.js">
+<link rel="modulepreload" href="/js/hero/hero-reveal.js">
+<link rel="modulepreload" href="/js/hero/local-clock.js">
+<link rel="modulepreload" href="/js/history/history-accordion.js">
+<link rel="modulepreload" href="/js/i18n/dictionaries.js">
+<link rel="modulepreload" href="/js/i18n/document-metadata.js">
+<link rel="modulepreload" href="/js/i18n/locale-switcher.js">
+<link rel="modulepreload" href="/js/i18n/locale.js">
+<link rel="modulepreload" href="/js/i18n/locales/en-us.js">
+<link rel="modulepreload" href="/js/i18n/locales/pt-br.js">
+<link rel="modulepreload" href="/js/i18n/translator.js">
+<link rel="modulepreload" href="/js/load-test/duration-summary.js">
+<link rel="modulepreload" href="/js/load-test/load-test-charts.js">
+<link rel="modulepreload" href="/js/load-test/load-test.js">
+<link rel="modulepreload" href="/js/load-test/ramp-scenario.js">
+<link rel="modulepreload" href="/js/load-test/series-resampler.js">
+<link rel="modulepreload" href="/js/load-test/terminal-log.js">
+<link rel="modulepreload" href="/js/load-test/worker-pool.js">
+<link rel="modulepreload" href="/js/marquee/marquee.js">
+<link rel="modulepreload" href="/js/navigation/anchor-links.js">
+<link rel="modulepreload" href="/js/scrollbar/custom-scrollbar.js">
+<link rel="modulepreload" href="/js/scrollbar/reading-progress.js">
+<link rel="modulepreload" href="/js/shared/contrast-audit.js">
+<link rel="modulepreload" href="/js/shared/contrast-report.js">
+<link rel="modulepreload" href="/js/shared/contrast-targets.js">
+<link rel="modulepreload" href="/js/shared/contrast.js">
+<link rel="modulepreload" href="/js/shared/dom.js">
+<link rel="modulepreload" href="/js/shared/environment.js">
+<link rel="modulepreload" href="/js/shared/format.js">
+<link rel="modulepreload" href="/js/shared/math.js">
+<link rel="modulepreload" href="/js/shared/page-readings.js">
+<link rel="modulepreload" href="/js/shared/render-loop.js">
+<link rel="modulepreload" href="/js/shared/storage.js">
+<link rel="modulepreload" href="/js/shared/svg-chart.js">
+<link rel="modulepreload" href="/js/shared/theme-colors.js">
+<link rel="modulepreload" href="/js/status-page/health-checks.js">
+<link rel="modulepreload" href="/js/status-page/status-page.js">
+<link rel="modulepreload" href="/js/theme/theme-controller.js">
+<link rel="modulepreload" href="/js/trace-viewer/trace-builder.js">
+<link rel="modulepreload" href="/js/trace-viewer/trace-viewer.js">
+<script type="module" src="/js/main.js"></script>
+
+<!-- Structured data. Static, in the language the markup ships (pt-BR); every text field carries both languages as a language map, so it stays true after the page translates itself. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": "https://eklund.com.br/#person",
+      "name": "Gustavo Eklund",
+      "url": "https://eklund.com.br/",
+      "jobTitle": [
+        { "@language": "pt-BR", "@value": "Desenvolvedor backend sênior" },
+        { "@language": "en-US", "@value": "Senior backend engineer" }
+      ],
+      "description": [
+        { "@language": "pt-BR", "@value": "Gustavo Eklund é desenvolvedor backend em Taubaté, SP. Desenvolve sistemas de pagamento, principalmente com Pix, que processam mais de 2 milhões de transações por dia." },
+        { "@language": "en-US", "@value": "Gustavo Eklund is a backend developer in Taubaté, Brazil. He develops payment systems, mostly with Pix, that handle more than 2 million transactions a day." }
+      ],
+      "worksFor": { "@type": "Organization", "name": "OKTO Payments" },
+      "alumniOf": { "@type": "EducationalOrganization", "name": "Fatec Taubaté" },
+      "address": { "@type": "PostalAddress", "addressLocality": "Taubaté", "addressRegion": "SP", "addressCountry": "BR" },
+      "sameAs": [
+        "https://github.com/GustavoEklund",
+        "https://www.linkedin.com/in/gustavo-eklund"
+      ],
+      "knowsAbout": [
+        "Pix",
+        "Open Finance",
+        "Go",
+        "TypeScript",
+        "DDD",
+        "Clean Architecture",
+        "CQRS",
+        "Event Sourcing",
+        { "@language": "pt-BR", "@value": "Observabilidade" },
+        { "@language": "en-US", "@value": "Observability" }
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://eklund.com.br/#website",
+      "url": "https://eklund.com.br/",
+      "name": "Gustavo Eklund",
+      "inLanguage": ["pt-BR", "en-US"],
+      "publisher": { "@id": "https://eklund.com.br/#person" },
+      "author": { "@id": "https://eklund.com.br/#person" }
+    },
+    {
+      "@type": "ProfilePage",
+      "@id": "https://eklund.com.br/#profile",
+      "url": "https://eklund.com.br/",
+      "name": [
+        { "@language": "pt-BR", "@value": "Gustavo Eklund | Desenvolvedor backend, Pix e pagamentos" },
+        { "@language": "en-US", "@value": "Gustavo Eklund | Backend developer, Pix and payments" }
+      ],
+      "inLanguage": ["pt-BR", "en-US"],
+      "isPartOf": { "@id": "https://eklund.com.br/#website" },
+      "mainEntity": { "@id": "https://eklund.com.br/#person" },
+      "primaryImageOfPage": {
+        "@type": "ImageObject",
+        "@id": "https://eklund.com.br/#social-card",
+        "url": "https://eklund.com.br/assets/brand/social-card.png",
+        "contentUrl": "https://eklund.com.br/assets/brand/social-card.png",
+        "encodingFormat": "image/png"
+      }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main" data-i18n="nav.skip">Skip to content</a>
+<div class="visually-hidden" id="announcer" role="status" aria-live="polite" aria-atomic="true"></div>
+<div class="reading-progress" aria-hidden="true"></div>
+<div class="scrollbar" id="scrollbar" aria-hidden="true"><div class="scrollbar-track"><div class="scrollbar-thumb"><b>0%</b></div></div><div class="scrollbar-marks"></div></div>
+<div class="cursor-dot" aria-hidden="true" popover="manual"></div><div class="cursor-ring" aria-hidden="true" popover="manual"><span></span></div>
+
+<!-- Gradients used by the logo hover states; the icons themselves live in assets/icons.svg. -->
+<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0" aria-hidden="true"><defs><linearGradient id="gradient-google" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4285F4"/><stop offset=".35" stop-color="#EA4335"/><stop offset=".65" stop-color="#FBBC05"/><stop offset="1" stop-color="#34A853"/></linearGradient><linearGradient id="gradient-otel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F5A800"/><stop offset="1" stop-color="#425CC7"/></linearGradient></defs></svg>
+
+<header class="site-header">
+  <a class="logo" translate="no" href="#" data-i18n-attr="aria-label:nav.home" aria-label="eklund.com.br, home">eklund<i>.</i></a>
+  <nav class="site-nav" data-i18n-attr="aria-label:nav.main" aria-label="Main">
+    <a class="nav-link" href="#status" data-i18n="nav.status">Status</a>
+    <a class="nav-link" href="#perfil" data-i18n="nav.profile">Profile</a>
+    <a class="nav-link" href="#arquitetura" data-i18n="nav.architecture">Architecture</a>
+    <a class="nav-link" href="#carga" data-i18n="nav.load">Load</a>
+    <a class="nav-link" href="#historico" data-i18n="nav.history">History</a>
+    <a class="nav-link" href="#contato" data-i18n="nav.contact">Contact</a>
+    <div class="locale-switcher" role="group" data-i18n-attr="aria-label:nav.language" aria-label="Language"><a href="/" data-locale="pt-BR" lang="pt-BR" hreflang="pt-BR" aria-label="PT, Português (Brasil)" title="Português (Brasil)">PT</a><a href="/en/" data-locale="en-US" lang="en-US" hreflang="en" aria-label="EN, English (United States)" title="English (United States)" aria-current="true">EN</a></div>
+    <a class="icon-button" id="source-button" href="https://github.com/GustavoEklund/eklund.com.br" target="_blank" rel="noopener" data-cursor="open" data-i18n-attr="aria-label:nav.sourceLabel;title:nav.sourceTitle;data-cursor:cursor.open" aria-label="Source code on GitHub" title="Source code of this site on GitHub"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><use href="/assets/icons.svg#icon-github"/></svg></a>
+    <button class="icon-button" id="command-palette-button" type="button" data-i18n-attr="aria-label:nav.paletteLabel;title:nav.paletteTitle" aria-label="Open command palette" title="Command palette (Ctrl K)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h10M4 17h7"/></svg></button>
+    <button class="icon-button" id="theme-toggle" type="button" aria-pressed="true" data-i18n-attr="aria-label:nav.themeLabel;title:nav.themeTitle" aria-label="Dark theme" title="Theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
+    <button class="icon-button motion-toggle" id="motion-toggle" type="button" aria-pressed="false" data-i18n-attr="aria-label:nav.motionLabel;title:nav.motionTitle" aria-label="Pause animations" title="Pause animations and live updates"><svg class="icon-pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg><svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M8 5.5v13l10-6.5z"/></svg></button>
+  </nav>
+</header>
+
+<main id="main" tabindex="-1">
+  <!-- Hero -->
+  <section class="hero container" id="hero" aria-labelledby="hero-heading">
+    <p class="eyebrow"><span class="live-dot" aria-hidden="true"></span><span><bdi data-i18n="hero.eyebrow">Senior backend developer · Taubaté, Brazil</bdi> <span class="visually-hidden" data-i18n="hero.localTime">local time in Taubaté</span> <span id="local-time"></span></span></p>
+
+    <h1 class="hero-name" translate="no" id="hero-heading"><span class="word">Gustavo</span> <span class="word serif">Eklund</span></h1>
+
+    <div class="hero-copy">
+      <p class="hero-tagline"><bdi data-i18n="hero.tagline">I develop payment systems, mostly with Pix.</bdi>
+        <span class="rotating-text" role="img" data-i18n-attr="aria-label:hero.rotating.label" aria-label="More than 2 million transactions a day, peaks of 500 per second, 99% of responses within 300 milliseconds, 99.9% availability"><span class="rotating-text-roll" aria-hidden="true">
+          <span data-i18n="hero.rotating.volume">more than 2 million transactions/day</span>
+          <span data-i18n="hero.rotating.peak">peaks of ~500 transactions/s</span>
+          <span data-i18n="hero.rotating.latency">99% of responses under 300 ms</span>
+          <span data-i18n="hero.rotating.uptime">99.9% availability</span>
+          <span data-i18n="hero.rotating.volume">more than 2 million transactions/day</span>
+        </span></span>
+      </p>
+      <div class="hero-actions">
+        <a class="btn" href="#historico"><bdi data-i18n="nav.history">History</bdi> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14m-6-6 6 6 6-6"/></svg></a>
+        <a class="btn btn-ghost" href="mailto:gustavo@eklund.com.br" data-cursor="copy" data-i18n-attr="data-cursor:cursor.copy" data-copy="gustavo@eklund.com.br">gustavo@eklund.com.br</a>
+        <span class="shortcut-hint"><kbd id="modifier-key" translate="no">⌘</kbd><kbd translate="no">K</kbd> <bdi data-i18n="hero.shortcut">navigate</bdi></span>
+      </div>
+    </div>
+
+    <div class="globe" id="globe">
+      <canvas id="globe-canvas" role="img" tabindex="0" data-cursor="drag" data-i18n-attr="data-cursor:cursor.drag;aria-label:hero.globe" aria-label="WebGL 3D globe with land points and arcs leaving Taubaté. Drag or use the arrow keys to spin."></canvas>
+      <div class="chip chip-network"><b><span id="chip-network">—</span> <bdi data-i18n="hero.chips.network">KB over the wire</bdi></b><small data-i18n="hero.chips.networkNote">0 dependencies</small></div>
+      <div class="chip chip-points"><b><span id="chip-points">—</span> <bdi data-i18n="hero.chips.points">points</bdi></b><small data-i18n="hero.chips.pointsNote">WebGL2 · drawn point by point</small></div>
+      <div class="chip chip-fps"><b><span id="chip-fps">—</span> fps</b><small data-i18n="hero.chips.fpsNote">measured now, in your browser</small></div>
+      <div class="chip chip-fcp"><b>FCP <span id="chip-fcp">—</span></b><small lang="en" translate="no">first contentful paint</small></div>
+      <div class="chip globe-controls" role="group" data-i18n-attr="aria-label:hero.controls.label" aria-label="Globe controls">
+        <span class="globe-controls-label" data-i18n="hero.controls.title">globe</span>
+        <span><bdi data-i18n="hero.controls.hue">hue</bdi> <b class="scrubber" data-control="hue" data-min="0" data-max="360" data-step="1" data-pixels-per-step="2" data-nudge="30" data-default="128" tabindex="0" role="slider" data-i18n-attr="aria-label:hero.controls.hueAria;data-cursor:cursor.drag" aria-label="hue" aria-valuemin="0" aria-valuemax="360" aria-valuenow="128" aria-valuetext="128°" data-cursor="drag">128°</b></span>
+        <span><bdi data-i18n="hero.controls.speed">speed</bdi> <b class="scrubber" data-control="speed" data-min="0" data-max="4" data-step="0.05" data-pixels-per-step="14" data-nudge=".5" data-default="1.5" tabindex="0" role="slider" data-i18n-attr="aria-label:hero.controls.speedAria;data-cursor:cursor.drag" aria-label="speed" aria-valuemin="0" aria-valuemax="4" aria-valuenow="1.5" aria-valuetext="1,5×" data-cursor="drag">1,5×</b></span>
+        <span><bdi data-i18n="hero.controls.points">points</bdi> <b class="scrubber" data-control="instances" data-min="1" data-max="64" data-step="1" data-pixels-per-step="6" data-nudge="4" data-default="1" tabindex="0" role="slider" data-i18n-attr="aria-label:hero.controls.pointsAria;data-cursor:cursor.drag" aria-label="point multiplier" aria-valuemin="1" aria-valuemax="64" aria-valuenow="1" aria-valuetext="×1" data-cursor="drag">×1</b></span>
+        <button class="text-button" id="shader-button" type="button">shader ↗</button>
+      </div>
+    </div>
+    <div class="scroll-cue" aria-hidden="true" data-i18n="hero.scrollCue">scroll</div>
+  </section>
+
+  <!-- Marquee -->
+  <div class="marquee-clip"><div class="marquee" id="marquee" translate="no" aria-hidden="true" data-cursor="drag" data-i18n-attr="data-cursor:cursor.drag">
+    <div class="marquee-row marquee-row-solid">
+      <div class="marquee-track"><span class="tech" style="--brand:#00ADD8"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-go"/></svg>Go</span><i>✦</i><span class="tech" style="--brand:#3178C6"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-typescript"/></svg>TypeScript</span><i>✦</i><span class="tech" style="--brand:#5FA04E"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-nodedotjs"/></svg>Node.js</span><i>✦</i><span class="tech" style="--brand:#4169E1"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-postgresql"/></svg>PostgreSQL</span><i>✦</i><span class="tech" style="--brand:#FF4438"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-redis"/></svg>Redis</span><i>✦</i><span class="tech" style="--brand:light-dark(#231F20,#fff)"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-apachekafka"/></svg>Kafka</span><i>✦</i><span class="tech" style="--brand:#FF6600"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-rabbitmq"/></svg>RabbitMQ</span><i>✦</i><span class="tech" style="--brand:#326CE5"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-kubernetes"/></svg>Kubernetes</span><i>✦</i><span class="tech" style="--brand:#FF9900"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-amazonwebservices"/></svg>AWS</span><i>✦</i><span class="tech" style="--brand:#FF4F8B"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-amazonsqs"/></svg>SQS</span><i>✦</i><span class="tech" style="--brand:#4285F4" data-gradient="google"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-googlecloud"/></svg>Google Cloud</span><i>✦</i><span class="tech" style="--brand:#F46800"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-grafana"/></svg>Grafana</span><i>✦</i><span class="tech" style="--brand:#E6522C"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-prometheus"/></svg>Prometheus</span><i>✦</i><span class="tech" style="--brand:#7D64FF"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-k6"/></svg>k6</span><i>✦</i><span class="tech" style="--brand:light-dark(#4D4D4D,#C9C9C9)"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-keycloak"/></svg>Keycloak</span><i>✦</i><span class="tech" style="--brand:light-dark(#005571,#00BFB3)"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-elasticsearch"/></svg>Elasticsearch</span><i>✦</i><span class="tech" style="--brand:#2EAD33"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-playwright"/></svg>Playwright</span><i>✦</i><span class="tech" style="--brand:#F5A800" data-gradient="otel"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-opentelemetry"/></svg>OpenTelemetry</span><i>✦</i></div>
+      <div class="marquee-track"><span class="tech" style="--brand:#00ADD8"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-go"/></svg>Go</span><i>✦</i><span class="tech" style="--brand:#3178C6"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-typescript"/></svg>TypeScript</span><i>✦</i><span class="tech" style="--brand:#5FA04E"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-nodedotjs"/></svg>Node.js</span><i>✦</i><span class="tech" style="--brand:#4169E1"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-postgresql"/></svg>PostgreSQL</span><i>✦</i><span class="tech" style="--brand:#FF4438"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-redis"/></svg>Redis</span><i>✦</i><span class="tech" style="--brand:light-dark(#231F20,#fff)"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-apachekafka"/></svg>Kafka</span><i>✦</i><span class="tech" style="--brand:#FF6600"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-rabbitmq"/></svg>RabbitMQ</span><i>✦</i><span class="tech" style="--brand:#326CE5"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-kubernetes"/></svg>Kubernetes</span><i>✦</i><span class="tech" style="--brand:#FF9900"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-amazonwebservices"/></svg>AWS</span><i>✦</i><span class="tech" style="--brand:#FF4F8B"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-amazonsqs"/></svg>SQS</span><i>✦</i><span class="tech" style="--brand:#4285F4" data-gradient="google"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-googlecloud"/></svg>Google Cloud</span><i>✦</i><span class="tech" style="--brand:#F46800"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-grafana"/></svg>Grafana</span><i>✦</i><span class="tech" style="--brand:#E6522C"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-prometheus"/></svg>Prometheus</span><i>✦</i><span class="tech" style="--brand:#7D64FF"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-k6"/></svg>k6</span><i>✦</i><span class="tech" style="--brand:light-dark(#4D4D4D,#C9C9C9)"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-keycloak"/></svg>Keycloak</span><i>✦</i><span class="tech" style="--brand:light-dark(#005571,#00BFB3)"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-elasticsearch"/></svg>Elasticsearch</span><i>✦</i><span class="tech" style="--brand:#2EAD33"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-playwright"/></svg>Playwright</span><i>✦</i><span class="tech" style="--brand:#F5A800" data-gradient="otel"><svg aria-hidden="true"><use href="/assets/icons.svg#icon-opentelemetry"/></svg>OpenTelemetry</span><i>✦</i></div>
+    </div>
+    <div class="marquee-row marquee-row-outline">
+      <div class="marquee-track"><span>Pix cash-in</span><i>·</i><span>Pix cash-out</span><i>·</i><span>DICT</span><i>·</i><span>QR Code</span><i>·</i><span>Pix Automático</span><i>·</i><span>Open Finance</span><i>·</i><span>SPI</span><i>·</i><span>Boleto</span><i>·</i><span>KYC</span><i>·</i><span>KYB</span><i>·</i><span>Loki</span><i>·</i><span>DDD</span><i>·</i><span>CQRS</span><i>·</i><span>Event Sourcing</span><i>·</i><span>TDD</span><i>·</i><span>Clean Code</span><i>·</i><span>Clean Architecture</span><i>·</i><span data-i18n="marquee.microservices">Microservices</span><i>·</i><span data-i18n="marquee.messaging">Messaging</span><i>·</i><span>ISO 20022</span><i>·</i><span>RSFN</span><i>·</i></div>
+      <div class="marquee-track"><span>Pix cash-in</span><i>·</i><span>Pix cash-out</span><i>·</i><span>DICT</span><i>·</i><span>QR Code</span><i>·</i><span>Pix Automático</span><i>·</i><span>Open Finance</span><i>·</i><span>SPI</span><i>·</i><span>Boleto</span><i>·</i><span>KYC</span><i>·</i><span>KYB</span><i>·</i><span>Loki</span><i>·</i><span>DDD</span><i>·</i><span>CQRS</span><i>·</i><span>Event Sourcing</span><i>·</i><span>TDD</span><i>·</i><span>Clean Code</span><i>·</i><span>Clean Architecture</span><i>·</i><span data-i18n="marquee.microservices">Microservices</span><i>·</i><span data-i18n="marquee.messaging">Messaging</span><i>·</i><span>ISO 20022</span><i>·</i><span>RSFN</span><i>·</i></div>
+    </div>
+  </div></div>
+
+  <!-- Status -->
+  <section class="section container" id="status" aria-labelledby="status-heading">
+    <div class="status-grid"><div class="section-header reveal">
+      <p class="eyebrow"><b>01</b> <bdi data-i18n="status.eyebrow">This page's status</bdi></p>
+      <h2 id="status-heading" data-i18n-html="status.title">Live monitoring, <em>measured in your browser.</em></h2>
+      <p class="lead" data-i18n="status.lead">This section is the status page for this site. The components, incidents and trace come from your browser's Performance API, measured on this visit, and no value is hard-coded.</p>
+    </div>
+
+    <div class="panel status-page reveal" id="status-page" data-level="0">
+      <div class="status-banner"><span class="status-dot" aria-hidden="true"></span><b id="status-title">Verificando sistemas…</b><span class="status-updated"><bdi data-i18n="status.updated">updated</bdi> <span id="status-updated">—</span></span></div>
+      <ul class="status-components" id="status-components" data-i18n-attr="aria-label:status.components" aria-label="Components"></ul>
+      <div class="status-history"><p class="status-history-header"><span data-i18n="status.history.title">Last 90 seconds of this visit</span><b id="status-uptime">—</b></p><div class="status-cells" id="status-cells" aria-hidden="true"></div></div>
+      <div class="status-incidents"><h3><span id="status-incidents-title" data-i18n="status.incidents.title">Incidents</span><span id="status-incident-count">0</span></h3><ol id="status-incidents" class="quiet-scroller" tabindex="0" aria-labelledby="status-incidents-title"><li class="is-empty" data-i18n="status.incidents.none">No incidents on this visit.</li></ol></div>
+    </div></div>
+
+    <div class="panel trace-viewer reveal" id="trace-viewer" role="group" data-i18n-attr="aria-label:trace.label" aria-label="Trace of this visit">
+      <div class="panel-header">
+        <span class="trace-id">trace <b id="trace-id">—</b></span>
+        <span class="trace-meta"><b id="trace-duration">—</b> · <span id="trace-span-count">—</span> <bdi data-i18n="trace.meta.spans">spans</bdi> · <span id="trace-service-count">—</span> <bdi data-i18n="trace.meta.services">services</bdi> · <bdi data-i18n="trace.meta.start">start</bdi> <span id="trace-start">—</span></span>
+        <span class="trace-tools"><span class="legend-inline" aria-hidden="true"><span class="is-square" style="--c:var(--c2)" data-i18n="trace.services.network">network</span><span class="is-square" style="--c:var(--c3)" data-i18n="trace.services.document">document</span><span class="is-square" style="--c:var(--c1)" data-i18n="trace.services.script">script</span><span class="is-square" style="--c:var(--c5)" data-i18n="trace.services.assets">assets</span><span class="is-square" style="--c:var(--c4)" data-i18n="trace.services.fonts">fonts</span></span><button class="btn-outline trace-zoom" id="trace-zoom-out" type="button" data-i18n-attr="aria-label:trace.zoomOut" aria-label="zoom out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"/></svg></button><button class="btn-outline trace-zoom" id="trace-zoom-in" type="button" data-i18n-attr="aria-label:trace.zoomIn" aria-label="zoom in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg></button><button class="btn-outline" id="trace-reset" type="button" hidden data-i18n="trace.reset">reset zoom</button></span>
+      </div>
+      <div class="trace-minimap" id="trace-minimap" aria-hidden="true"></div>
+      <div class="trace-columns" aria-hidden="true"><span data-i18n="trace.columns.span">Span</span><span class="col-service" data-i18n="trace.columns.service">Service</span><span class="col-duration" data-i18n="trace.columns.duration">Duration</span><span class="col-share" data-i18n="trace.columns.share">% of total</span><span class="col-ruler" id="trace-ruler"></span></div>
+      <div class="trace-rows" id="trace-rows" role="listbox" tabindex="0" data-i18n-attr="aria-label:trace.rows" aria-label="Trace spans"></div>
+      <div class="trace-detail" id="trace-detail" aria-live="polite" aria-atomic="true"><p class="trace-hint" data-i18n="trace.hint">Hover a span, or use ↑↓, to see its attributes. Drag on the timeline or use + and − to zoom. Esc clears.</p></div>
+    </div>
+  </section>
+
+  <!-- Profile -->
+  <section class="section container" id="perfil" aria-labelledby="profile-heading">
+    <div class="two-columns"><div class="prose reveal">
+      <p class="eyebrow"><b>02</b> <bdi data-i18n="profile.eyebrow">Profile</bdi></p>
+      <h2 id="profile-heading" data-i18n-html="profile.title">Seven years building software, <em>five of them in payments.</em> <span class="heading-note">More than 10 years in IT overall.</span></h2>
+      <p data-i18n-html="profile.p1">I'm a senior backend developer. I've worked at a digital bank, at a credit platform for banking correspondents and, since 2024, at OKTO Payments, a multinational payments company.</p>
+      <p data-i18n-html="profile.p2">At OKTO, the Brazil payments team rebuilt the company's Pix. OKTO is a direct participant in the SPI, the Central Bank system that settles Pix payments. We delivered sending and receiving Pix, key lookups, QR Code, Pix Automático and biometric Pix through Open Finance, all approved by the Central Bank.</p>
+      <p data-i18n-html="profile.p3">Before that, I led two teams, one of 4 people and one of 5. Each delivered a complete platform, from architecture and back end to apps, infrastructure and deployment.</p>
+      <p data-i18n-html="profile.p4">Day to day I write Go and TypeScript. I use DDD, Clean Architecture, CQRS and Event Sourcing to model systems, and Grafana, Loki, Prometheus and k6 to monitor and test them. I also develop with coding agents, such as Claude Code, Codex and Cursor, and write the specifications they follow.</p>
+    </div>
+    <aside class="status-board reveal" data-i18n-attr="aria-label:profile.board.label" aria-label="Current status">
+      <h3><bdi data-i18n="profile.board.title">Status</bdi> <span><i class="live-dot" aria-hidden="true"></i> <bdi data-i18n="profile.board.state">operational</bdi></span></h3>
+      <ul>
+        <li><span data-i18n="profile.board.role">Role</span><div><b data-i18n="profile.board.roleValue">Senior backend engineer</b><i data-i18n="profile.board.roleNote">OKTO Payments · since Aug 2024</i></div></li>
+        <li><span data-i18n="profile.board.volume">Volume</span><div><b data-i18n="profile.board.volumeValue">more than 2 million transactions/day</b><i data-i18n="profile.board.volumeNote">peaks of ~500 TPS</i></div></li>
+        <li><span data-i18n="profile.board.latency">Latency</span><div><b>p95 200 ms · p99 300 ms</b><i data-i18n="profile.board.latencyNote">critical Pix services</i></div></li>
+        <li><span data-i18n="profile.board.uptime">Uptime</span><div><b data-i18n="profile.board.uptimeValue">99.9%</b><i data-i18n="profile.board.uptimeNote">availability</i></div></li>
+        <li><span data-i18n="profile.board.base">Base</span><div><b>Taubaté, SP</b><i><bdi data-i18n="profile.board.remote">remote</bdi> · <span id="local-time-secondary"></span></i></div></li>
+        <li><span data-i18n="profile.board.languages">Languages</span><div><b data-i18n="profile.board.languagesValue">Portuguese · English</b><i data-i18n="profile.board.languagesNote">advanced English, CCAA</i></div></li>
+        <li><span data-i18n="profile.board.education">Education</span><div><b>Fatec Taubaté</b><i data-i18n="profile.board.educationNote">Systems Analysis and Development, 2023</i></div></li>
+      </ul>
+    </aside></div>
+
+    <div class="panel dashboard reveal" id="dashboard" role="group" data-i18n-attr="aria-label:dashboard.label" aria-label="Observability dashboard">
+      <div class="panel-header"><span class="panel-title"><i class="live-dot" aria-hidden="true"></i> <bdi data-i18n="dashboard.title">Observability · OKTO Payments · Pix</bdi></span><span class="dashboard-note" data-i18n="dashboard.note">numbers from my résumé, illustrative curves</span><span class="dashboard-range" data-i18n="dashboard.range">last 24 h</span></div>
+      <dl class="stat-tiles">
+        <div class="stat-tile"><dt data-i18n="dashboard.tiles.transactions">Transactions / day</dt><dd><bdi data-i18n="dashboard.tiles.transactionsValue">2 million</bdi><small>+</small></dd></div>
+        <div class="stat-tile"><dt data-i18n="dashboard.tiles.peak">Peak</dt><dd>~500<small>TPS</small></dd></div>
+        <div class="stat-tile"><dt data-i18n="dashboard.tiles.p95">p95 latency</dt><dd>200<small>ms</small></dd></div>
+        <div class="stat-tile"><dt data-i18n="dashboard.tiles.p99">p99 latency</dt><dd>300<small>ms</small></dd></div>
+        <div class="stat-tile"><dt data-i18n="dashboard.tiles.availability">Availability</dt><dd><bdi data-i18n="dashboard.tiles.availabilityValue">99.9</bdi><small>%</small></dd></div>
+        <div class="stat-tile"><dt data-i18n="dashboard.tiles.countries">Countries</dt><dd>7</dd></div>
+      </dl>
+      <div class="dashboard-grid">
+        <figure class="chart-panel" id="chart-throughput"><figcaption><b data-i18n="dashboard.throughput.title">Throughput</b><span data-i18n="dashboard.throughput.subtitle">transactions per second · Pix</span></figcaption><div class="chart-plot"></div></figure>
+        <figure class="chart-panel" id="chart-latency"><figcaption><b data-i18n="dashboard.latency.title">Latency</b><span data-i18n="dashboard.latency.subtitle">ms · critical Pix services</span><span class="chart-legend"><span><i style="--c:var(--series-1)"></i>p95</span><span><i style="--c:var(--series-2)"></i>p99</span><span><i class="is-dashed"></i><bdi data-i18n="dashboard.latency.reference">reference 300 ms</bdi></span></span></figcaption><div class="chart-plot"></div></figure>
+        <figure class="chart-panel is-wide" id="chart-uptime"><figcaption><b data-i18n="dashboard.uptime.title">Availability</b><span data-i18n="dashboard.uptime.subtitle">last 30 days · 99.9% · one partial degradation</span></figcaption><div class="chart-plot uptime-strip"></div></figure>
+      </div>
+      <details class="data-table"><summary data-i18n="dashboard.table.summary">View as a table (hourly)</summary><table><thead><tr><th data-i18n="dashboard.table.hour">Hour</th><th data-i18n="dashboard.table.averageTps">Avg TPS</th><th data-i18n="dashboard.table.maximumTps">Max TPS</th><th>p95 (ms)</th><th>p99 (ms)</th></tr></thead><tbody id="dashboard-table-body"></tbody></table></details>
+    </div>
+  </section>
+
+  <!-- Architecture -->
+  <section class="section container" id="arquitetura" aria-labelledby="architecture-heading">
+    <div class="section-header reveal">
+      <p class="eyebrow"><b>03</b> <bdi data-i18n="architecture.eyebrow">Architecture</bdi></p>
+      <h2 id="architecture-heading" data-i18n-html="architecture.title">Architecture of a Pix, <em>from the app to the Central Bank.</em></h2>
+      <p class="lead" data-i18n="architecture.lead">This map is a simplified version of how a payments company connected directly to the SPI processes a Pix. I built it from the Central Bank's Direct Participation Roadmap, Timing Manual and Pix Security Manual. The traffic is simulated. Hover a service to see what it does, or click follow a Pix to watch one payment from start to finish.</p>
+    </div>
+    <div class="panel architecture reveal" id="architecture">
+      <div class="panel-header architecture-header"><span class="panel-title"><i class="live-dot" aria-hidden="true"></i> <bdi data-i18n="architecture.header.traffic">simulated traffic</bdi></span><span class="panel-metric"><bdi data-i18n="architecture.header.load">load</bdi> <b id="architecture-load">—</b></span><span class="panel-metric">TPS <b id="architecture-tps">—</b></span><span class="panel-metric"><bdi data-i18n="architecture.header.replicas">replicas</bdi> <b id="architecture-replicas">—</b></span><span class="legend-inline" aria-hidden="true"><span style="--c:var(--accent)" data-i18n="architecture.header.synchronous">synchronous</span><span style="--c:var(--accent-2)" data-i18n="architecture.header.event">event</span><span class="is-dashed" data-i18n="architecture.header.data">data</span><span style="--c:var(--fg)">RSFN</span></span><button class="btn-outline" id="architecture-follow" type="button" data-i18n="architecture.header.follow">▶ follow a Pix</button></div>
+      <div class="architecture-caption" id="architecture-caption" role="status" hidden></div>
+      <div class="architecture-canvas quiet-scroller" tabindex="0" role="region" data-i18n-attr="aria-label:architecture.canvas" aria-label="Architecture map, scroll sideways"><svg id="architecture-svg" viewBox="0 50 1736 660" role="img" data-i18n-attr="aria-label:architecture.map" aria-label="Architecture map of a direct SPI participant: channels enter through the api-gateway; charges, accounts, indirect-psp, recurrence, pix-out and dict-service publish to Kafka; ledger, anti-fraud, reconciliation, webhooks, liquidity and pix-in consume; spi-gateway and dict-gateway sign with the HSM and talk to the SPI, DICT and STR over the RSFN."></svg><div class="architecture-tooltip" id="architecture-tooltip" hidden></div></div>
+      <details class="data-table architecture-list"><summary data-i18n="architecture.list.summary">View as a list of services</summary><dl id="architecture-list-body"></dl></details>
+    </div>
+  </section>
+
+  <!-- Load test -->
+  <section class="section container" id="carga" aria-labelledby="load-heading">
+    <div class="section-header reveal">
+      <p class="eyebrow"><b>04</b> <bdi data-i18n="loadTest.eyebrow">Load test</bdi></p>
+      <h2 id="load-heading" data-i18n-html="loadTest.title">I wrote a load test <em>that runs in your browser.</em></h2>
+      <p class="lead" data-i18n="loadTest.lead">The test fires payments at a simplified Pix engine that I also wrote. Both run in the background of your browser, using Web Workers, and the output imitates k6, a load-testing tool. The engine validates each payment, rejects duplicates, tracks the balance of 10 thousand accounts and records everything in a hash-chained journal. The numbers are measured on your computer, on this visit.</p>
+    </div>
+    <div class="panel load-test reveal" id="load-test">
+      <div class="panel-header load-test-toolbar"><span class="load-test-badge">k6-ish</span><span><bdi data-i18n="loadTest.toolbar.scenario">scenario</bdi> <b data-i18n="loadTest.toolbar.ramp">ramp</b> · <b id="load-test-workers">—</b> workers · <bdi data-i18n="loadTest.toolbar.stages">stages</bdi> <b>5s ↑ · 10s = · 5s ↓</b></span><span class="load-test-state" id="load-test-state" data-i18n="loadTest.states.waiting">waiting</span><button class="btn-outline" id="load-test-run" type="button" data-i18n="loadTest.run">run</button></div>
+      <div class="load-test-progress" id="load-test-progress"><i></i></div>
+      <div class="load-test-grid">
+        <div class="terminal">
+          <div class="terminal-titlebar" aria-hidden="true"><span class="terminal-lights"><i></i><i></i><i></i></span><span class="terminal-command" translate="no">k6 run --vus auto --stages 5s:100%,10s:100%,5s:0% pix-engine.js</span><span class="terminal-shell">zsh · workers</span></div>
+          <div class="terminal-screen quiet-scroller" id="load-test-terminal" role="log" tabindex="0" data-i18n-attr="aria-label:loadTest.terminalLabel" aria-label="Load test output" aria-live="off"><div class="terminal-output"></div><div class="terminal-prompt" aria-hidden="true"><b>❯</b><span class="terminal-cursor"></span></div></div>
+        </div>
+        <div class="load-test-charts">
+          <figure class="chart-panel"><figcaption><b>Throughput</b><span data-i18n="loadTest.charts.throughputSubtitle">Pix per second · dashed line = ramp stage</span></figcaption><div class="chart-plot" id="load-test-throughput"></div></figure>
+          <figure class="chart-panel"><figcaption><b data-i18n="loadTest.charts.latencyTitle">Latency per batch</b><span data-i18n="loadTest.charts.latencySubtitle">ms per batch of 1,000 Pix · rolling p95 and p99</span><span class="chart-legend"><span><i style="--c:var(--series-1)"></i>p95</span><span><i class="is-dashed-series" style="--c:var(--series-2)"></i>p99</span></span></figcaption><div class="chart-plot" id="load-test-latency"></div></figure>
+          <figure class="chart-panel"><figcaption><b data-i18n="loadTest.charts.distributionTitle">Distribution</b><span data-i18n="loadTest.charts.distributionSubtitle">batches per latency bucket</span></figcaption><div class="chart-plot" id="load-test-histogram"></div></figure>
+        </div>
+      </div>
+      <dl class="load-test-summary" id="load-test-summary">
+        <div data-metric="processed"><dt data-i18n="loadTest.summary.processed">Pix processed</dt><dd>—</dd></div>
+        <div data-metric="peak"><dt data-i18n="loadTest.summary.peak">Peak</dt><dd>—<small>/s</small></dd></div>
+        <div data-metric="p95"><dt data-i18n="loadTest.summary.p95">p95 per batch</dt><dd>—<small>ms</small></dd></div>
+        <div data-metric="p99"><dt data-i18n="loadTest.summary.p99">p99 per batch</dt><dd>—<small>ms</small></dd></div>
+        <div data-metric="per-pix"><dt data-i18n="loadTest.summary.perPix">Per Pix</dt><dd>—<small>µs</small></dd></div>
+        <div data-metric="duplicates"><dt data-i18n="loadTest.summary.duplicates">Duplicates blocked</dt><dd>—</dd></div>
+        <div data-metric="insufficient-funds"><dt data-i18n="loadTest.summary.insufficient">Insufficient funds</dt><dd>—</dd></div>
+        <div data-metric="checks"><dt>Checks</dt><dd>—<small>/5</small></dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- History -->
+  <section class="section container" id="historico" aria-labelledby="history-heading">
+    <div class="section-header reveal">
+      <p class="eyebrow"><b>05</b> <bdi data-i18n="history.eyebrow">History</bdi></p>
+      <h2 id="history-heading" data-i18n-html="history.title">Where I've <em>worked.</em></h2>
+      <p class="lead" data-i18n="history.lead">Four companies in seven years. The cards advance on their own, or click one to open it.</p>
+    </div>
+
+    <div class="history is-autoplaying reveal" id="history">
+      <article class="job-card is-open">
+        <span class="job-progress" aria-hidden="true"></span>
+        <h3 class="job-heading"><button class="job-header" type="button" aria-expanded="true" aria-controls="job-okto">
+          <img class="job-logo" src="/assets/okto-payments-logo-200-x-200.jpg" alt="" width="44" height="44" loading="lazy" decoding="async">
+          <span class="job-summary"><span class="job-period">2024.08 → <bdi data-i18n="history.today">today</bdi></span><span class="job-company">OKTO Payments</span><span class="job-role" data-i18n="history.jobs.okto.role">Senior backend engineer</span></span>
+          <span class="job-toggle" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+        </button></h3>
+        <div class="job-fold" id="job-okto"><div class="job-body"><p data-i18n="history.jobs.okto.p1">OKTO Payments is a payments company operating in 7 countries and processing more than €17 billion a year. We rebuilt its Pix infrastructure so the company could be a direct participant in the SPI. Today that means more than 2 million transactions a day, with peaks of about 500 per second and 95% of responses within 200 ms.</p><p data-i18n="history.jobs.okto.p2">We went through the Central Bank certifications for receiving Pix, sending Pix, QR Code, key lookups on the DICT (with a token bucket), Recurring Scheduled Pix and Pix Automático. We also delivered biometric Pix through Open Finance (JSR) with ITP, and boletos through BaaS. We use Grafana, Loki and Prometheus dashboards to track success rate per client and latency percentiles, and we test load with k6.</p><ul class="job-tags"><li>Go</li><li>TypeScript</li><li>SPI</li><li>DICT</li><li>Open Finance</li><li>Grafana</li><li>k6</li></ul></div></div>
+        <div class="job-event job-event-1"><i></i><div><b data-i18n="history.jobs.okto.event1">Certification completed</b><small data-i18n="history.jobs.okto.event1Note">Central Bank · Pix Automático</small></div></div>
+        <div class="job-event job-event-2"><i></i><div><b>p99 · 300 ms</b><small data-i18n="history.jobs.okto.event2Note">99.9% availability</small></div></div>
+        <span class="job-year" aria-hidden="true"><i style="--i:0">2</i><i style="--i:1">4</i></span>
+      </article>
+
+      <article class="job-card">
+        <span class="job-progress" aria-hidden="true"></span>
+        <h3 class="job-heading"><button class="job-header" type="button" aria-expanded="false" aria-controls="job-g8">
+          <img class="job-logo" src="/assets/g8-finance-logo-200-x-200.jpg" alt="" width="44" height="44" loading="lazy" decoding="async">
+          <span class="job-summary"><span class="job-period">2023.02 → 2024.08</span><span class="job-company">G8 Finance</span><span class="job-role" data-i18n="history.jobs.g8.role">Full-stack engineer · tech lead</span></span>
+          <span class="job-toggle" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+        </button></h3>
+        <div class="job-fold" id="job-g8"><div class="job-body"><p data-i18n="history.jobs.g8.p1">An online credit system (multi-tenant SaaS) for banking correspondents, with thousands of customers. Each correspondent configures and runs its own loan portfolio, and the commission is calculated on the profit of each operation.</p><p data-i18n="history.jobs.g8.p2">I led a team of 4, from the multi-tenant architecture to the commission engine. I also handled the deployment and all the infrastructure on my own, on VPS.</p><ul class="job-tags"><li>Multi-tenant</li><li data-i18n="history.tags.commissions">Commissions</li><li>VPS</li><li>Deploy</li></ul></div></div>
+        <div class="job-event job-event-1"><i></i><div><b data-i18n="history.jobs.g8.event1">Team of 4</b><small data-i18n="history.jobs.g8.event1Note">tech lead, end to end</small></div></div>
+        <div class="job-event job-event-2"><i></i><div><b data-i18n="history.jobs.g8.event2">Infra on VPS</b><small data-i18n="history.jobs.g8.event2Note">self-managed deploys</small></div></div>
+        <span class="job-year" aria-hidden="true"><i style="--i:0">2</i><i style="--i:1">3</i></span>
+      </article>
+
+      <article class="job-card">
+        <span class="job-progress" aria-hidden="true"></span>
+        <h3 class="job-heading"><button class="job-header" type="button" aria-expanded="false" aria-controls="job-esatto">
+          <img class="job-logo" src="/assets/esatto-logo-200-x-200.jpg" alt="" width="44" height="44" loading="lazy" decoding="async">
+          <span class="job-summary"><span class="job-period">2021.06 → 2023.05</span><span class="job-company">Esatto</span><span class="job-role" data-i18n="history.jobs.esatto.role">Full-stack engineer · tech lead</span></span>
+          <span class="job-toggle" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+        </button></h3>
+        <div class="job-fold" id="job-esatto"><div class="job-body"><p data-i18n="history.jobs.esatto.p1">A white-label digital bank, for Android and iOS, built for an institution that takes part in Pix through another bank (an indirect participant). It had accounts, statements, onboarding with KYC and KYB, TED and DOC transfers, boletos, investments and full Pix: receiving, sending by key, QR Code or bank details, and managing keys and portability.</p><p data-i18n="history.jobs.esatto.p2">I led a team of 5 that delivered the whole platform in a few months, with infrastructure on Google Cloud, CI/CD and publishing on the App Store and Google Play.</p><ul class="job-tags"><li>Clean Architecture</li><li>DDD</li><li>CQRS</li><li>Event Sourcing</li><li>Google Cloud</li><li>CI/CD</li></ul></div></div>
+        <div class="job-event job-event-1"><i></i><div><b data-i18n="history.jobs.esatto.event1">Apps published</b><small data-i18n="history.jobs.esatto.event1Note">App Store · Google Play</small></div></div>
+        <div class="job-event job-event-2"><i></i><div><b data-i18n="history.jobs.esatto.event2">Full Pix</b><small data-i18n="history.jobs.esatto.event2Note">DICT · key portability</small></div></div>
+        <span class="job-year" aria-hidden="true"><i style="--i:0">2</i><i style="--i:1">1</i></span>
+      </article>
+
+      <article class="job-card">
+        <span class="job-progress" aria-hidden="true"></span>
+        <h3 class="job-heading"><button class="job-header" type="button" aria-expanded="false" aria-controls="job-anhanguera">
+          <img class="job-logo" src="/assets/anhanguera-educacional-logo-200-x-200.jpg" alt="" width="44" height="44" loading="lazy" decoding="async">
+          <span class="job-summary"><span class="job-period">2019.07 → 2021.06</span><span class="job-company">Anhanguera</span><span class="job-role" data-i18n="history.jobs.anhanguera.role">IT technician</span></span>
+          <span class="job-toggle" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+        </button></h3>
+        <div class="job-fold" id="job-anhanguera"><div class="job-body"><p data-i18n="history.jobs.anhanguera.p1">An internal web management system for a higher-education institution, with REST APIs, automated tests, CI/CD and automation libraries. It ran on physical Linux servers that I installed myself.</p><p data-i18n="history.jobs.anhanguera.p2">I also did structured cabling, rack and switch setup, mass cloning of workstations and operations support.</p><ul class="job-tags"><li>REST</li><li>CI/CD</li><li>Linux</li><li data-i18n="history.tags.networking">Networking</li></ul></div></div>
+        <div class="job-event job-event-1"><i></i><div><b data-i18n="history.jobs.anhanguera.event1">Servers up</b><small data-i18n="history.jobs.anhanguera.event1Note">physical Linux · cron · local git</small></div></div>
+        <div class="job-event job-event-2"><i></i><div><b data-i18n="history.jobs.anhanguera.event2">Green CI</b><small data-i18n="history.jobs.anhanguera.event2Note">automated tests</small></div></div>
+        <span class="job-year" aria-hidden="true"><i style="--i:0">1</i><i style="--i:1">9</i></span>
+      </article>
+    </div>
+
+    <div class="education reveal">
+      <p><img src="/assets/fatec-taubate-logo-200-x-200.jpg" alt="" width="24" height="24" loading="lazy" decoding="async"><span data-i18n-html="history.education.degrees"><b>Education</b> · Fatec Taubaté, Systems Analysis and Development (2023) · Etec Pindamonhangaba, IT Technician (2018)</span></p>
+      <p><span data-i18n-html="history.education.courses"><b>Courses</b> · Clean Code and Clean Architecture, Rodrigo Branas (2022) · Advanced Node.js with TDD and Clean Architecture, Rodrigo Manguinho (2021)</span></p>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section class="section container contact" id="contato" aria-labelledby="contact-heading">
+    <canvas class="chevron-field" id="chevron-field" aria-hidden="true"></canvas>
+    <p class="eyebrow reveal"><b>06</b> <bdi data-i18n="contact.eyebrow">Contact</bdi></p>
+    <h2 class="reveal" id="contact-heading" data-i18n-html="contact.title">Let's <em>talk.</em></h2>
+    <p class="lead reveal" data-i18n="contact.lead">Send me an email. Click the address to copy it.</p>
+    <a class="email-link reveal" id="email-link" href="mailto:gustavo@eklund.com.br" data-cursor="copy" data-i18n-attr="data-cursor:cursor.copy" data-copy="gustavo@eklund.com.br">gustavo@eklund.com.br</a>
+    <div id="copied-toast" class="toast" popover data-i18n="contact.copied">email copied ✓</div>
+    <ul class="social-links reveal">
+      <li><a href="https://github.com/GustavoEklund" target="_blank" rel="noopener" data-cursor="open" data-i18n-attr="data-cursor:cursor.open">GitHub <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a></li>
+      <li><a href="https://www.linkedin.com/in/gustavo-eklund" target="_blank" rel="noopener" data-cursor="open" data-i18n-attr="data-cursor:cursor.open">LinkedIn <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a></li>
+    </ul>
+  </section>
+
+</main>
+
+<footer class="container">
+  <p>© <span id="current-year">2026</span> <b>Gustavo Eklund</b> · Taubaté–SP</p>
+  <p><bdi data-i18n="footer.stack">Built with just HTML, CSS and JavaScript, no frameworks and no libraries ·</bdi> <b><span id="page-size">—</span> KB</b> <bdi data-i18n="footer.uncompressed">of code, uncompressed ·</bdi> <a id="source-link" href="https://github.com/GustavoEklund/eklund.com.br" target="_blank" rel="noopener" data-cursor="open" data-i18n="footer.source" data-i18n-attr="data-cursor:cursor.open">Source code on GitHub</a></p>
+</footer>
+
+<dialog class="dialog code-dialog" id="shader-dialog" data-i18n-attr="aria-label:shader.label" aria-label="Globe code">
+  <div class="code-dialog-header"><span data-i18n="shader.title">GLSL ES 3.0 · exactly what is running on the globe</span><button class="icon-button" id="shader-close" type="button" data-i18n-attr="aria-label:shader.close" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  <pre class="quiet-scroller" translate="no" tabindex="0" role="region" data-i18n-attr="aria-label:shader.source" aria-label="Shader source code"><code id="shader-code"></code></pre>
+</dialog>
+
+<dialog class="dialog command-palette" id="command-palette" data-i18n-attr="aria-label:palette.label" aria-label="Command palette">
+  <input id="command-palette-input" type="text" role="combobox" aria-autocomplete="list" aria-expanded="true" placeholder="Where to?" data-i18n-attr="placeholder:palette.placeholder;aria-label:palette.search" autocomplete="off" spellcheck="false" aria-label="Search commands" aria-controls="command-palette-list">
+  <ul class="quiet-scroller" id="command-palette-list" role="listbox" data-i18n-attr="aria-label:palette.list" aria-label="Commands"></ul>
+  <p class="is-empty" id="command-palette-empty" data-i18n="palette.empty" hidden>Nothing here. Try "theme" or "globe".</p>
+  <p class="command-palette-footer"><span><kbd translate="no">↑</kbd><kbd translate="no">↓</kbd> <bdi data-i18n="palette.navigate">navigate</bdi></span><span><kbd translate="no">↵</kbd> <bdi data-i18n="palette.open">open</bdi></span><span><kbd translate="no">esc</kbd> <bdi data-i18n="palette.close">close</bdi></span></p>
+</dialog>
+</body>
+</html>

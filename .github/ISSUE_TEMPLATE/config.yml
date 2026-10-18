@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/GustavoEklund/eklund.com.br/security/advisories/new
+    about: Private report. Please do not open a public issue for a vulnerability (see SECURITY.md).
+  - name: Ask a question
+    url: https://github.com/GustavoEklund/eklund.com.br/discussions
+    about: How something works, or whether a change would be welcome, before you open an issue.

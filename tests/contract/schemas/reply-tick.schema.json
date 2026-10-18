@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://eklund.com.br/contracts/worker/reply-tick.json",
+  "title": "tick reply",
+  "description": "On the wire durations is a Float32Array whose buffer is transferred, not copied; the contract helper turns it into a plain array before validation. The counters are cumulative since the end of the warm-up.",
+  "type": "object",
+  "required": [
+    "durations",
+    "accepted",
+    "insufficientFunds",
+    "duplicates",
+    "invalid",
+    "negativeBalances"
+  ],
+  "properties": {
+    "durations": {
+      "type": "array",
+      "items": { "type": "number", "minimum": 0 },
+      "description": "Milliseconds each batch of 1,000 Pix took in this tick."
+    },
+    "accepted": { "type": "integer", "minimum": 0 },
+    "insufficientFunds": { "type": "integer", "minimum": 0 },
+    "duplicates": { "type": "integer", "minimum": 0 },
+    "invalid": { "type": "integer", "minimum": 0 },
+    "negativeBalances": { "type": "integer", "minimum": 0 }
+  }
+}

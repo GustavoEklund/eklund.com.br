@@ -1,0 +1,51 @@
+# eklund.com.br: Hostinger (LiteSpeed / Apache)
+AddDefaultCharset utf-8
+Options -Indexes
+AddType application/javascript .js .mjs
+AddType image/svg+xml .svg
+AddType font/woff2 .woff2
+AddType application/manifest+json .webmanifest
+
+# Always HTTPS
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# The English version has its own page, /en/. The address it had before, /?lang=en, leads there. (/?lang=pt stays as it is: the
+# canonical link of the page names /, and the script in the head reads it as the visitor's wish to stay in Portuguese.)
+RewriteCond %{QUERY_STRING} (^|&)lang=en(&|$) [NC]
+RewriteRule ^$ /en/? [R=301,L]
+
+# Compression: brotli when available, gzip otherwise
+<IfModule mod_brotli.c>
+  AddOutputFilterByType BROTLI_COMPRESS text/html text/css text/plain text/xml application/xml application/javascript application/json application/manifest+json image/svg+xml
+</IfModule>
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml application/xml application/javascript application/json application/manifest+json image/svg+xml
+</IfModule>
+
+# Cache. This file is written for the build (dist/), where every stylesheet, script, font, image and the manifest has a hash in
+# its name (assets/main-<hash>.js): a changed file gets a new name, so each can be kept for a year. The pages revalidate quickly,
+# since they are what names the files. The few files that keep their name are the exceptions below: robots.txt, the sitemap,
+# favicon.ico and, in assets/brand/ (its own .htaccess), the manifest icons and the social card.
+<IfModule mod_headers.c>
+  <FilesMatch "\.html?$">
+    Header set Cache-Control "public, max-age=600, stale-while-revalidate=86400"
+    Header set Content-Language "pt-BR"
+  </FilesMatch>
+  <FilesMatch "\.(css|js|svg|webmanifest|woff2|png|jpg|webp|avif|ico)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "^(robots\.txt|sitemap\.xml|favicon\.ico|security\.txt)$">
+    Header set Cache-Control "public, max-age=86400, stale-while-revalidate=604800"
+  </FilesMatch>
+  # Security headers. tools/site-headers.mjs is the source of truth: the development server sends the same ones, and
+  # tests/contract/security-headers.contract.test.js fails when they differ. The script hash in the policy is the
+  # inline theme script of index.html; the test prints the new value when that script changes.
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
+  Header always set Cross-Origin-Opener-Policy "same-origin"
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'sha256-4ZqnwGZcn5RW4XM6pRswlWgAYC0S+16xuDiMtrgFy4s='; style-src 'self'; style-src-attr 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+</IfModule>

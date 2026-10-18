@@ -1,0 +1,567 @@
+@layer components {
+  .hero {
+    position: relative;
+    min-height: 100svh;
+    padding: calc(6rem + env(safe-area-inset-top)) 0 2.5rem;
+    display: grid;
+    gap: 1.5rem 3rem;
+    align-content: center;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hero-name {
+    font-family: var(--font-display);
+    font-size: clamp(4rem, 13.4vw, 15.5rem);
+    font-weight: 800;
+    line-height: 0.86;
+    letter-spacing: -0.05em;
+    font-variation-settings:
+      'opsz' 96,
+      'wdth' 80;
+    text-wrap: balance;
+    color: var(--fg);
+  }
+
+  .hero-name .word {
+    display: inline-block;
+    overflow: clip;
+    padding: 0.06em 0.08em 0.1em;
+    margin: -0.06em -0.08em -0.1em;
+    vertical-align: top;
+  }
+
+  .hero-name .letter {
+    display: inline-block;
+    will-change: transform;
+  }
+
+  .hero-name .serif {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    color: var(--accent);
+    font-variation-settings: normal;
+  }
+
+  /* Hidden with display:none until the fonts load, so the reveal never counts as a layout shift. */
+  .js .hero:not(.is-revealed) .hero-name,
+  .js .hero:not(.is-revealed) .eyebrow,
+  .js .hero:not(.is-revealed) .hero-copy {
+    display: none;
+  }
+
+  .hero.is-revealed .eyebrow,
+  .hero.is-revealed .hero-copy {
+    animation: rise 0.9s var(--ease-out) both;
+  }
+
+  .hero.is-revealed .hero-copy {
+    animation-delay: 0.35s;
+  }
+
+  .hero.is-revealed .letter {
+    animation: letter 1.1s var(--spring) both;
+    animation-delay: calc(0.12s + var(--i) * 32ms);
+  }
+
+  @keyframes letter {
+    from {
+      transform: translateY(115%) rotate(5deg);
+    }
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      translate: 0 22px;
+    }
+  }
+
+  .hero-tagline {
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 1rem + 1.2vw, 1.85rem);
+    line-height: 1.22;
+    letter-spacing: -0.02em;
+    max-width: 24ch;
+    text-wrap: balance;
+    margin-bottom: 1.75rem;
+  }
+
+  .rotating-text {
+    display: block;
+    height: 1.45em;
+    overflow: clip;
+    margin-top: 0.45em;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 0.62em;
+    letter-spacing: 0;
+    color: var(--accent-text);
+  }
+
+  .rotating-text-roll {
+    display: block;
+    animation: rotate-lines 12s var(--spring) infinite;
+  }
+
+  .rotating-text-roll > span {
+    display: block;
+    height: 1.45em;
+    line-height: 1.45;
+  }
+
+  .rotating-text-roll > span::before {
+    content: '▸ ';
+    opacity: 0.6;
+  }
+
+  @keyframes rotate-lines {
+    0%,
+    20% {
+      translate: 0 0;
+    }
+
+    25%,
+    45% {
+      translate: 0 -20%;
+    }
+
+    50%,
+    70% {
+      translate: 0 -40%;
+    }
+
+    75%,
+    95% {
+      translate: 0 -60%;
+    }
+
+    100% {
+      translate: 0 -80%;
+    }
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1rem;
+  }
+
+  .shortcut-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-left: 0.25rem;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+  }
+
+  @media (width <= 640px) {
+    .shortcut-hint {
+      display: none;
+    }
+  }
+
+  /* The canvas is 44% larger than the visible globe so the halo fades out on its own. */
+  .globe {
+    position: relative;
+    width: min(100%, 76vh, 760px);
+    aspect-ratio: 1;
+    justify-self: center;
+    transition:
+      opacity 0.7s ease,
+      scale 1.4s var(--ease-out);
+  }
+
+  .js .globe:not(.is-revealed) {
+    opacity: 0;
+    scale: 0.82;
+  }
+
+  .globe canvas {
+    position: absolute;
+    inset: -22%;
+    width: 144%;
+    height: 144%;
+    touch-action: pan-y;
+  }
+
+  .globe.is-fallback canvas {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 35% 30%, var(--globe-body), var(--bg) 68%);
+    border-radius: 50%;
+  }
+
+  .chip {
+    position: absolute;
+    z-index: 3;
+    padding: 0.6rem 0.9rem 0.6rem 1rem;
+    border-radius: 0.9rem;
+    background: color-mix(in oklch, var(--bg-2) 94%, transparent);
+    box-shadow:
+      inset 0 0 0 1px var(--line),
+      0 14px 36px -14px oklch(0% 0 0deg / 55%);
+    font-size: 0.7rem;
+    line-height: 1.3;
+    display: grid;
+    gap: 0.1rem;
+    white-space: nowrap;
+    transition:
+      opacity 0.6s ease,
+      translate 0.9s var(--spring);
+    transition-delay: var(--delay, 0s);
+  }
+
+  .js .globe:not(.is-revealed) .chip {
+    opacity: 0;
+    translate: 0 10px;
+  }
+
+  .globe.is-revealed .chip {
+    animation: float 7s ease-in-out infinite alternate;
+    animation-delay: var(--float-delay, 0s);
+  }
+
+  .chip b {
+    font-weight: 600;
+    color: var(--fg);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .chip small {
+    color: var(--fg-2);
+    font-size: 0.62rem;
+    letter-spacing: 0.02em;
+  }
+
+  .chip::before {
+    content: '';
+    position: absolute;
+    left: -0.3rem;
+    top: 0.95rem;
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 4px color-mix(in oklch, var(--accent) 22%, transparent);
+  }
+
+  .chip-network {
+    left: -2%;
+    top: 12%;
+
+    --delay: 1.1s;
+  }
+
+  .chip-points {
+    right: -4%;
+    top: 24%;
+
+    --delay: 1.35s;
+    --float-delay: -2.3s;
+  }
+
+  .chip-fps {
+    left: 3%;
+    bottom: 22%;
+
+    --delay: 1.6s;
+    --float-delay: -4.1s;
+  }
+
+  .chip-fcp {
+    right: 0;
+    bottom: 9%;
+
+    --delay: 1.85s;
+    --float-delay: -5.7s;
+  }
+
+  @keyframes float {
+    from {
+      translate: 0 -6px;
+    }
+
+    to {
+      translate: 0 8px;
+    }
+  }
+
+  @media (width <= 640px) {
+    .chip {
+      font-size: 0.64rem;
+    }
+
+    .chip small {
+      display: none;
+    }
+  }
+
+  /* Globe controls: a HUD chip above the sphere with scrubbable numbers. */
+  .globe-controls {
+    left: 50%;
+    top: -4%;
+    translate: -50% 0;
+
+    --delay: 2.1s;
+
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.55rem 0.9rem 0.55rem 1rem;
+    font-size: 0.66rem;
+    color: var(--fg-2);
+    white-space: nowrap;
+    z-index: 4;
+  }
+
+  .globe.is-revealed .globe-controls {
+    animation: none;
+  }
+
+  .js .globe:not(.is-revealed) .globe-controls {
+    translate: -50% 10px;
+  }
+
+  .globe-controls::before {
+    top: 50%;
+    translate: 0 -50%;
+  }
+
+  .globe-controls-label {
+    font-size: 0.58rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg);
+  }
+
+  .globe-controls-label::after {
+    content: ' ▸';
+    color: var(--accent-text);
+  }
+
+  .text-button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.5rem;
+    font: inherit;
+    font-size: 0.58rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent-text);
+    padding: 0.2rem 0;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s;
+  }
+
+  .text-button:hover {
+    border-color: var(--accent);
+  }
+
+  @media (width <= 899px) {
+    .hero .globe {
+      margin-top: 3.2rem;
+    }
+
+    .globe-controls {
+      font-size: 0.62rem;
+      gap: 0.6rem;
+      padding-inline: 0.8rem;
+    }
+
+    .globe-controls-label {
+      display: none;
+    }
+
+    .globe-controls::before {
+      display: none;
+    }
+  }
+
+  @media (width <= 420px) {
+    .globe-controls .text-button {
+      display: none;
+    }
+  }
+
+  .scrubber {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 3.1em;
+    min-height: 1.5rem;
+    text-align: center;
+    padding: 0.14rem 0.4rem;
+    margin-left: 0.2rem;
+    border-radius: 0.35rem;
+    background: color-mix(in oklch, var(--accent) 12%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--accent) 28%, transparent);
+    color: var(--accent-text);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    cursor: ew-resize;
+    user-select: none;
+    touch-action: none;
+    transition:
+      background 0.2s,
+      color 0.2s,
+      scale 0.25s var(--spring);
+  }
+
+  .scrubber:hover,
+  .scrubber.is-active {
+    background: var(--accent);
+    color: var(--ink);
+  }
+
+  .scrubber.is-active {
+    scale: 1.08;
+  }
+
+  .scrubber:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .code-dialog {
+    width: min(94vw, 880px);
+    margin-top: 7vh;
+  }
+
+  .code-dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem 1rem 0.8rem 1.3rem;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+  }
+
+  .code-dialog pre {
+    margin: 0;
+    padding: 1rem 1.3rem 1.4rem;
+    overflow: auto;
+    max-height: 72vh;
+    font-size: 0.74rem;
+    line-height: 1.65;
+    color: var(--fg);
+    tab-size: 2;
+  }
+
+  .tok-keyword {
+    color: var(--accent-text);
+    font-weight: 500;
+  }
+
+  .tok-function {
+    color: var(--fg);
+  }
+
+  .tok-number {
+    color: var(--accent-2-text);
+  }
+
+  .tok-comment {
+    color: var(--fg-2);
+    font-style: italic;
+  }
+
+  @media (width >= 900px) {
+    .hero {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 0.92fr);
+      grid-template-rows: 1fr auto auto 1fr auto;
+      row-gap: 0;
+    }
+
+    .hero .eyebrow {
+      grid-area: 2 / 1;
+    }
+
+    .hero-copy {
+      grid-area: 3 / 1;
+    }
+
+    .hero .globe {
+      grid-area: 1 / 2 / 6 / 3;
+      align-self: center;
+    }
+
+    .hero-name {
+      grid-area: 5 / 1 / 6 / 3;
+      position: relative;
+      z-index: 2;
+      margin-top: -1.5vw;
+      pointer-events: none;
+    }
+  }
+
+  .scroll-cue {
+    position: absolute;
+    right: 0;
+    bottom: 1rem;
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* Hidden until the display fonts settle, like the nav: by then the translator has already written the final word, so the cue never changes width on screen. */
+  .js:not(.fonts-ready) .scroll-cue {
+    visibility: hidden;
+  }
+
+  .scroll-cue::after {
+    content: '';
+    width: 1px;
+    height: 2.4rem;
+    background: linear-gradient(var(--accent), transparent);
+    animation: drip 1.8s ease-in-out infinite;
+  }
+
+  @keyframes drip {
+    0% {
+      scale: 1 0;
+      transform-origin: top;
+    }
+
+    50% {
+      scale: 1 1;
+      transform-origin: top;
+    }
+
+    51% {
+      transform-origin: bottom;
+    }
+
+    100% {
+      scale: 1 0;
+      transform-origin: bottom;
+    }
+  }
+
+  @media (width <= 900px) {
+    .scroll-cue {
+      display: none;
+    }
+  }
+}

@@ -1,0 +1,521 @@
+@layer components {
+  .trace-viewer {
+    container: trace / inline-size;
+    margin-top: clamp(2rem, 4vw, 4rem);
+    outline: none;
+
+    --c0: color-mix(in oklch, var(--fg) 40%, transparent);
+    --c1: var(--accent-text);
+    --c2: var(--accent-2-text);
+    --c3: color-mix(in oklch, var(--fg) 60%, transparent);
+    --c4: light-dark(
+      oklch(48% 0.14 calc(var(--hue) + 170)),
+      oklch(76% 0.14 calc(var(--hue) + 170))
+    );
+    --c5: light-dark(oklch(50% 0.16 calc(var(--hue) + 60)), oklch(72% 0.16 calc(var(--hue) + 60)));
+    --columns: minmax(9rem, 15rem) 6.5rem 5rem 4.5rem minmax(0, 1fr);
+  }
+
+  .trace-rows:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+
+  .trace-zoom {
+    display: inline-grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+  }
+
+  .trace-zoom svg {
+    width: 0.85rem;
+    height: 0.85rem;
+  }
+
+  .trace-id b {
+    display: inline-block;
+    min-width: 17ch; /* the 16 hex digits of the id in the monospace font (16 ch plus letter spacing), so filling it moves nothing beside it */
+    color: var(--accent-text);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: none;
+  }
+
+  .trace-meta {
+    /* the same tracking the header had by inheritance; named so the reserved widths below can count it */
+    --meta-tracking: 0.12em;
+
+    letter-spacing: var(--meta-tracking);
+  }
+
+  .trace-meta b {
+    color: var(--fg);
+    font-weight: 600;
+  }
+
+  .trace-meta span {
+    color: var(--fg);
+  }
+
+  /* The numbers come in when the viewer first renders. Their widest forms ("999 ms", "9,99 s"; two digits of spans) are reserved, so the
+     text after each one stays put. A glyph of the monospace face is 1ch wide plus the letter spacing, which ch does not include; the extra tenth of an em
+     absorbs the sub-pixel difference between the stand-in font and the real one. */
+  #trace-duration {
+    display: inline-block;
+    min-width: calc(6 * (1ch + var(--meta-tracking)) + 0.1em);
+  }
+
+  #trace-span-count {
+    display: inline-block;
+    min-width: calc(2 * (1ch + var(--meta-tracking)) + 0.1em);
+  }
+
+  .trace-tools {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .trace-minimap {
+    position: relative;
+    height: 2.6rem;
+    margin: 0 var(--panel-padding);
+    border-bottom: 1px solid var(--line);
+    cursor: crosshair;
+    touch-action: pan-y;
+    user-select: none;
+  }
+
+  .trace-minimap i {
+    position: absolute;
+    height: 2px;
+    border-radius: 1px;
+    min-width: 2px;
+    opacity: 0.85;
+    margin-top: 0.4rem;
+  }
+
+  .trace-minimap b {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background: color-mix(in oklch, var(--fg) 7%, transparent);
+    border-inline: 1px solid color-mix(in oklch, var(--fg) 40%, transparent);
+    pointer-events: none;
+    transition:
+      left 0.3s var(--ease-out),
+      width 0.3s var(--ease-out);
+  }
+
+  .trace-columns,
+  .trace-row {
+    display: grid;
+    grid-template-columns: var(--columns);
+    align-items: center;
+    column-gap: 0.75rem;
+    padding-left: var(--panel-padding);
+  }
+
+  .trace-columns {
+    height: 2.1rem;
+    font-size: 0.54rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+    border-bottom: 1px solid var(--line);
+    background: color-mix(in oklch, var(--fg) 2.5%, transparent);
+  }
+
+  .col-ruler {
+    position: relative;
+    height: 100%;
+    margin-right: var(--panel-padding);
+  }
+
+  .col-ruler i {
+    position: absolute;
+    left: var(--x);
+    top: 0;
+    bottom: 0;
+    border-left: 1px solid color-mix(in oklch, var(--fg) 25%, transparent);
+  }
+
+  .col-ruler i b {
+    position: absolute;
+    left: 0.3rem;
+    top: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: none;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .trace-rows {
+    position: relative;
+    min-height: 47.6rem;
+  } /* 28 rows of 1.7rem: the box exists before the trace renders */
+  .trace-row {
+    height: 1.7rem;
+    font-size: 0.7rem;
+    color: var(--fg-2);
+    border-bottom: 1px solid color-mix(in oklch, var(--fg) 4%, transparent);
+    transition:
+      background 0.15s,
+      color 0.15s;
+  }
+
+  .trace-row:nth-child(even) {
+    background: color-mix(in oklch, var(--fg) 1.5%, transparent);
+  }
+
+  .trace-row:hover,
+  .trace-row.is-highlighted {
+    background: color-mix(in oklch, var(--fg) 6%, transparent);
+    color: var(--fg);
+  }
+
+  .trace-row.is-selected {
+    background: color-mix(in oklch, var(--accent) 10%, transparent);
+    color: var(--fg);
+    box-shadow: inset 3px 0 0 var(--accent);
+  }
+
+  .col-name {
+    position: relative;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .depth-0 .col-name {
+    color: var(--fg);
+    font-weight: 600;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .depth-1 .col-name {
+    padding-left: 1.1rem;
+    color: var(--fg);
+    font-weight: 500;
+  }
+
+  .depth-1 .col-name::before {
+    content: '▾';
+    position: absolute;
+    left: 0.05rem;
+    font-size: 0.6rem;
+    color: var(--fg-2);
+  }
+
+  .depth-2 .col-name {
+    padding-left: 2.2rem;
+  }
+
+  .depth-2 .col-name::before {
+    content: '';
+    position: absolute;
+    left: 1.25rem;
+    top: -0.9rem;
+    bottom: 0.5rem;
+    width: 0.55rem;
+    border-left: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    border-radius: 0 0 0 0.3rem;
+  }
+
+  .col-service {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .col-service i {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 2px;
+    background: var(--service-color);
+    flex: none;
+  }
+
+  .col-duration,
+  .col-share {
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    padding-right: 0.5rem;
+  }
+
+  .col-lane {
+    position: relative;
+    height: 100%;
+    overflow: clip;
+    margin-right: var(--panel-padding);
+    touch-action: pan-y;
+    cursor: crosshair;
+  }
+
+  .span-bar {
+    position: absolute;
+    top: 0.42rem;
+    height: 0.86rem;
+    left: var(--start);
+    width: max(var(--width), 2px);
+    border-radius: 3px;
+    background: var(--service-color);
+    transform-origin: left;
+    scale: 0 1;
+  }
+
+  .depth-0 .span-bar {
+    opacity: 0.25;
+  }
+
+  .depth-1 .span-bar {
+    opacity: 0.55;
+  }
+
+  .trace-viewer.is-revealed .span-bar {
+    animation: bar-in 0.6s var(--ease-out) forwards;
+    animation-delay: calc(var(--i) * 35ms);
+  }
+
+  @keyframes bar-in {
+    from {
+      scale: 0 1;
+    }
+
+    to {
+      scale: 1 1;
+    }
+  }
+
+  .trace-overlay {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    pointer-events: none;
+  }
+
+  .trace-overlay .tick {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--x);
+    border-left: 1px solid color-mix(in oklch, var(--fg) 7%, transparent);
+  }
+
+  .trace-mark {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--x);
+    border-left: 1px dashed var(--c);
+  }
+
+  .trace-mark b {
+    position: absolute;
+    top: 0.25rem;
+    left: 0.3rem;
+    font-size: 0.54rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--c);
+    background: var(--bg-2);
+    padding: 0 0.25rem;
+    white-space: nowrap;
+  }
+
+  .trace-mark.is-flipped b {
+    left: auto;
+    right: 0.3rem;
+  }
+
+  .playhead {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--x);
+    border-left: 1px solid var(--fg);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .trace-rows:hover .playhead {
+    opacity: 0.8;
+  }
+
+  .playhead b {
+    position: absolute;
+    bottom: 0.15rem;
+    left: 0.4rem;
+    font-size: 0.58rem;
+    background: var(--fg);
+    color: var(--bg);
+    padding: 0.1rem 0.35rem;
+    border-radius: 0.3rem;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .playhead.is-flipped b {
+    left: auto;
+    right: 0.4rem;
+  }
+
+  .selection-box {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--start);
+    width: var(--width);
+    background: color-mix(in oklch, var(--accent) 12%, transparent);
+    border-inline: 1px solid var(--accent);
+    display: none;
+  }
+
+  .selection-box.is-visible {
+    display: block;
+  }
+
+  .trace-detail {
+    border-top: 1px solid var(--line);
+    padding: 0.9rem var(--panel-padding) 1.1rem;
+    min-height: 5.6rem;
+    display: grid;
+    gap: 0.6rem;
+    align-content: start;
+  }
+
+  .trace-hint {
+    font-size: 0.68rem;
+    color: var(--fg-2);
+  }
+
+  .trace-detail-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.25rem;
+    align-items: baseline;
+    font-size: 0.68rem;
+    color: var(--fg-2);
+  }
+
+  .trace-detail-header > b {
+    font-size: 0.92rem;
+    color: var(--fg);
+    font-weight: 600;
+  }
+
+  .trace-detail-header span b {
+    color: var(--fg);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .trace-detail-header .col-service {
+    font-size: 0.58rem;
+  }
+
+  .trace-attributes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .trace-attributes div {
+    display: inline-flex;
+    gap: 0.35rem;
+    padding: 0.3rem 0.55rem;
+    border-radius: 0.4rem;
+    background: var(--bg);
+    box-shadow: inset 0 0 0 1px var(--line);
+    font-size: 0.62rem;
+  }
+
+  .trace-attributes dt {
+    color: var(--fg-2);
+  }
+
+  .trace-attributes dt::after {
+    content: ' =';
+  }
+
+  .trace-attributes dd {
+    color: var(--fg);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Where the box is under 20em wide (large text on a phone) the name and the duration share a line and the bar has the line below. */
+  @container trace (max-width: 20em) {
+    .trace-columns,
+    .trace-row {
+      grid-template-columns: minmax(0, 1fr) auto;
+      row-gap: 0;
+    }
+
+    .trace-columns {
+      height: auto;
+    }
+
+    .col-ruler {
+      grid-column: 1 / -1;
+      height: 2.1rem;
+    }
+
+    .col-lane {
+      grid-column: 1 / -1;
+      height: 1.7rem;
+    }
+  }
+
+  @media (width <= 760px) {
+    .trace-viewer {
+      --columns: minmax(6rem, 9rem) 4rem minmax(0, 1fr);
+    }
+
+    .col-service,
+    .col-share {
+      display: none;
+    }
+
+    /* A name that does not fit wraps instead of ending in an ellipsis (1.4.4, 1.4.12); at the usual size every name fits on one line, so the rows keep their height. */
+    .trace-row {
+      height: auto;
+      min-height: 1.7rem;
+      padding-block: 0.2rem;
+      font-size: 0.62rem;
+    }
+
+    .col-name {
+      white-space: normal;
+      overflow-wrap: anywhere;
+      line-height: 1.3;
+    }
+
+    .trace-meta,
+    .trace-tools .legend-inline {
+      display: none;
+    }
+
+    .trace-detail-header .col-service {
+      display: flex;
+    }
+
+    .trace-mark b {
+      font-size: 0.48rem;
+    }
+
+    .col-ruler i b {
+      font-size: 0.5rem;
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://eklund.com.br/contracts/worker/command-done.json",
+  "title": "done command",
+  "description": "Sent once when the scenario is over. The worker answers with its final report (reply-done).",
+  "type": "object",
+  "required": ["command"],
+  "properties": {
+    "command": { "const": "done" }
+  }
+}

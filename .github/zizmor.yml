@@ -1,0 +1,11 @@
+# Settings for zizmor (https://docs.zizmor.sh), which audits the workflows for the ways a workflow can be turned against its
+# repository. Anything silenced here says why.
+rules:
+  self-repository:
+    ignore:
+      # zizmor prefers `uses: $/.github/actions/setup`, GitHub's newer way to name an action of the same repository. actionlint
+      # (which lints the same files in the workflows job) does not read that form yet, so the older `./` form stays.
+      - ci.yml
+      - conventions.yml
+      - security.yml
+      - release.yml

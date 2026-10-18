@@ -1,0 +1,5 @@
+Contact: mailto:gustavo@eklund.com.br
+Policy: https://github.com/GustavoEklund/eklund.com.br/blob/main/SECURITY.md
+Expires: 2027-10-16T00:00:00.000Z
+Preferred-Languages: pt-BR, en
+Canonical: https://eklund.com.br/.well-known/security.txt

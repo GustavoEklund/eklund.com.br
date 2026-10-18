@@ -1,0 +1,2 @@
+# The message of every commit follows Conventional Commits and is spelled right (CONTRIBUTING.md#commit-messages).
+node tools/commit-gate.mjs message "$1"

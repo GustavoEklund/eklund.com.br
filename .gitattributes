@@ -1,0 +1,16 @@
+# Text files are stored with LF and checked out as they are, on every platform.
+* text=auto eol=lf
+
+# Binary files git must not touch.
+*.woff2 binary
+*.png binary
+*.jpg binary
+*.ico binary
+*.webp binary
+*.jar binary
+
+# What GitHub's language statistics and diffs should leave out: generated or vendored files.
+pnpm-lock.yaml linguist-generated=true -diff
+source/en/index.html linguist-generated=true
+source/js/globe/land-bitset.js linguist-generated=true
+tools/land.json linguist-generated=true

@@ -1,0 +1,449 @@
+@layer components {
+  .history {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .job-card {
+    position: relative;
+    isolation: isolate;
+    overflow: clip;
+    border-radius: 1.25rem;
+    background: var(--bg-2);
+    box-shadow: inset 0 0 0 1px var(--line);
+    display: grid;
+    grid-template-rows: auto 1fr;
+    min-width: 0;
+  }
+
+  .job-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.9rem;
+    width: 100%;
+    padding: 1.6rem 1.5rem 0;
+    text-align: left;
+  }
+
+  .job-heading {
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: none;
+    margin: 0;
+    min-width: 0; /* a grid item would otherwise be as wide as its widest line, and push the card out at large text sizes */
+  }
+
+  .job-summary {
+    display: block;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .job-logo {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.8rem;
+    object-fit: cover;
+    background: #fff;
+    box-shadow: inset 0 0 0 1px var(--line);
+    flex: none;
+    align-self: center;
+  }
+
+  .job-period {
+    font-size: 0.64rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+    display: block;
+    overflow-wrap: anywhere;
+  }
+
+  .job-company {
+    display: block;
+    overflow-wrap: anywhere;
+    font-family: var(--font-display);
+    font-size: clamp(1.4rem, 2.2vw, 2rem);
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    line-height: 1;
+    margin-top: 0.55rem;
+    font-variation-settings:
+      'opsz' 96,
+      'wdth' 86;
+    text-wrap: balance;
+  }
+
+  .job-role {
+    display: block;
+    font-size: 0.74rem;
+    color: var(--fg-2);
+    margin-top: 0.5rem;
+  }
+
+  .job-toggle {
+    flex: none;
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px var(--line);
+    display: grid;
+    place-items: center;
+    color: var(--fg);
+    transition:
+      rotate 0.5s var(--spring),
+      background 0.3s,
+      color 0.3s;
+  }
+
+  .job-toggle svg {
+    width: 0.85rem;
+    height: 0.85rem;
+  }
+
+  .job-card.is-open .job-toggle {
+    rotate: 45deg;
+    background: var(--fg);
+    color: var(--bg);
+  }
+
+  .job-fold {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition:
+      grid-template-rows 0.6s var(--ease-out),
+      visibility 0s 0.6s;
+  }
+
+  .job-card.is-open .job-fold {
+    grid-template-rows: 1fr;
+    transition:
+      grid-template-rows 0.6s var(--ease-out),
+      visibility 0s;
+  }
+
+  /* A closed card is hidden from assistive technology too, once its closing animation has finished. */
+  .job-card:not(.is-open) .job-fold,
+  .job-card:not(.is-open) .job-event {
+    visibility: hidden;
+  }
+
+  .job-body {
+    min-height: 0;
+    overflow: clip;
+    padding: 0 1.5rem;
+    display: grid;
+    align-content: start;
+    gap: 1rem;
+    opacity: 0;
+    translate: 0 10px;
+    transition:
+      opacity 0.4s,
+      translate 0.5s var(--ease-out),
+      padding 0.4s;
+  }
+
+  .job-card.is-open .job-body {
+    opacity: 1;
+    translate: 0 0;
+    padding: 1.1rem 1.5rem 1.6rem;
+    transition-delay: 0.2s;
+  }
+
+  .job-body p {
+    max-width: 48ch;
+    font-size: 0.8rem;
+    color: var(--fg-2);
+    text-wrap: pretty;
+  }
+
+  .job-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .job-tags li {
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.4rem 0.6rem;
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px var(--line);
+    color: var(--fg-2);
+    background: var(--bg-2);
+  }
+
+  .job-year {
+    position: absolute;
+    right: -0.04em;
+    bottom: -0.26em;
+    z-index: -1;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(11rem, 26vw, 24rem);
+    line-height: 1;
+    letter-spacing: -0.07em;
+    color: transparent;
+    -webkit-text-stroke: 1.5px color-mix(in oklch, var(--accent) 50%, transparent);
+    pointer-events: none;
+    user-select: none;
+    font-variation-settings:
+      'opsz' 96,
+      'wdth' 78;
+    display: flex;
+  }
+
+  .job-year i {
+    display: inline-block;
+    font-style: normal;
+    opacity: 0;
+  }
+
+  .job-card.is-open .job-year i {
+    animation: digit 1s var(--spring) both;
+    animation-delay: calc(0.12s + var(--i) * 110ms);
+  }
+
+  @keyframes digit {
+    0% {
+      opacity: 0;
+      translate: 0 55%;
+      rotate: 8deg;
+    }
+
+    30% {
+      opacity: 1;
+    }
+
+    100% {
+      opacity: 1;
+      translate: 0 0;
+      rotate: 0deg;
+    }
+  }
+
+  .job-progress {
+    position: absolute;
+    left: 1.5rem;
+    right: 1.5rem;
+    top: 0;
+    height: 2px;
+    background: var(--line);
+    border-radius: 2px;
+    overflow: clip;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .job-progress::after {
+    content: '';
+    display: block;
+    height: 100%;
+    width: 100%;
+    background: var(--accent-text);
+    transform-origin: left;
+    scale: 0 1;
+  }
+
+  .job-card.is-open .job-progress {
+    opacity: 1;
+  }
+
+  .history.is-autoplaying .job-card.is-open .job-progress::after {
+    animation: fill var(--autoplay-duration, 9s) linear forwards;
+  }
+
+  .history.is-autoplaying:hover .job-card.is-open .job-progress::after,
+  .history.is-autoplaying:focus-within .job-card.is-open .job-progress::after {
+    animation-play-state: paused;
+  }
+
+  @keyframes fill {
+    to {
+      scale: 1 1;
+    }
+  }
+
+  .job-event {
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 0.85rem;
+    border-radius: 0.8rem;
+    background: var(--bg);
+    box-shadow:
+      inset 0 0 0 1px var(--line),
+      0 14px 36px -14px oklch(0% 0 0deg / 50%);
+    font-size: 0.66rem;
+    white-space: nowrap;
+    opacity: 0;
+    translate: 0 12px;
+    transition:
+      opacity 0.5s,
+      translate 0.7s var(--spring),
+      visibility 0s 0.7s;
+  }
+
+  .job-event b {
+    font-weight: 600;
+    display: block;
+  }
+
+  .job-event small {
+    color: var(--fg-2);
+    font-size: 0.6rem;
+  }
+
+  .job-event i {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--accent);
+    flex: none;
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--accent) 22%, transparent);
+  }
+
+  .job-card.is-open .job-event {
+    opacity: 1;
+    translate: 0 0;
+    animation: float 6s ease-in-out infinite alternate;
+    animation-delay: var(--float-delay, 0s);
+  }
+
+  .job-card.is-open .job-event-1 {
+    transition-delay: 0.5s;
+  }
+
+  .job-card.is-open .job-event-2 {
+    transition-delay: 0.7s;
+
+    --float-delay: -3s;
+  }
+
+  .job-event-1 {
+    right: 1.5rem;
+    top: 5.4rem;
+  }
+
+  .job-event-2 {
+    right: 2.6rem;
+    top: 9rem;
+  }
+
+  @media (width <= 1099px) {
+    .job-event {
+      display: none;
+    }
+  }
+
+  @media (width <= 899px) {
+    .job-card.is-open {
+      min-height: 24rem;
+    }
+  }
+
+  /* The cards sit side by side only where the section is wide enough for the text size: 50em of the section's own font size, so larger text stacks them. */
+  #historico {
+    container: history / inline-size;
+  }
+
+  /* Under 16em wide (large text on a phone) the title goes on a line of its own under the logo and the toggle, instead of being squeezed between them. */
+  @container history (max-width: 16em) {
+    .job-header {
+      flex-wrap: wrap;
+      row-gap: 0.9rem;
+    }
+
+    .job-summary {
+      order: 3;
+      flex: 1 0 100%;
+    }
+  }
+
+  @container history (min-width: 50em) {
+    .history {
+      display: flex;
+      min-height: clamp(520px, 62vh, 640px);
+    } /* grows with the text instead of cutting it off (WCAG 1.4.12) */
+    .job-card {
+      flex: 1 1 0;
+      transition: flex-grow 0.85s var(--spring);
+    }
+
+    .job-card.is-open {
+      flex-grow: 3.3;
+    }
+
+    .job-fold {
+      grid-template-rows: 1fr;
+    }
+
+    .job-body {
+      padding: 1.1rem 1.5rem 1.6rem;
+    }
+
+    .job-card:not(.is-open) .job-body {
+      opacity: 0;
+    }
+
+    .job-card:not(.is-open) .job-role {
+      display: none;
+    }
+
+    .job-card:not(.is-open) .job-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.9rem;
+      padding-right: 1.5rem;
+      cursor: pointer;
+    }
+
+    .job-card:not(.is-open) .job-toggle {
+      position: absolute;
+      top: 1.4rem;
+      right: 1.4rem;
+    }
+
+    .job-card:not(.is-open) .job-logo {
+      align-self: flex-start;
+    }
+
+    .job-card:not(.is-open) .job-company {
+      font-size: clamp(1.25rem, 1.7vw, 1.6rem);
+    }
+  }
+
+  .education {
+    margin-top: 1.5rem;
+    display: grid;
+    gap: 0.35rem;
+    font-size: 0.74rem;
+    color: var(--fg-2);
+  }
+
+  .education b {
+    color: var(--fg);
+    font-weight: 500;
+  }
+
+  .education p {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .education img {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 0.4rem;
+    object-fit: cover;
+    background: #fff;
+  }
+}

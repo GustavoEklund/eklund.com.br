@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://eklund.com.br/contracts/worker/reply-warm.json",
+  "title": "warm reply",
+  "description": "LoadTest sums batchesPerTick over the workers to print the warm-up rate. Fields it does not read may be added.",
+  "type": "object",
+  "required": ["batchesPerTick"],
+  "properties": {
+    "batchesPerTick": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Batches of 1,000 Pix one worker can run in one 48 ms tick."
+    }
+  }
+}

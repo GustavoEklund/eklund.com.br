@@ -1,0 +1,36 @@
+name: Text, translation or typo
+description: A wrong word, an awkward sentence or a translation that reads badly, in Portuguese or English.
+title: 'copy: '
+labels: [copy]
+body:
+  - type: input
+    id: where
+    attributes:
+      label: Where
+      description: The address, and the section or the control.
+      placeholder: https://eklund.com.br/en/#perfil, second paragraph
+    validations:
+      required: true
+  - type: dropdown
+    id: language
+    attributes:
+      label: Language
+      options: [Portuguese, English]
+    validations:
+      required: true
+  - type: textarea
+    id: current
+    attributes:
+      label: Current text
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Your suggestion, and why
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        The facts about my career are not open to change by issue, but a doubt about whether a sentence is clear is welcome. The text is under [CC BY-NC-ND 4.0](https://github.com/GustavoEklund/eklund.com.br/blob/main/NOTICE.md).

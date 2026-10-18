@@ -1,0 +1,10 @@
+.idea/
+.DS_Store
+node_modules/
+reports/
+test-results/
+.stryker-tmp/
+.vitest/
+dist/
+.cspellcache
+.lighthouseci/

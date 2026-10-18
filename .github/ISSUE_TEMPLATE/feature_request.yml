@@ -1,0 +1,31 @@
+name: Suggestion
+description: A change to the site, the tooling or the documentation.
+title: 'feat: '
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is a personal site and not a framework, so it grows slowly. A good suggestion says what problem it solves. Read [CONTRIBUTING.md](https://github.com/GustavoEklund/eklund.com.br/blob/main/CONTRIBUTING.md#what-helps-most) for what is likely to be accepted.
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What is hard, missing or wrong today, and for whom.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you would change
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Other ways to solve it
+  - type: dropdown
+    id: contribute
+    attributes:
+      label: Would you send the pull request?
+      options: ['Yes', 'Yes, with some guidance', 'No']

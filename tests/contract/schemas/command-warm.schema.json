@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://eklund.com.br/contracts/worker/command-warm.json",
+  "title": "warm command",
+  "description": "Sent once per worker before the scenario starts. The worker runs the engine for a fixed warm-up window and answers with reply-warm.",
+  "type": "object",
+  "required": ["command"],
+  "properties": {
+    "command": { "const": "warm" }
+  }
+}

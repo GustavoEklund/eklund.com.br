@@ -1,0 +1,414 @@
+@layer components {
+  .load-test-toolbar b {
+    color: var(--fg);
+    font-weight: 600;
+  }
+
+  .load-test-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.35rem;
+    background: var(--accent);
+    color: var(--ink);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+
+  .load-test-state {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+
+    /* The dot (0.5rem) and its gap, then the longest label ("aguardando", "warming up": 10 glyphs, each 1ch plus the panel header's 0.12em
+       tracking). "running" and "done" leave the dot where it is. */
+    min-width: calc(10 * (1ch + 0.12em) + 0.95rem + 0.1em);
+  }
+
+  #load-test-run {
+    min-width: 8.5rem;
+    text-align: center;
+  } /* "rodar" and "rodar de novo" take the same room */
+  .load-test-state::before {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--fg-2);
+  }
+
+  .load-test.is-running .load-test-state::before {
+    background: var(--accent);
+    animation: ping 1.2s ease-out infinite;
+  }
+
+  .load-test.is-done .load-test-state::before {
+    background: var(--ok);
+  }
+
+  .load-test-progress {
+    height: 2px;
+    background: var(--line);
+  }
+
+  .load-test-progress i {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--accent-text);
+    transition: width 0.2s linear;
+  }
+
+  .load-test-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  } /* minmax(0, ...): a terminal line that does not wrap must scroll inside its screen, not stretch the column */
+
+  /* Side by side: the charts column sets the row height and the terminal fills it (a grid row with an explicit
+     min-height of 0 lets the pre scroll instead of growing). Stacked on narrow screens, the terminal keeps a fixed height. */
+  @media (width >= 1000px) {
+    .load-test-grid {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      align-items: stretch;
+    }
+
+    /* contain: size makes the terminal contribute nothing to the row height: the charts column sets it, the log scrolls. */
+    .terminal {
+      contain: size;
+      border-right: 1px solid var(--line);
+      border-bottom: 0;
+    }
+  }
+
+  /* Terminal: title bar, timestamp gutter, glyph column, blinking prompt. Fills the charts column's height. */
+  .terminal {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    background: color-mix(in oklch, var(--bg) 70%, var(--bg-2));
+    border-bottom: 1px solid var(--line);
+
+    --terminal-gutter: 6.4rem;
+  } /* panel padding + hh:mm:ss */
+  .terminal-titlebar {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.6rem var(--panel-padding);
+    border-bottom: 1px solid var(--line);
+    font-size: 0.62rem;
+    color: var(--fg-2);
+  }
+
+  .terminal-lights {
+    display: inline-flex;
+    gap: 0.4rem;
+  }
+
+  .terminal-lights i {
+    width: 0.62rem;
+    height: 0.62rem;
+    border-radius: 50%;
+    background: var(--line);
+  }
+
+  .terminal-lights i:nth-child(1) {
+    background: oklch(70% 0.19 25deg);
+  }
+
+  .terminal-lights i:nth-child(2) {
+    background: oklch(82% 0.17 80deg);
+  }
+
+  .terminal-lights i:nth-child(3) {
+    background: var(--ok);
+  }
+
+  .terminal-command {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--fg);
+    font-weight: 500;
+  }
+
+  .terminal-command::before {
+    content: '❯ ';
+    color: var(--accent-text);
+  }
+
+  .terminal-shell {
+    font-size: 0.56rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .terminal-screen {
+    position: relative;
+    flex: none; /* in a column with no set height, flex: 1 would let the log grow the box line by line */
+    min-height: 0;
+    height: 30rem;
+    overflow: scroll auto;
+    padding: 0.9rem 0 0.6rem;
+    font-size: 0.7rem;
+    line-height: 1.7;
+    color: var(--fg-2);
+  }
+
+  .terminal-output {
+    display: block;
+    min-width: max-content;
+  }
+
+  .terminal-line {
+    display: grid;
+    grid-template-columns: var(--terminal-gutter) 1.2rem minmax(0, 1fr);
+    align-items: baseline;
+    padding: 0.05rem var(--panel-padding) 0.05rem 0;
+    white-space: pre;
+    animation: terminal-line-in 0.25s var(--ease-out) both;
+  }
+
+  @keyframes terminal-line-in {
+    from {
+      opacity: 0;
+      translate: 0 4px;
+    }
+  }
+
+  .terminal-line:hover {
+    background: color-mix(in oklch, var(--fg) 3%, transparent);
+  }
+
+  .terminal-line time {
+    padding-left: var(--panel-padding);
+    font-size: 0.58rem;
+    color: color-mix(in oklch, var(--fg-2) 90%, transparent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .terminal-line i {
+    font-style: normal;
+    color: var(--fg-2);
+  }
+
+  .terminal-line b {
+    color: var(--fg);
+    font-weight: 600;
+  }
+
+  .terminal-line em {
+    font-style: normal;
+    color: var(--accent-text);
+    font-weight: 600;
+  }
+
+  .terminal-line code {
+    color: color-mix(in oklch, var(--fg-2) 86%, transparent);
+  }
+
+  .terminal-line.is-blank {
+    height: 0.8rem;
+    animation: none;
+  }
+
+  .terminal-line.is-command span {
+    color: var(--fg);
+  }
+
+  .terminal-line.is-command i::before {
+    content: '❯';
+    color: var(--accent-text);
+  }
+
+  .terminal-line.is-info i::before {
+    content: '·';
+  }
+
+  /* Dimmed by color, not opacity: opacity stacked on the timestamp's own transparency and dropped both below 4.5:1. */
+  .terminal-line.is-dim span,
+  .terminal-line.is-dim i {
+    color: color-mix(in oklch, var(--fg-2) 86%, transparent);
+  }
+
+  .terminal-line.is-dim i::before {
+    content: '·';
+  }
+
+  .terminal-line.is-running i::before {
+    content: '»';
+    color: var(--accent-text);
+  }
+
+  .terminal-line.is-running span {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .terminal-line.is-ok i::before {
+    content: '✓';
+    color: var(--ok);
+    font-weight: 700;
+  }
+
+  .terminal-line.is-fail i::before {
+    content: '✗';
+    color: var(--bad);
+    font-weight: 700;
+  }
+
+  .terminal-line.is-fail span {
+    color: var(--bad);
+  }
+
+  .terminal-line.is-metric i::before {
+    content: '▪';
+    color: var(--accent-2-text);
+  }
+
+  .terminal-line.is-metric b {
+    display: inline-block;
+    min-width: 9rem;
+    color: var(--accent-2-text);
+  }
+
+  .terminal-prompt {
+    display: grid;
+    grid-template-columns: var(--terminal-gutter) 1.2rem 1fr;
+    align-items: center;
+    padding: 0.3rem var(--panel-padding) 0 0;
+  }
+
+  .terminal-prompt b {
+    grid-column: 2;
+    color: var(--accent-text);
+    font-weight: 700;
+  }
+
+  .terminal-cursor {
+    display: inline-block;
+    width: 0.55em;
+    height: 1.1em;
+    background: var(--fg-2);
+    opacity: 0.35;
+    vertical-align: text-bottom;
+  }
+
+  .terminal-cursor.is-blinking {
+    background: var(--accent);
+    opacity: 1;
+    animation: terminal-blink 1s steps(2, start) infinite;
+  }
+
+  @keyframes terminal-blink {
+    to {
+      visibility: hidden;
+    }
+  }
+
+  /* After the base rule, which sets the stacked height: side by side the screen fills the row the charts column sets. */
+  @media (width >= 1000px) {
+    .terminal-screen {
+      flex: 1;
+      height: auto;
+    }
+  }
+
+  @media (width <= 760px) {
+    .terminal-screen {
+      font-size: 0.62rem;
+      height: 22rem;
+    }
+
+    .terminal {
+      --terminal-gutter: 0px;
+    }
+
+    .terminal-line time {
+      display: none;
+    }
+
+    .terminal-shell {
+      display: none;
+    }
+  }
+
+  /* Until the page has set data-motion, or without scripts; afterwards the header button decides (accessibility.css). */
+  @media (prefers-reduced-motion: reduce) {
+    :root:not([data-motion]) .terminal-line {
+      animation: none;
+    }
+
+    :root:not([data-motion]) .terminal-cursor.is-blinking {
+      animation: none;
+    }
+  }
+
+  .load-test-charts {
+    display: grid;
+    grid-template-rows: auto auto auto;
+  }
+
+  .load-test-charts .chart-panel + .chart-panel {
+    border-top: 1px solid var(--line);
+  }
+
+  .load-test-charts .chart-plot {
+    aspect-ratio: 520 / 150;
+  } /* reserves the chart box before it renders: no layout shift */
+  .load-test-charts .chart-plot svg text {
+    font-size: 9.5px;
+  }
+
+  .load-test-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border-top: 1px solid var(--line);
+  }
+
+  @media (width >= 760px) {
+    .load-test-summary {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .load-test-summary div {
+    background: var(--bg-2);
+    padding: 0.9rem clamp(1rem, 2vw, 1.5rem);
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .load-test-summary dt {
+    font-size: 0.56rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+  }
+
+  .load-test-summary dd {
+    font-family: var(--font-display);
+    font-size: clamp(1.3rem, 2.2vw, 2rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    font-variation-settings:
+      'opsz' 96,
+      'wdth' 85;
+    font-variant-numeric: tabular-nums;
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+  }
+
+  .load-test-summary dd small {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--accent-text);
+  }
+}

@@ -1,0 +1,229 @@
+/* Layer order is fixed here, in the first stylesheet the document loads. */
+@layer reset, base, layout, components, effects;
+
+@layer reset {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+  }
+
+  html {
+    text-size-adjust: 100%;
+    interpolate-size: allow-keywords;
+  } /* smooth anchor scrolling lives in AnchorLinks */
+  body {
+    min-height: 100svh;
+  }
+
+  canvas,
+  svg {
+    display: block;
+  }
+
+  button,
+  input {
+    font: inherit;
+    color: inherit;
+  }
+
+  button {
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  ul,
+  ol {
+    list-style: none;
+    padding: 0;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-weight: inherit;
+    font-size: inherit;
+  }
+}
+
+@layer base {
+  :root {
+    /* --hue recolors the whole site; the globe and the chevron field read these tokens at runtime. */
+    --hue: 128;
+
+    /* The light accent keeps one relative luminance at every hue (about 0.22), the one value that gives dark ink 4.5:1 or better
+       on the fill and keeps the fill itself above 3:1 on --bg and --bg-2. A hue's own brightness moves with it, so the lightness
+       follows a Fourier fit of the lightness that holds that luminance; tools/contrast-audit.mjs checks it at hues 0 to 360. */
+    --hue-angle: calc(var(--hue) * 1deg);
+    --accent-lightness: calc(
+      0.5924 + 0.0318 * cos(var(--hue-angle)) - 0.0009 * sin(var(--hue-angle)) - 0.0087 *
+        cos(calc(2 * var(--hue-angle))) - 0.0052 * sin(calc(2 * var(--hue-angle))) + 0.0025 *
+        cos(calc(3 * var(--hue-angle))) + 0.0043 * sin(calc(3 * var(--hue-angle)))
+    );
+    --bg: light-dark(oklch(97% 0.025 var(--hue)), oklch(13.5% 0.012 265deg));
+    --bg-2: light-dark(oklch(93.5% 0.045 var(--hue)), oklch(17.5% 0.015 265deg));
+    --fg: light-dark(oklch(20% 0.02 265deg), oklch(96% 0.008 100deg));
+    --fg-2: light-dark(oklch(41% 0.02 265deg), oklch(72% 0.014 265deg));
+    --accent: light-dark(
+      oklch(var(--accent-lightness) 0.19 var(--hue)),
+      oklch(88% 0.23 var(--hue))
+    );
+    --accent-2: light-dark(
+      oklch(60% 0.2 calc(var(--hue) + 250)),
+      oklch(76% 0.19 calc(var(--hue) + 250))
+    );
+    --ink: oklch(14% 0.03 var(--hue));
+    --line: color-mix(in oklch, var(--fg) 12%, transparent);
+    --globe-body: light-dark(oklch(88% 0.03 var(--hue)), oklch(20% 0.022 265deg));
+    --globe-dot: light-dark(oklch(45% 0.1 var(--hue)), oklch(56% 0.08 var(--hue)));
+
+    /* Status colors read as text (4.5:1) and as graphics (3:1) on every surface, so one value serves both. */
+    --ok: light-dark(oklch(48% 0.14 145deg), oklch(78% 0.2 145deg));
+    --warn: light-dark(oklch(50% 0.12 70deg), oklch(82% 0.17 80deg));
+    --bad: light-dark(oklch(52% 0.19 25deg), oklch(68% 0.21 25deg));
+
+    /* Accent for text and thin strokes: the lightest values that still reach 4.5:1 on every light surface and every hue;
+       on the dark theme they are the accents themselves. */
+    --accent-text: light-dark(oklch(46% 0.19 var(--hue)), var(--accent));
+    --accent-2-text: light-dark(oklch(45% 0.2 calc(var(--hue) + 250)), var(--accent-2));
+
+    /* Chart series pair, validated for color-vision deficiency on both surfaces. */
+    --series-1: light-dark(#5c8a00, #78a020);
+    --series-2: light-dark(#4a5fd1, #6f78dc);
+    --font-display:
+      'Bricolage Grotesque', 'Bricolage Grotesque Fallback', 'Helvetica Neue', arial, sans-serif;
+    --font-serif: 'Instrument Serif', 'Instrument Serif Fallback', 'Times New Roman', serif;
+    --font-mono:
+      'JetBrains Mono', 'JetBrains Mono Fallback', ui-monospace, 'SF Mono', menlo, monospace;
+    --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --spring: linear(
+      0,
+      0.006,
+      0.025 2.8%,
+      0.101 6.1%,
+      0.539 18.9%,
+      0.721 25.3%,
+      0.849 31.5%,
+      0.937 38.1%,
+      0.968 41.8%,
+      0.991 45.7%,
+      1.006 50.1%,
+      1.013 54.8%,
+      1.013 60.4%,
+      1 72.4%,
+      0.996 85.1%,
+      1
+    );
+    --gutter: clamp(1.1rem, 4vw, 3.5rem);
+    --max-width: 1440px;
+    --panel-padding: clamp(1.25rem, 3vw, 2rem);
+
+    color-scheme: dark;
+    accent-color: var(--accent);
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) transparent;
+  }
+
+  :root[data-theme='light'] {
+    color-scheme: light;
+  }
+
+  /* With a mouse and JS the native scrollbar hides; the custom one takes over. */
+  @media (pointer: fine) {
+    html.js {
+      scrollbar-width: none;
+    }
+
+    html.js::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 8px;
+  }
+
+  ::-webkit-scrollbar-button {
+    display: none;
+  }
+
+  /* Inner scrollers: thin and quiet, so the content stays the loud part. */
+  .quiet-scroller {
+    scrollbar-width: thin;
+    scrollbar-color: auto;
+  }
+
+  .quiet-scroller::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .quiet-scroller::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  .quiet-scroller::-webkit-scrollbar-thumb {
+    background: color-mix(in oklch, var(--fg) 22%, transparent);
+    border-radius: 6px;
+  }
+
+  .quiet-scroller:hover::-webkit-scrollbar-thumb {
+    background: color-mix(in oklch, var(--fg) 38%, transparent);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-mono);
+    font-size: clamp(0.88rem, 0.84rem + 0.2vw, 0.98rem);
+    line-height: 1.65;
+    letter-spacing: -0.005em;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden; /* propagates to the viewport, so sticky children keep working */
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: var(--ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* Film grain from an SVG turbulence filter; a plain overlay, no blend mode, to keep compositing cheap. */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  :root[data-theme='light'] body::after {
+    opacity: 0.05;
+  }
+}

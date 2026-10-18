@@ -1,0 +1,60 @@
+# Continuous integration
+
+Every check that can run unattended runs in GitHub Actions. The quick ones also run on the developer's machine, through git hooks, so a failure shows up before the push and not after it.
+
+## What runs, and when
+
+| Where               | When                                                 | What                                                                                                                                                                                                                                                                                                    |
+| ------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pre-commit`        | `git commit`                                         | On staged files only: format and lint (`vp check --fix`), the unit, property, integration and architecture tests related to what changed, the i18n audit when `index.html` or a dictionary changed, and the spelling of every staged file                                                               |
+| `commit-msg`        | `git commit`                                         | The message follows Conventional Commits and is spelled right                                                                                                                                                                                                                                           |
+| `pre-push`          | `git push`                                           | The same checks on every commit about to be sent (it catches `--no-verify`, a rebase and an amended commit), then `pnpm run verify`: format, lint, i18n, spelling, every Vitest project and the BDD suite                                                                                               |
+| `CI`                | pull request, push to `main`, Mondays                | Format, lint, i18n and spelling; Vitest with coverage; BDD; end-to-end on desktop and phone; W3C validation, CSS lint and the 361-hue contrast sweep; the production build, its tests and the whole end-to-end suite against it; Lighthouse. On Mondays also mutation testing and the filter-list check |
+| `Conventions`       | pull request, push to `main`                         | The title and every commit message follow the convention, and a change that visitors will notice has a changelog line                                                                                                                                                                                   |
+| `CodeQL`            | pull request, push to `main`, Tuesdays               | Static analysis of the JavaScript and of the workflows                                                                                                                                                                                                                                                  |
+| `Dependency review` | pull request that changes a dependency or a workflow | Fails on a new known vulnerability of high severity                                                                                                                                                                                                                                                     |
+| `Security scans`    | pull request, push to `main`, Mondays                | actionlint and zizmor on the workflows, gitleaks on the history, `pnpm audit`                                                                                                                                                                                                                           |
+| `Scorecard`         | push to `main`, Saturdays                            | OpenSSF Scorecard, published for the badge                                                                                                                                                                                                                                                              |
+| `Links`             | pull request that changes Markdown, Mondays          | Links between files and headings (and, on Monday, the web)                                                                                                                                                                                                                                              |
+| `Release`           | tag `vX.Y.Z`                                         | Verifies, builds and publishes the release ([`releasing.md`](releasing.md))                                                                                                                                                                                                                             |
+
+The hooks live in [`.vite-hooks/`](../.vite-hooks) and are installed by `pnpm install` (Vite+ sets `core.hooksPath`). CI sets `VP_GIT_HOOKS=0`, because the hooks are for people.
+
+## The gates
+
+**Commit convention.** [`commitlint.config.mjs`](../commitlint.config.mjs) extends the Conventional Commits preset with the scopes of this project, a header of at most 72 characters and a blank line before the body and the footer. [`tools/commit-gate.mjs`](../tools/commit-gate.mjs) applies it, and spell-checks the message, in four places with the same code: the message of a commit (`commit-msg`), the commits of a push (`pre-push`), the commits of a pull request (`Conventions`, `range`) and the title of a pull request (`Conventions`, `title`), which is the message of a squash merge. A merge commit and a bot's commit are not spell-checked.
+
+**Spelling.** [cspell](https://cspell.org) checks every text file with the English dictionary and the Brazilian Portuguese one ([`cspell.config.yaml`](../cspell.config.yaml)). Markdown is checked against English alone, and the dictionaries of the site, the code and the tests accept both languages. A word that is the project's real vocabulary (a Banco Central term, a name, a tool) goes into [`.cspell/project-words.txt`](../.cspell/project-words.txt). The first run found five British spellings in comments and test titles, which are fixed, because the code is written in American English.
+
+**Copy style.** The rules of the voice are tests: a dictionary value may not be empty, padded or hold an em dash (`tests/integration/dictionaries.integration.test.js`), and the documents may not hold one either (`tests/contract/community-files.contract.test.js`).
+
+**Changelog.** [`tools/changelog.mjs`](../tools/changelog.mjs) checks that [`CHANGELOG.md`](../CHANGELOG.md) keeps the Keep a Changelog format (the six groups, dated versions from newest to oldest, the comparison links) and that `package.json` has the newest released version. A pull request titled `feat`, `fix`, `perf`, `revert`, or marked as breaking with `!`, has to change the file, unless it carries the label `skip-changelog`.
+
+**Lighthouse.** The limits and what they came from are in [`build-and-deploy.md`](build-and-deploy.md#lighthouse).
+
+## Security
+
+- **Workflows.** Every action is pinned to a commit, with the version in a comment, and Dependabot proposes the updates. Every workflow starts with no permissions and every job asks for what it needs (`persist-credentials: false` on every checkout, and the pull request title and the branch names reach `run` steps only through environment variables). [zizmor](https://docs.zizmor.sh) audits all of this, and actionlint checks the syntax; both run on every change. [`.github/zizmor.yml`](../.github/zizmor.yml) says why the one thing it silences is silenced.
+- **Code.** CodeQL with the `security-extended` queries, on every pull request and every week.
+- **Secrets.** gitleaks scans the whole history. GitHub's own secret scanning with push protection is switched on in the settings ([`repository-settings.md`](repository-settings.md)).
+- **Dependencies.** `pnpm audit` fails on a high or critical advisory, and the dependency review fails a pull request that adds one. The one advisory that has no fix yet (`braces`, reached through Stylelint) is listed in [`pnpm-workspace.yaml`](../pnpm-workspace.yaml) with the reason. Audit and measurement tools that bring their own tree of dependencies (Lighthouse) run through a pinned action and stay out of the lockfile.
+- **Installation.** `pnpm` installs a version only when it has been public for two days, refuses a package that lost the provenance an older version had (`trustPolicy: no-downgrade`), refuses a dependency of a dependency that comes from a git address, and runs no install script that is not approved in `pnpm-workspace.yaml`. Dependabot adds a cool-down of its own (7 days, 14 for a major version) before it opens a pull request.
+- **Supply chain score.** OpenSSF Scorecard grades the repository every week, and the result is the badge in the README.
+
+When one of these catches something real, the fix goes in with a `fix(security)` or `fix(deps)` commit and, for a vulnerability in what ships, a line under `### Security` in the changelog.
+
+### A security update that arrives too young
+
+GitHub's security updates ignore the cool-down, as intended. When Dependabot opens one for a version that is less than two days old, `pnpm install --frozen-lockfile` fails with `ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION`. Either wait until the version is two days old and run the job again, or, if the vulnerability is exploitable here, add that exact version to `minimumReleaseAgeExclude` in `pnpm-workspace.yaml` and remove the line afterwards.
+
+## Running the gates on your machine
+
+| Gate                               | Command                                                                                                            |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Everything the pre-push hook runs  | `pnpm run verify`                                                                                                  |
+| Spelling                           | `pnpm run proofread`                                                                                               |
+| The message of a commit or a title | `pnpm run commit-gate title "feat(globe): add a shortcut"`                                                         |
+| The commits since `main`           | `pnpm run commit-gate range main HEAD`                                                                             |
+| The changelog                      | `pnpm run changelog check`                                                                                         |
+| Known vulnerabilities              | `pnpm audit`                                                                                                       |
+| The workflows                      | `actionlint` and `zizmor .github`, which are not dependencies of the project; install them as their pages describe |

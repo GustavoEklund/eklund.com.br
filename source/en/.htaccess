@@ -1,0 +1,7 @@
+# The English page. The document language of the root .htaccess is Portuguese; this folder says it is English.
+# tools/site-headers.mjs is the source of truth, and tests/contract/security-headers.contract.test.js compares it with this file.
+<IfModule mod_headers.c>
+  <FilesMatch "\.html?$">
+    Header set Content-Language "en-US"
+  </FilesMatch>
+</IfModule>

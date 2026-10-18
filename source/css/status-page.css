@@ -1,0 +1,242 @@
+@layer components {
+  .status-grid {
+    display: grid;
+    gap: clamp(2rem, 4vw, 4rem);
+    align-items: start;
+  }
+
+  @media (width >= 1000px) {
+    .status-grid {
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    }
+
+    .status-grid .section-header {
+      position: sticky;
+      top: 6rem;
+      margin-bottom: 0;
+    }
+  }
+
+  .status-page {
+    --level-color: var(--ok);
+  }
+
+  .status-page[data-level='1'] {
+    --level-color: var(--warn);
+  }
+
+  .status-page[data-level='2'] {
+    --level-color: var(--bad);
+  }
+
+  .status-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 1.1rem var(--panel-padding);
+    background: color-mix(in oklch, var(--level-color) 13%, transparent);
+    border-bottom: 1px solid var(--line);
+    font-size: 0.92rem;
+    transition: background 0.5s;
+  }
+
+  .status-banner b {
+    font-weight: 600;
+    flex: 1;
+  }
+
+  .status-updated {
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .status-dot {
+    width: 0.62rem;
+    height: 0.62rem;
+    border-radius: 50%;
+    background: var(--level-color);
+    box-shadow: 0 0 0 0 var(--level-color);
+    animation: ping 2.4s ease-out infinite;
+    flex: none;
+  }
+
+  .status-components {
+    min-height: 34rem;
+  } /* eight rows: the box exists before the checks render */
+  .status-components li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.35rem 1.5rem;
+    align-items: center;
+    padding: 0.8rem var(--panel-padding);
+    border-bottom: 1px solid var(--line);
+    font-size: 0.8rem;
+    transition: background 0.25s;
+  }
+
+  .status-components li:hover {
+    background: color-mix(in oklch, var(--fg) 3%, transparent);
+  }
+
+  .status-components li b {
+    font-weight: 500;
+  }
+
+  .status-components li small {
+    display: grid;
+    color: var(--fg-2);
+    font-size: 0.68rem;
+    font-variant-numeric: tabular-nums;
+    text-wrap: pretty;
+  }
+
+  /* The text and, when the check has one, a copy of its longest form sit in the same cell, so the row is as tall as the longer of the two
+     and a late result does not push the page. The copy is hidden and has no accessible text. */
+  .status-components li small > .status-detail,
+  .status-components li small[data-reserve]::after {
+    grid-area: 1 / 1;
+  }
+
+  .status-components li small[data-reserve]::after {
+    content: attr(data-reserve);
+    visibility: hidden;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--ok);
+    white-space: nowrap;
+    transition: color 0.3s;
+  }
+
+  .status-badge i {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: currentcolor;
+  }
+
+  .status-badge[data-level='1'] {
+    color: var(--warn);
+  }
+
+  .status-badge[data-level='2'] {
+    color: var(--bad);
+  }
+
+  .status-history {
+    padding: 1rem var(--panel-padding);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .status-history-header,
+  .status-incidents h3 {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: 0.62rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+  }
+
+  .status-history-header b {
+    color: var(--fg);
+    font-weight: 600;
+  }
+
+  .status-cells {
+    display: flex;
+    gap: 2px;
+    height: 1.5rem;
+    margin-top: 0.7rem;
+  }
+
+  .status-cells i {
+    flex: 1;
+    border-radius: 2px;
+    background: color-mix(in oklch, var(--fg) 7%, transparent);
+    transition:
+      background 0.4s,
+      scale 0.3s;
+    transform-origin: bottom;
+  }
+
+  .status-cells i[data-level='0'] {
+    background: var(--ok);
+  }
+
+  .status-cells i[data-level='1'] {
+    background: var(--warn);
+  }
+
+  .status-cells i[data-level='2'] {
+    background: var(--bad);
+  }
+
+  .status-cells i.is-latest {
+    animation: cell-in 0.5s var(--spring);
+  }
+
+  @keyframes cell-in {
+    from {
+      scale: 1 0;
+    }
+  }
+
+  .status-incidents {
+    padding: 1rem var(--panel-padding) 1.25rem;
+  }
+
+  .status-incidents h3 {
+    margin-bottom: 0.5rem;
+  }
+
+  /* A box of the height of six one-line rows, which is how many the log keeps: a new incident, which on a narrow screen takes two
+     or three lines, scrolls inside the box (newest on top) instead of pushing the page. The box is a stop of the keyboard so it can be scrolled. */
+  .status-incidents ol {
+    height: 12.9rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .status-incidents li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    padding: 0.4rem 0;
+    font-size: 0.76rem;
+    border-top: 1px solid var(--line);
+    animation: rise 0.5s var(--ease-out) both;
+  }
+
+  .status-incidents li.is-empty {
+    color: var(--fg-2);
+    border: 0;
+    animation: none;
+  }
+
+  .status-incidents time {
+    color: var(--fg-2);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .incident-resolution {
+    margin-left: auto;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ok);
+    font-weight: 600;
+  }
+}
