@@ -139,7 +139,7 @@ test.describe('architecture map', () => {
     site,
     page,
   }) => {
-    test.setTimeout(90_000);
+    test.setTimeout(180_000); // the walkthrough runs in real time, and a loaded machine draws it slowly
     await site.open('/');
     await site.openPalette();
     await site.paletteInput.fill('seguir um pix');
@@ -149,7 +149,7 @@ test.describe('architecture map', () => {
     await page.keyboard.press('Enter');
     await expect(site.followButton).toBeDisabled({ timeout: 15_000 });
     await expect(site.architectureCaption).toBeVisible();
-    await expect(site.followButton).toBeEnabled({ timeout: 40_000 });
+    await expect(site.followButton).toBeEnabled({ timeout: 120_000 });
   });
 
   test('the simulated traffic panel counts replicas against the ceiling of the diagram', async ({

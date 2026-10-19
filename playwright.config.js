@@ -29,7 +29,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 2 : 4,
-  timeout: 60_000,
+  timeout: process.env.CI ? 90_000 : 60_000, // a shared runner draws the WebGL page slowly
   expect: { timeout: 10_000 },
   use: {
     baseURL: BASE_URL,

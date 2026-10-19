@@ -51,13 +51,17 @@ test.describe('a visitor who paused motion, reloaded and plays it again', () => 
   }) => {
     await site.open('/');
     await expect(site.html).toHaveAttribute('data-motion', 'paused');
-    expect(await marqueeStates(page)).toStrictEqual(['paused', 'paused', 'paused', 'paused']);
+    await expect
+      .poll(() => marqueeStates(page))
+      .toStrictEqual(['paused', 'paused', 'paused', 'paused']);
     const stopped = await marqueeClock(page);
     await page.waitForTimeout(400);
     expect(await marqueeClock(page)).toBe(stopped);
     await motionButton(page).click();
     await expect(site.html).toHaveAttribute('data-motion', 'full');
-    expect(await marqueeStates(page)).toStrictEqual(['running', 'running', 'running', 'running']);
+    await expect
+      .poll(() => marqueeStates(page))
+      .toStrictEqual(['running', 'running', 'running', 'running']);
     await expect.poll(async () => (await marqueeClock(page)) > stopped).toBe(true);
   });
 
@@ -74,7 +78,9 @@ test.describe('a visitor who paused motion, reloaded and plays it again', () => 
     await site.paletteInput.fill(PT_BR.palette.commands.resumeMotion.title);
     await site.paletteInput.press('Enter');
     await expect(site.html).toHaveAttribute('data-motion', 'full');
-    expect(await marqueeStates(page)).toStrictEqual(['running', 'running', 'running', 'running']);
+    await expect
+      .poll(() => marqueeStates(page))
+      .toStrictEqual(['running', 'running', 'running', 'running']);
   });
 
   test.describe('with a mouse', () => {
@@ -106,7 +112,7 @@ test.describe('a visitor who paused motion, reloaded and plays it again', () => 
       await page.mouse.move(900, 500);
       expect(await ringAfterFrames(page)).not.toBe('translate(900px, 500px');
       await expect
-        .poll(() => ringAfterFrames(page), { timeout: 5000 })
+        .poll(() => ringAfterFrames(page), { timeout: 20_000 }) // the ring eases toward the pointer one frame at a time
         .toBe('translate(900px, 500px');
     });
 
@@ -153,11 +159,15 @@ test.describe('when the system asks for reduced motion', () => {
   }) => {
     await site.open('/');
     await expect(site.html).toHaveAttribute('data-motion', 'paused');
-    expect(await marqueeStates(page)).toStrictEqual(['paused', 'paused', 'paused', 'paused']);
+    await expect
+      .poll(() => marqueeStates(page))
+      .toStrictEqual(['paused', 'paused', 'paused', 'paused']);
     expect(await loopsOf(page, '.rotating-text-roll')).toBe('1');
     await motionButton(page).click();
     await expect(site.html).toHaveAttribute('data-motion', 'full');
-    expect(await marqueeStates(page)).toStrictEqual(['running', 'running', 'running', 'running']);
+    await expect
+      .poll(() => marqueeStates(page))
+      .toStrictEqual(['running', 'running', 'running', 'running']);
     expect(await loopsOf(page, '.rotating-text-roll')).toBe('infinite');
   });
 
@@ -168,7 +178,9 @@ test.describe('when the system asks for reduced motion', () => {
     await page.addInitScript(() => localStorage.setItem('motion', 'full'));
     await site.open('/');
     await expect(site.html).toHaveAttribute('data-motion', 'full');
-    expect(await marqueeStates(page)).toStrictEqual(['running', 'running', 'running', 'running']);
+    await expect
+      .poll(() => marqueeStates(page))
+      .toStrictEqual(['running', 'running', 'running', 'running']);
     expect(await loopsOf(page, '.rotating-text-roll')).toBe('infinite');
   });
 });

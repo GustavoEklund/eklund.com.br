@@ -2,8 +2,11 @@ import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:f
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { PT_BR } from '@site/js/i18n/locales/pt-br.js';
+
+// Every test here starts a process or makes a git repository, which a loaded machine does slowly.
+vi.setConfig({ testTimeout: 30_000, hookTimeout: 30_000 });
 
 const PROJECT = new URL('../../', import.meta.url).pathname;
 

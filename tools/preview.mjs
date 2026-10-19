@@ -27,7 +27,7 @@ const chrome = spawn(
 );
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 /** A message from the page, on one line: what the page prints cannot add lines to this tool's output. */
-const oneLine = (text) => String(text).replace(/[\r\n]+/g, ' ');
+const oneLine = (text) => String(text).replace(/\r?\n|\r/g, ' ');
 let info;
 for (let i = 0; i < 60; i++) {
   try {

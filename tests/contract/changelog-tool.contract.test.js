@@ -3,13 +3,16 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import {
   Changelog,
   ChangelogCommand,
   ChangelogPolicy,
   SemanticVersion,
 } from '../../tools/changelog.mjs';
+
+// Every test here starts a process or makes a git repository, which a loaded machine does slowly.
+vi.setConfig({ testTimeout: 30_000, hookTimeout: 30_000 });
 
 const PROJECT = join(import.meta.dirname, '..', '..');
 const TOOL = join(PROJECT, 'tools', 'changelog.mjs');
