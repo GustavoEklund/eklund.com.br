@@ -123,10 +123,18 @@ export class Changelog {
       if (heading) {
         group = { heading: heading[1], lines: [] };
         current.groups.push(group);
-      } else if (group && line.trim() !== '') group.lines.push(line);
-      else if (!group && line.trim() !== '') current.groups.push({ heading: '', lines: [line] }); // text outside any group: reported
+      } else if (group) group.lines.push(line);
+      else if (line.trim() !== '') current.groups.push({ heading: '', lines: [line] }); // text outside any group: reported
     }
+    for (const { groups } of releases)
+      for (const group of groups) group.lines = Changelog.#trimmed(group.lines);
     return new Changelog({ preface: preface.join('\n').trim(), releases, links });
+  }
+
+  /** The lines of a group without the blank lines around them. The ones between its paragraphs and lists stay. */
+  static #trimmed(lines) {
+    const filled = lines.map((line) => line.trim() !== '');
+    return lines.slice(filled.indexOf(true), filled.lastIndexOf(true) + 1);
   }
 
   get unreleased() {
