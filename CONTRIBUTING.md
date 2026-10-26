@@ -20,10 +20,10 @@ Open an issue for anything bigger than a typo, and say what you want to change a
 
 ## Set up
 
-You need Node 24 (`mise install` reads [`mise.toml`](mise.toml)), Java 17 or newer for the HTML validator, and a clone of the repository.
+You need Node 24 and pnpm 12, Java 17 or newer for the HTML validator, and a clone of the repository. `mise install` sets up Node and pnpm from [`mise.toml`](mise.toml), which takes the pnpm version from `packageManager` in `package.json`. Without mise, `corepack enable` gives you the same pnpm.
 
 ```sh
-corepack enable                          # pnpm 12 is pinned in package.json
+mise install                             # Node 24, and pnpm 12 as package.json pins it
 pnpm install                             # also installs the git hooks
 pnpm exec playwright install chromium    # once, for the browser tests
 pnpm dev                                 # http://127.0.0.1:8734 serves source/
