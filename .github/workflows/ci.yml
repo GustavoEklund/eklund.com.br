@@ -81,7 +81,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: ['1/2', '2/2'] # the suite on one runner takes 26 minutes, two halves take about 13 each
+        shard: ['1/4', '2/4', '3/4', '4/4'] # Playwright cuts the list in order, desktop tests first: two quarters of desktop, then two of mobile, about 15 minutes each instead of 29 for the whole desktop project
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -143,7 +143,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: ['1/2', '2/2']
+        shard: ['1/4', '2/4', '3/4', '4/4']
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

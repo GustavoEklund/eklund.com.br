@@ -46,10 +46,16 @@
             "context": "Behavior-driven scenarios"
           },
           {
-            "context": "End-to-end, accessibility and layout stability (1/2)"
+            "context": "End-to-end, accessibility and layout stability (1/4)"
           },
           {
-            "context": "End-to-end, accessibility and layout stability (2/2)"
+            "context": "End-to-end, accessibility and layout stability (2/4)"
+          },
+          {
+            "context": "End-to-end, accessibility and layout stability (3/4)"
+          },
+          {
+            "context": "End-to-end, accessibility and layout stability (4/4)"
           },
           {
             "context": "W3C validation, WCAG contrast sweep and CSS lint"
@@ -58,10 +64,16 @@
             "context": "Production build and its checks"
           },
           {
-            "context": "End-to-end against the production build (1/2)"
+            "context": "End-to-end against the production build (1/4)"
           },
           {
-            "context": "End-to-end against the production build (2/2)"
+            "context": "End-to-end against the production build (2/4)"
+          },
+          {
+            "context": "End-to-end against the production build (3/4)"
+          },
+          {
+            "context": "End-to-end against the production build (4/4)"
           },
           {
             "context": "Lighthouse on the production build"
