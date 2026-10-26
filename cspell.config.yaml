@@ -13,10 +13,12 @@ dictionaryDefinitions:
 dictionaries:
   - project-words
 useGitignore: true
-# Advisory identifiers (GHSA-xxxx-xxxx-xxxx) and label colors are random letters and digits.
+# Advisory identifiers (GHSA-xxxx-xxxx-xxxx) and label colors are random letters and digits. The block that ai-memory writes
+# into AGENTS.md, between its markers, is rewritten on every refresh and is not ours to spell.
 ignoreRegExpList:
   - /GHSA(-[a-z0-9]{4}){3}/g
   - /--color [0-9A-Fa-f]{6}/g
+  - /^<!-- ai-memory:start -->$[\s\S]*?^<!-- ai-memory:end -->$/gm
 ignorePaths:
   - node_modules/**
   - dist/**
@@ -35,6 +37,9 @@ ignorePaths:
   - .lighthouseci/**
   - .vite-hooks/_/**
   - .cspellcache
+  # What `ai-memory install-instructions` writes and rewrites on every refresh.
+  - .claude/skills/ai-memory-*/**
+  - .agents/skills/ai-memory-*/**
 overrides:
   - filename: '**/*.md'
     language: en-US

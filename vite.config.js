@@ -74,6 +74,10 @@ export default defineConfig({
       'reports/**',
       '.stryker-tmp/**',
       '.vitest/**',
+      // What `ai-memory install-instructions` writes and rewrites on every refresh. Its block in AGENTS.md sits between
+      // prettier-ignore comments instead, because the rest of that file is ours.
+      '.claude/skills/ai-memory-*/**',
+      '.agents/skills/ai-memory-*/**',
     ],
   },
   // What `vp staged` runs on the files of a commit (the pre-commit hook). The slower suites run on push and in CI.

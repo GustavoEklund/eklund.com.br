@@ -64,5 +64,6 @@ The first public version of the site and of its repository.
 - This changelog, Semantic Versioning, and a release workflow that checks the tag against `package.json` and this file, builds the site, publishes a GitHub release with the zip of the site, a checksum, a software bill of materials and a signed provenance attestation.
 - The MIT license for the code and CC BY-NC-ND 4.0 for the text and images ([`NOTICE.md`](NOTICE.md)), a Code of Conduct, contributing and support guides, issue forms, a pull request template and code owners.
 - Documentation in [`docs/`](docs/): architecture, internationalization, web standards, testing, build and deploy, continuous integration, releasing and repository settings, and the decisions behind them.
+- A guide for coding agents in [`AGENTS.md`](AGENTS.md), which Claude Code reads through `CLAUDE.md`: the commands, the architecture and the rules that the tests enforce. [ai-memory](https://github.com/akitaonrails/ai-memory) keeps their sessions and handoffs across agents, with its workspace and project in [`.ai-memory.toml`](.ai-memory.toml).
 
 [Unreleased]: https://github.com/GustavoEklund/eklund.com.br/commits/main
