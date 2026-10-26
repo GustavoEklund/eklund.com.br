@@ -1,3 +1,7 @@
 [tools]
 node = "24.22.0"
 python = "3.15"
+
+[settings]
+# pnpm comes in the version that `packageManager` names in package.json, so the version is written in one place.
+idiomatic_version_file_enable_tools = ["pnpm"]
