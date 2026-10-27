@@ -256,7 +256,22 @@ export class Changelog {
     const footer = older
       ? `**Full changelog**: ${REPOSITORY}/compare/v${older.name}...v${release.name}`
       : `**Full changelog**: ${REPOSITORY}/commits/v${release.name}`;
-    return `${release.body()}\n\n${footer}\n`;
+    const body = release
+      .body()
+      .replace(
+        /(!?)(\[[^\]]*\]\()([^)\s]+)/g,
+        (link, image, text, target) =>
+          image + text + Changelog.#tagged(target, release.name, image),
+      );
+    return `${body}\n\n${footer}\n`;
+  }
+
+  /** A link target of the notes as it works on the release page, which would read a relative one from /releases/tag/. */
+  static #tagged(target, version, image) {
+    if (/^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(target)) return target;
+    if (target.startsWith('#')) return `${REPOSITORY}/blob/v${version}/CHANGELOG.md${target}`;
+    const view = image ? 'raw' : target.endsWith('/') ? 'tree' : 'blob';
+    return `${REPOSITORY}/${view}/v${version}/${target.replace(/^\.?\//, '')}`;
   }
 
   /** The file with [Unreleased] moved into a new version section dated `date`. */
