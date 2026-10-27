@@ -9,12 +9,23 @@ const PROJECT = join(import.meta.dirname, '..', '..');
 
 /** The production build of the site, made by the real `pnpm run build` into a folder of its own, and what is in it. */
 export class BuiltSite {
-  /** Builds into a new temporary folder and returns the site there. Call `remove()` when done. */
-  static build() {
+  /**
+   * Builds into a new temporary folder and returns the site there. Call `remove()` when done. `mode: 'version'` builds the copy
+   * of the version for its own folder, /1.1.0/, which `pnpm run build` writes to dist/1.1.0/.
+   */
+  static build({ mode } = {}) {
     const folder = mkdtempSync(join(tmpdir(), 'built-site-'));
     const result = spawnSync(
       join(PROJECT, 'node_modules', '.bin', 'vp'),
-      ['build', '--config', 'vite.build.config.js', '--outDir', folder, '--emptyOutDir'],
+      [
+        'build',
+        '--config',
+        'vite.build.config.js',
+        ...(mode ? ['--mode', mode] : []),
+        '--outDir',
+        folder,
+        '--emptyOutDir',
+      ],
       { cwd: PROJECT, encoding: 'utf8' },
     );
     if (result.status !== 0)
