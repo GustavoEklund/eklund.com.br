@@ -93,6 +93,7 @@ tools/
   measure-sections.mjs     measures the off-screen sections at many widths in both languages and prints the `contain-intrinsic-size` rules for layout.css
   site-build.mjs           the parts of the production build that Vite+ does not do itself (see Build and deploy)
   measure-build.mjs        loads the page from source/ and from dist/ in several network and CPU conditions and prints what the build saves
+  deploy.mjs               puts a release online over FTP with TLS, and compares the pages online with it (the Deploy workflow)
 vite.config.js             Vitest projects (one per kind of test) and the strict lint rules for tests/
 vite.build.config.js       the production build (Vite+): source/ in, dist/ out; dist/ is generated and not in git
 playwright.config.js  cucumber.mjs  stryker.config.mjs  .dependency-cruiser.cjs

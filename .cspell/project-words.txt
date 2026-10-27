@@ -66,6 +66,7 @@ gpgsign
 grafana
 grotesqu
 gstatic
+gustavo
 gustavoeklund
 hhea
 highp
@@ -73,6 +74,7 @@ historico
 hostinger
 hreflang
 hrefs
+hstgr
 icom
 ihdr
 ispb

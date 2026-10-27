@@ -46,8 +46,8 @@ Every pull request that visitors or readers of the repository would notice adds 
    - `eklund.com.br-v1.1.0.zip.sha256`, its checksum;
    - `eklund.com.br-v1.1.0.sbom.cdx.json`, a CycloneDX software bill of materials of the toolchain that built it;
    - a signed provenance attestation of the zip (`gh attestation verify`), and the notes from the changelog.
-7. **Deploy** by uploading the zip as described in [`build-and-deploy.md`](build-and-deploy.md#deploy-to-hostinger). Deployment is manual until a deploy workflow exists.
-8. **Look at the site**: `https://eklund.com.br/` and `/en/`, the status page, and the response headers.
+7. **Watch it go online.** The last job of the workflow, `Put the release online`, runs the [`Deploy`](../.github/workflows/deploy.yml) workflow. It checks the zip, sends it to the hosting and to the mirror, and compares every page online with the page of the release ([`build-and-deploy.md`](build-and-deploy.md#deploy-to-hostinger)).
+8. **Look at the site**: `https://eklund.com.br/`, `/en/` and `/1.1.0/`, the status page, and the response headers.
 
 The first release is `1.0.0`: write its entries under `[Unreleased]`, and step 3 turns them into the version.
 
@@ -57,7 +57,7 @@ Branch from `main` (the site always runs the newest release, so there are no mai
 
 ## A release that must not be used
 
-If a release is broken or unsafe, publish the fix as the next patch version, mark the bad one in the changelog by adding `[YANKED]` to its heading (`## [1.1.0] - 2026-12-01 [YANKED]`), and edit its GitHub release to say so and point at the fix. To go back right now, upload the zip of the previous release.
+If a release is broken or unsafe, publish the fix as the next patch version, mark the bad one in the changelog by adding `[YANKED]` to its heading (`## [1.1.0] - 2026-12-01 [YANKED]`), and edit its GitHub release to say so and point at the fix. To go back right now, run the Deploy workflow with the tag of the previous release (`gh workflow run deploy.yml -f tag=v1.0.0 -f dry-run=false`). The copy of the bad version stays in its folder, so delete that folder by hand if it must not be reached at all.
 
 ## What the repository enforces
 
