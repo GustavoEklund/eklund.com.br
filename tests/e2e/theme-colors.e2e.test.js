@@ -2,14 +2,27 @@ import { test, expect } from './support/fixtures.js';
 import { GlobePixels } from './support/globe-pixels.js';
 import { SitePage } from './support/site-page.js';
 
+/** The pixel the poll saw: a second reading could land on a canvas that a resize has just cleared. */
 const centerOnceOpaque = async (page) => {
+  let center;
   await expect
-    .poll(async () => (await GlobePixels.corners(page)).center[3], { timeout: 60_000 })
+    .poll(
+      async () => {
+        center = (await GlobePixels.corners(page)).center;
+        return center[3];
+      },
+      { timeout: 60_000 },
+    )
     .toBe(255);
-  return (await GlobePixels.corners(page)).center;
+  return center;
 };
 
 test.describe('the colors the canvases and the browser read from the theme, with motion paused', () => {
+  // A phone draws the globe at a pixel ratio of 1.5, and the globe lowers it to 1 after two seconds under 45 frames a
+  // second, which a shared runner can do on one page and not on the other: the two canvases then differ in size, and so
+  // does the pixel at their center. At a device scale factor of 1 there is no ratio to lower.
+  test.use({ deviceScaleFactor: 1 });
+
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => localStorage.setItem('motion', 'paused'));
     await GlobePixels.install(page);
