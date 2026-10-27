@@ -65,6 +65,24 @@ Required checks (the names are those of the jobs): the jobs of `CI` that run on 
 
 The ruleset asks for no approving review, because there is a single maintainer and GitHub does not let an author approve their own pull request. When there is a second maintainer, raise `required_approving_review_count` to 1 and turn on `require_code_owner_review`: [`CODEOWNERS`](../.github/CODEOWNERS) is already written. Signed commits (`required_signatures`) are the next rule to add once the maintainer signs commits (`git config commit.gpgsign true` with an SSH or a GPG key).
 
+## Deploy
+
+The [`Deploy`](../.github/workflows/deploy.yml) workflow reads the FTP account from the secrets of the `production` environment. Only `main`, for a run by hand, and the release tags, when `Release` calls it, can deploy from that environment:
+
+```sh
+gh api --method PUT repos/GustavoEklund/eklund.com.br/environments/production \
+  -F 'deployment_branch_policy[protected_branches]=false' -F 'deployment_branch_policy[custom_branch_policies]=true'
+gh api --method POST repos/GustavoEklund/eklund.com.br/environments/production/deployment-branch-policies -f name=main -f type=branch
+gh api --method POST repos/GustavoEklund/eklund.com.br/environments/production/deployment-branch-policies -f name='v*' -f type=tag
+
+# Each command asks for the value, so the password stays out of the shell history
+gh secret set FTP_HOST --env production --repo GustavoEklund/eklund.com.br
+gh secret set FTP_USER --env production --repo GustavoEklund/eklund.com.br
+gh secret set FTP_PASSWORD --env production --repo GustavoEklund/eklund.com.br
+```
+
+The values come from the FTP account made for the deploy, whose folder is `/public_html` ([`build-and-deploy.md`](build-and-deploy.md#set-it-up-once)). `FTP_HOST` is the IP address that hPanel shows as the FTP host under Files, FTP Accounts, without `ftp://`. It is a secret because it is the address of the server behind the CDN, and for the same reason the deploy does not use the `ftp.` name that the list of accounts offers to activate: that name would publish the address in the DNS. `FTP_USER` is the user name as that list shows it, with its prefix, like `u123456789.deploy`. The environment asks for no approval: a release goes online as soon as it is published.
+
 ## Labels
 
 The issue forms and Dependabot use these labels. GitHub creates `bug`, `enhancement` and `dependencies` by itself.

@@ -47,19 +47,51 @@ Two results are worse in the build. On a fast connection the first paint now com
 
 ## Deploy to Hostinger
 
-1. `pnpm run build`.
-2. hPanel → File Manager → `public_html`. Upload the contents of `dist/`, hidden files included (`.htaccess`, `en/.htaccess`, `.well-known/`). The `assets/` folder goes first and the HTML last, so a visitor never gets a page that points at files that are not there yet.
-3. The first time, delete the old `css/`, `js/` and `fonts/` folders, `icon.svg`, `apple-touch-icon.png` and `site.webmanifest` from `public_html` (the build keeps them under `assets/`, with a hash in the name). Later deploys leave older hashed files in `assets/`, which is harmless, and they can be deleted a few days later.
-4. Caching is set by `.htaccess`: hashed files for a year with `immutable`, HTML for ten minutes, `robots.txt`, `sitemap.xml`, `favicon.ico` and `security.txt` for one day. Check compression with `curl -sI -H 'Accept-Encoding: br' https://eklund.com.br/ | grep -i content-encoding`.
+Every release goes online by itself. Once the [`Release`](../.github/workflows/release.yml) workflow publishes a release, it calls [`Deploy`](../.github/workflows/deploy.yml), which:
 
-Each release also publishes the same files as a zip. Download `eklund.com.br-vX.Y.Z.zip` from the [releases page](https://github.com/GustavoEklund/eklund.com.br/releases), check it, and upload it to `public_html` with the same order and the same clean-up (hPanel's File Manager can extract a zip):
+1. downloads the zip of the release, and checks it against its checksum and against the provenance attestation that `Release` signed for it from the tag;
+2. sends it over FTP with TLS ([`tools/deploy.mjs`](../tools/deploy.mjs)) to `public_html/gustavo/`, the folder of `gustavo.eklund.com.br`, which mirrors the site, and then to `public_html`;
+3. compares every page online with the page of the release, byte for byte, and checks its Content-Security-Policy, which allows its script.
+
+The zip carries the copy of the version for its own folder. So each release stays online at `eklund.com.br/1.1.0/` and `gustavo.eklund.com.br/1.1.0/` after the next ones. A pre-release (`v1.2.0-rc.1`) goes only to its own folder, never to the root. The plan of the hosting has FTP and no SSH: [ADR 0008](decisions/0008-deploy-each-release-over-ftps.md) says why the deploy works this way.
+
+In each folder, the deploy:
+
+- **Skips what is already there.** A hashed file the server already has, with the same size, is not sent again, since the hash in its name says it is the same file. Every other file is sent each time, because FTP has no checksum to compare.
+- **Never shows a file half written.** Every file goes up under a temporary name, `.deploy-<token>-<name>`, and is renamed once all are up. The renames go in order: the hashed files first, then the other files, then the `.htaccess` files and the pages, with the page at the root last. So a visitor never gets a page that names a file the server does not have yet.
+- **Deletes what the release no longer has, with one exception.** The files of the release that was online before stay until the next deploy. Its pages can still be open in a browser, or come back from the browser cache for a day (`stale-while-revalidate`), and they name its files.
+- **Leaves alone the copies of the other versions and the mirror folder.**
+- **Stops at a folder that is not this site.** If a folder holds files but not the `.htaccess` of this site, the deploy leaves it as it is and stops. So a wrong FTP folder, such as the home folder above `public_html`, is never emptied.
+
+### Set it up once
+
+1. In hPanel, go to Files and then FTP Accounts, and create an FTP account whose folder is `/public_html`. The deploy uses this account and nothing else does, so its password can change without touching the main account.
+2. Create the `production` environment with the address, the user and the password of that account ([`repository-settings.md`](repository-settings.md#deploy)).
+3. Run a dry run with the tag of the newest release, as described below, and read what the first deploy would delete. Anything that has to stay in `public_html` and is not a version folder or `gustavo/` has to go into the release, or be kept somewhere else.
+
+### Run it by hand
+
+Go to Actions, Deploy, Run workflow, or use the command line:
+
+```sh
+gh workflow run deploy.yml -f tag=v1.1.0                  # a dry run: it connects, compares and says what it would send and delete
+gh workflow run deploy.yml -f tag=v1.1.0 -f dry-run=false # puts v1.1.0 online, also to put an older release back
+```
+
+A run by hand is a dry run unless `dry-run` is `false`. A run that stops halfway leaves the pages it had not renamed as they were. Running it again finishes the deploy, and deletes the temporary files the first run left.
+
+### Without the workflow
+
+Each release publishes the zip that the workflow deploys. Download `eklund.com.br-vX.Y.Z.zip` from the [releases page](https://github.com/GustavoEklund/eklund.com.br/releases) and check it:
 
 ```sh
 sha256sum --check eklund.com.br-vX.Y.Z.zip.sha256
 gh attestation verify eklund.com.br-vX.Y.Z.zip --repo GustavoEklund/eklund.com.br
 ```
 
-The second command proves that the zip was built by this repository's release workflow from the tagged commit. The CI job `build` also keeps `dist/` of every run as the artifact `site`. Automatic deployment is not set up yet.
+The second command proves that the zip was built by this repository's release workflow from the tagged commit. Then, in hPanel's File Manager, upload its contents to `public_html` and to `public_html/gustavo/`, hidden files included (`.htaccess`, `en/.htaccess`, `.well-known/`). The `assets/` folders go first and the pages last. The File Manager can extract a zip. The CI job `build` also keeps `dist/` of every run as the artifact `site`.
+
+Caching is set by `.htaccess`: hashed files for a year with `immutable`, HTML for ten minutes, and `robots.txt`, `sitemap.xml`, `favicon.ico` and `security.txt` for one day. Check compression with `curl -sI -H 'Accept-Encoding: br' https://eklund.com.br/ | grep -i content-encoding`.
 
 ## Lighthouse
 

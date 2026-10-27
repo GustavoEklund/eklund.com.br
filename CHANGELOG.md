@@ -4,6 +4,11 @@ All notable changes to this project are written here. The format follows [Keep a
 
 ## [Unreleased]
 
+### Added
+
+- Every version stays online in a folder of its own, at `eklund.com.br/1.1.0/` and so on, after newer versions come out. Each one is built a second time for its folder, so it loads nothing from the site at the root and keeps working, in both languages.
+- Every release now goes online by itself, a few minutes after it is published. The Release workflow checks the zip against its checksum and its signed provenance, and sends it to the hosting over FTP with TLS, and to the mirror at `gustavo.eklund.com.br`. Then it compares every page online with the page of the release. Running the Deploy workflow with an older tag puts that release back online.
+
 ## [1.0.0] - 2026-10-27
 
 ### Added
