@@ -73,7 +73,7 @@ Code, comments and identifiers are in American English, with comments only where
 ## Commits, changelog and spelling
 
 - Conventional Commits, checked by [`tools/commit-gate.mjs`](tools/commit-gate.mjs) in the `commit-msg` and `pre-push` hooks and in CI. The scope is a feature folder of `source/js` or one of the areas in [`commitlint.config.mjs`](commitlint.config.mjs), the header has at most 72 characters, the subject is imperative and lower case, the body wraps at 100 columns, and the message is spell-checked in English. `pnpm run commit-gate title "feat(globe): add a shortcut"` checks one, and `pnpm run commit-gate range main HEAD` checks a branch.
-- Pull requests are squash-merged, so their title follows the same convention.
+- Pull requests are squash-merged, so their title follows the same convention and fits in 72 characters together with the ` (#123)` that GitHub appends.
 - A `feat`, `fix`, `perf`, `revert` or breaking change adds a line under `## [Unreleased]` in [`CHANGELOG.md`](CHANGELOG.md), unless the pull request carries the `skip-changelog` label.
 - cspell checks every file in English and Brazilian Portuguese, and Markdown in English only. Real project vocabulary goes into `.cspell/project-words.txt`, which a test keeps sorted, lower case and without repeats.
 

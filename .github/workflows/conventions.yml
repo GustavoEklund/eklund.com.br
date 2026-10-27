@@ -32,9 +32,11 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup
-      - run: node tools/commit-gate.mjs title "$PR_TITLE"
+      # The squash merge writes the title followed by " (#123)", and that whole header is what has to fit in 72 characters.
+      - run: node tools/commit-gate.mjs title "$PR_TITLE (#$PR_NUMBER)"
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
 
   messages:
     name: Commit messages
