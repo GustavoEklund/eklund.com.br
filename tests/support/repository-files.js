@@ -11,6 +11,10 @@ const SKIPPED_FOLDERS = new Set([
   '.vitest',
   'fixtures',
 ]);
+/** What `ai-memory install-instructions` writes and rewrites on every refresh, kept as it comes like a vendored folder:
+ * its skills, and the block between its markers in AGENTS.md. */
+const AI_MEMORY_SKILLS = /^\.(?:claude|agents)\/skills\/ai-memory-[^/]+\//;
+const AI_MEMORY_BLOCK = /^<!-- ai-memory:start -->$[\s\S]*?^<!-- ai-memory:end -->$/gm;
 
 /** Reads the repository itself: its documents, its workflows and the files around the site. */
 export class RepositoryFiles {
@@ -41,9 +45,11 @@ export class RepositoryFiles {
     return found;
   }
 
-  /** The documents a reader opens: the Markdown files of the repository, apart from tests' fixtures and vendored folders. */
+  /** The documents a reader opens: the Markdown files of the repository, apart from tests' fixtures, vendored folders and what ai-memory manages. */
   static documents() {
-    return RepositoryFiles.files().filter((path) => path.endsWith('.md'));
+    return RepositoryFiles.files().filter(
+      (path) => path.endsWith('.md') && !AI_MEMORY_SKILLS.test(path),
+    );
   }
 
   /** Each workflow: its file name, its text, and the names of its jobs. */
@@ -87,8 +93,9 @@ export class MarkdownDocument {
     this.text = text;
   }
 
+  /** A document as people wrote it, without the block that ai-memory keeps in it. */
   static of(path) {
-    return new MarkdownDocument(path, RepositoryFiles.read(path));
+    return new MarkdownDocument(path, RepositoryFiles.read(path).replace(AI_MEMORY_BLOCK, ''));
   }
 
   /** GitHub's anchor for a heading: lower case, punctuation gone, spaces as hyphens, a number after a repeat. */

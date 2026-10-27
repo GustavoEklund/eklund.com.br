@@ -1,0 +1,36 @@
+# Where ai-memory (https://github.com/akitaonrails/ai-memory) keeps the memory of this repository, and how it captures and
+# recalls it. Agents that cannot tell which project they are in read the workspace and the project from here (AGENTS.md).
+# Every key is described in https://github.com/akitaonrails/ai-memory/blob/main/docs/marker-file.md.
+
+workspace = "default"
+# The name the git remote already gives this repository, written down so that agents read it instead of deriving it.
+project = "gustavoeklund-eklund.com.br"
+# Projects are named after the whole repository path without the host, which is where the name above comes from.
+identity_style = "path"
+# The sessions of subagents are kept too, because they are part of the work done here.
+drop_subagent_captures = "false"
+
+[recall]
+# A question without a scope searches this project only. Other projects are searched by name or with `global`.
+default_global = "false"
+
+[briefing]
+# Every session starts with a brief of the pinned and rule pages and the titles of the pages changed last, in at most
+# 4000 characters (about a thousand tokens), so that an agent knows what the memory holds before it starts.
+inject_on_session_start = "true"
+max_chars = 4000
+
+[profile]
+# The usual choices from other projects reach this one as defaults, below the rules in AGENTS.md, and this project adds
+# to them.
+contribute = true
+consume = true
+
+[capture]
+# Work on the decision records stays out of what ai-memory captures, so that it never turns them into pages that could
+# go stale: they live in docs/decisions/.
+ignore_paths = ["docs/decisions/**"]
+
+# Not set, because they do not apply: `identity` and `project_strategy` (the repository has a remote and `project` is
+# pinned), `aliases` (the project never had another name), `server` (there is one server) and `[routes]` (routing rules
+# for the marker in an operator's home folder).

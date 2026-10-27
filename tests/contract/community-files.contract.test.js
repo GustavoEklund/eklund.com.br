@@ -109,7 +109,9 @@ describe('the documents', () => {
   it('are the ones expected, so that a new one is a decision', () => {
     expect([...documents].sort()).toStrictEqual(
       [
+        'AGENTS.md',
         'CHANGELOG.md',
+        'CLAUDE.md',
         'CODE_OF_CONDUCT.md',
         'CONTRIBUTING.md',
         'NOTICE.md',
@@ -141,7 +143,9 @@ describe('the documents', () => {
   });
 
   it('use no em dash and no en dash, like the copy of the site', () => {
-    expect(documents.filter((path) => /[—–]/.test(RepositoryFiles.read(path)))).toStrictEqual([]);
+    expect(documents.filter((path) => /[—–]/.test(MarkdownDocument.of(path).text))).toStrictEqual(
+      [],
+    );
   });
 
   it('link only to files and headings that exist', () => {
