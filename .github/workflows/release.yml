@@ -67,7 +67,9 @@ jobs:
         run: |
           mkdir release
           node tools/changelog.mjs notes "${TAG#v}" > release/notes.md
-          (cd dist && zip --quiet --recurse-paths --no-extra "../release/eklund.com.br-${TAG}.zip" .)
+          # --strip-extra (-X) keeps the owner and the times of the runner out of the zip.
+          # The manual of zip 3.0 calls it --no-extra, a name that zip itself rejects.
+          (cd dist && zip --quiet --recurse-paths --strip-extra "../release/eklund.com.br-${TAG}.zip" .)
           (cd release && sha256sum "eklund.com.br-${TAG}.zip" > "eklund.com.br-${TAG}.zip.sha256")
           pnpm sbom --sbom-format cyclonedx --out "release/eklund.com.br-${TAG}.sbom.cdx.json"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
