@@ -4,6 +4,8 @@ All notable changes to this project are written here. The format follows [Keep a
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-27
+
 ### Added
 
 - Every version stays online in a folder of its own, at `eklund.com.br/1.1.0/` and so on, after newer versions come out. Each one is built a second time for its folder, so it loads nothing from the site at the root and keeps working, in both languages.
@@ -73,5 +75,6 @@ The first public version of the site and of its repository.
 - Documentation in [`docs/`](docs/): architecture, internationalization, web standards, testing, build and deploy, continuous integration, releasing and repository settings, and the decisions behind them.
 - A guide for coding agents in [`AGENTS.md`](AGENTS.md), which Claude Code reads through `CLAUDE.md`: the commands, the architecture and the rules that the tests enforce. [ai-memory](https://github.com/akitaonrails/ai-memory) keeps their sessions and handoffs across agents, with its workspace and project in [`.ai-memory.toml`](.ai-memory.toml).
 
-[Unreleased]: https://github.com/GustavoEklund/eklund.com.br/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/GustavoEklund/eklund.com.br/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/GustavoEklund/eklund.com.br/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/GustavoEklund/eklund.com.br/releases/tag/v1.0.0
