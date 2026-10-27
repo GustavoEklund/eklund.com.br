@@ -20,7 +20,7 @@ Open an issue for anything bigger than a typo, and say what you want to change a
 
 ## Set up
 
-You need Node 24 and pnpm 12, Java 17 or newer for the HTML validator, and a clone of the repository. `mise install` sets up Node and pnpm from [`mise.toml`](mise.toml), which takes the pnpm version from `packageManager` in `package.json`. Without mise, `corepack enable` gives you the same pnpm.
+You need Node 24 and pnpm 12, Java 17 or newer for the HTML validator, `zip` for the build tests, and a clone of the repository. `mise install` sets up Node and pnpm from [`mise.toml`](mise.toml), which takes the pnpm version from `packageManager` in `package.json`. Without mise, `corepack enable` gives you the same pnpm.
 
 ```sh
 mise install                             # Node 24, and pnpm 12 as package.json pins it

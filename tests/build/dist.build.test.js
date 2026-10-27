@@ -1,8 +1,13 @@
 // @vitest-environment happy-dom
+import { execFileSync } from 'node:child_process';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { SiteHeaders } from '../../tools/site-headers.mjs';
 import { HtaccessHeaders } from '../contract/support/htaccess-headers.js';
 import { BuiltSite } from '../support/built-site.js';
+import { RepositoryFiles } from '../support/repository-files.js';
 import { SiteSource } from '../support/site-source.js';
 
 /** What the files of one page may weigh once compressed, with a margin over what they weigh today so that growth is a decision. */
@@ -59,6 +64,17 @@ const inlineScript = (html) =>
   [...html.matchAll(/<script(?![^>]*\s(?:src|type)=)[^>]*>([\s\S]*?)<\/script>/g)].map(
     ([, code]) => code,
   );
+/** The entries of a zip as its central directory lists them: each name and the length of its extra field. */
+const zipEntries = (zip) => {
+  const end = zip.lastIndexOf(Buffer.from('PK\x05\x06', 'latin1'));
+  let at = zip.readUInt32LE(end + 16);
+  return Array.from({ length: zip.readUInt16LE(end + 10) }, () => {
+    const [name, extra, comment] = [28, 30, 32].map((offset) => zip.readUInt16LE(at + offset));
+    const entry = { name: zip.toString('utf8', at + 46, at + 46 + name), extra };
+    at += 46 + name + extra + comment;
+    return entry;
+  });
+};
 
 describe('the production build', () => {
   let site;
@@ -333,6 +349,34 @@ describe('the production build', () => {
           .filter(([file, bytes]) => bytes > BUDGET_GZIP_BYTES[file])
           .map(([file, bytes]) => `${file}: ${bytes} bytes, budget ${BUDGET_GZIP_BYTES[file]}`),
       ).toStrictEqual([]);
+    });
+  });
+
+  describe('packed into the zip that a release publishes', () => {
+    let work;
+    beforeAll(() => {
+      work = mkdtempSync(join(tmpdir(), 'release-'));
+      cpSync(site.folder, join(work, 'dist'), { recursive: true });
+      mkdirSync(join(work, 'release'));
+    });
+    afterAll(() => rmSync(work, { recursive: true, force: true }));
+
+    it('is made by the zip line of release.yml, with every file of the build at its root, the hidden ones too, and no extra field with the owner and the times of the runner', () => {
+      const command = RepositoryFiles.read('.github/workflows/release.yml').match(
+        /^ +(\(cd dist && zip .+\))$/m,
+      )[1];
+      execFileSync('bash', ['-ec', command], {
+        cwd: work,
+        env: { ...process.env, TAG: 'v1.2.3' },
+      });
+      const entries = zipEntries(readFileSync(join(work, 'release', 'eklund.com.br-v1.2.3.zip')));
+      expect([
+        entries
+          .filter(({ name }) => !name.endsWith('/'))
+          .map(({ name }) => name)
+          .sort(),
+        entries.filter(({ extra }) => extra > 0).map(({ name }) => name),
+      ]).toStrictEqual([site.files(), []]);
     });
   });
 });

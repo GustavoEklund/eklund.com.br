@@ -6,7 +6,7 @@ The source of eklund.com.br: a personal site in plain HTML, CSS and JavaScript, 
 
 ## Commands
 
-`mise install` sets up Node 24 and pnpm 12: [`mise.toml`](mise.toml) pins Node and takes the pnpm version from `packageManager` in `package.json` (without mise, `corepack enable`). The HTML validator needs Java 17 or newer, and the browser tests need `pnpm exec playwright install chromium` once. `vp` is Vite+, which bundles Vitest 5, Oxlint and Oxfmt.
+`mise install` sets up Node 24 and pnpm 12: [`mise.toml`](mise.toml) pins Node and takes the pnpm version from `packageManager` in `package.json` (without mise, `corepack enable`). The HTML validator needs Java 17 or newer, the build tests need `zip`, and the browser tests need `pnpm exec playwright install chromium` once. `vp` is Vite+, which bundles Vitest 5, Oxlint and Oxfmt.
 
 ```sh
 pnpm dev                    # source/ at http://127.0.0.1:8734, with the production headers
