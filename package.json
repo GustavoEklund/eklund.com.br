@@ -31,7 +31,7 @@
   "scripts": {
     "prepare": "vp config --no-agent",
     "dev": "node tools/serve.mjs --port 8734",
-    "build": "vp build --config vite.build.config.js",
+    "build": "vp build --config vite.build.config.js && vp build --config vite.build.config.js --mode version",
     "preview": "vp run build && node tools/serve.mjs --port 8737 --root dist",
     "measure:build": "node tools/measure-build.mjs",
     "screenshots": "node tools/readme-screenshots.mjs",

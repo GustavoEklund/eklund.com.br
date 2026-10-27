@@ -10,7 +10,7 @@ The source of eklund.com.br: a personal site in plain HTML, CSS and JavaScript, 
 
 ```sh
 pnpm dev                    # source/ at http://127.0.0.1:8734, with the production headers
-pnpm run build              # dist/
+pnpm run build              # dist/, with the copy of the version for its own folder in dist/<version>/
 pnpm run preview            # builds, then serves dist/ at http://127.0.0.1:8737
 pnpm run check              # format and lint; `pnpm exec vp check --fix` applies the fixes
 pnpm run lint:css           # Stylelint

@@ -42,7 +42,7 @@ Every pull request that visitors or readers of the repository would notice adds 
    `-s` signs the tag with your key; use `-a` if you have no signing key yet.
 
 6. **Watch the workflow.** It checks that the tag, `package.json` and `CHANGELOG.md` name the same version and that CI passed on that commit, builds the site, runs the build tests, and publishes the release with:
-   - `eklund.com.br-v1.1.0.zip`, the contents of `dist/`;
+   - `eklund.com.br-v1.1.0.zip`, the contents of `dist/`, with the copy of the version for its own folder in `1.1.0/`;
    - `eklund.com.br-v1.1.0.zip.sha256`, its checksum;
    - `eklund.com.br-v1.1.0.sbom.cdx.json`, a CycloneDX software bill of materials of the toolchain that built it;
    - a signed provenance attestation of the zip (`gh attestation verify`), and the notes from the changelog.

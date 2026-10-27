@@ -3,10 +3,10 @@
 `source/` runs as it is (native ES modules, one request per file), which is how it is developed and tested. What goes to Hostinger is the production build:
 
 ```sh
-pnpm run build              # source/ -> dist/ (vite.build.config.js, tools/site-build.mjs)
+pnpm run build              # source/ -> dist/, and the copy of the version -> dist/1.1.0/ (vite.build.config.js, tools/site-build.mjs)
 pnpm run preview            # builds, then serves dist/ at http://127.0.0.1:8737 with the headers production sends
 pnpm run measure:build      # source against dist: requests, bytes and load times (needs openssl and a fresh build)
-pnpm run test:build         # 37 tests on what the build produced
+pnpm run test:build         # 48 tests on what the build produced
 pnpm run test:e2e:dist      # the whole Playwright suite against dist/ instead of source/
 pnpm run screenshots        # redraws the pictures of the README into docs/images (needs a fresh build)
 ```
@@ -18,6 +18,7 @@ What the build does:
 - The markup, the JSON-LD and the web manifest are minified. The inline script in the head stays byte for byte, since the CSP allows it by its hash; the manifest icons point at the built addresses.
 - The hand-written `modulepreload` list is dropped, one bundle needs none.
 - `.htaccess` (root and `/en/`), `robots.txt`, `sitemap.xml`, `favicon.ico`, `security.txt` and `assets/brand/` are copied as they are.
+- The same site is built a second time for the folder named after the version in `package.json`, into `dist/1.1.0/`, which a release leaves online at `eklund.com.br/1.1.0/`. Every address in that copy starts with `/1.1.0/`: its files, the links between its two pages and the addresses of its web manifest, so it loads nothing from the live site and keeps working after the next release. Its canonical, alternate and social addresses still name the pages at the root, and the head script sends no reader of English anywhere from a folder.
 
 If the inline script in the head of `source/index.html` changes, the hash in `source/.htaccess` changes with it; `pnpm run test:contract` prints the new value. `tests/build/` fails when the built pages and the headers disagree.
 

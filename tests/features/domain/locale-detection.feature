@@ -18,6 +18,12 @@ Funcionalidade: Escolha do idioma do site
       | /english       | pt-BR  |
       | /enigma/       | pt-BR  |
 
+    Exemplos: a cópia de uma versão na sua pasta segue a mesma regra
+      | endereço      | idioma |
+      | /1.1.0/       | pt-BR  |
+      | /1.1.0/en/    | en-US  |
+      | /1.1.0/enigma | pt-BR  |
+
   Esquema do Cenário: Quem é levado para a página em inglês
     Dado um visitante em "<endereço>", com a escolha salva "<salva>" e o navegador com "<navegador>"
     Quando a página começa a abrir
