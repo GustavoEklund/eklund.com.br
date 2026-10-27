@@ -8,12 +8,21 @@ const integer = fc.integer({ min: -1e6, max: 1e6 });
 const quarter = fc.constantFrom(0, 0.25, 0.5, 0.75, 1);
 
 describe('Numbers properties', () => {
-  it('clamp equals the bound it crosses, or the value itself', () =>
+  it('clamp equals the bound it crosses, or the value itself, a zero with either sign', () =>
     fc.assert(
       fc.property(finite, ordered, (value, [min, max]) => {
         const expected = value < min ? min : value > max ? max : value;
-        expect(Numbers.clamp(value, min, max)).toBe(expected);
+        // Math.min and Math.max put -0 before 0, so a zero can come back with the sign of a bound, and no caller reads that
+        // sign. Adding 0 turns -0 into 0 on both sides.
+        expect(Numbers.clamp(value, min, max) + 0).toBe(expected + 0);
       }),
+      // The case fast-check found in CI, and the same one the other way around: clamp(0, 0, -0) is -0, clamp(-0, 0, 1) is 0.
+      {
+        examples: [
+          [0, [0, -0]],
+          [-0, [0, 1]],
+        ],
+      },
     ));
 
   it('clamp is idempotent', () =>
