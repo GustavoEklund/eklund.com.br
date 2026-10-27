@@ -40,18 +40,21 @@ describe('security headers', () => {
         SiteHeaders.development({ html: ENGLISH, isDocument: true, pathname: '/en/index.html' })[
           'Content-Language'
         ],
-      ]).toStrictEqual(['en-US', 'en-US', 'en-US', 'en-US']);
+        SiteHeaders.development({ html: ENGLISH, isDocument: true, pathname: '/1.1.0/en/' })[
+          'Content-Language'
+        ],
+      ]).toStrictEqual(['en-US', 'en-US', 'en-US', 'en-US', 'en-US']);
     });
 
     it('do not take a path that only starts with the letters en for the English page', () => {
       expect(
-        ['/', '/index.html', '/enigma/', '/english', '/a/en/'].map(
+        ['/', '/index.html', '/enigma/', '/english', '/1.1.0/', '/1.1.0/english/'].map(
           (pathname) =>
             SiteHeaders.development({ html: INDEX, isDocument: true, pathname })[
               'Content-Language'
             ],
         ),
-      ).toStrictEqual(['pt-BR', 'pt-BR', 'pt-BR', 'pt-BR', 'pt-BR']);
+      ).toStrictEqual(['pt-BR', 'pt-BR', 'pt-BR', 'pt-BR', 'pt-BR', 'pt-BR']);
     });
 
     it('allow both pages with one hash: the English page carries the very same inline script', () => {

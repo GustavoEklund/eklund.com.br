@@ -3,6 +3,11 @@ import fc from 'fast-check';
 import { Locale } from '@site/js/i18n/locale.js';
 
 const pathSegment = fc.stringMatching(/^[a-z0-9]{0,8}$/);
+/** Where the site lives: the root of the domain, or the folder a version is copied to. */
+const folder = fc.oneof(
+  fc.constant(''),
+  fc.tuple(fc.nat(99), fc.nat(99), fc.nat(99)).map((numbers) => `${numbers.join('.')}/`),
+);
 const extraQuery = fc.array(
   fc.tuple(fc.stringMatching(/^[a-km-z]{1,5}$/), fc.stringMatching(/^[a-z0-9]{0,5}$/)),
   { maxLength: 3 },
@@ -36,11 +41,12 @@ describe('Locale properties', () => {
     fc.assert(
       fc.property(
         fc.constantFrom(...Locale.SUPPORTED),
+        folder,
         pathSegment,
         extraQuery,
-        (locale, segment, query) => {
+        (locale, where, segment, query) => {
           const built = new URL(
-            Locale.urlFor(locale, pageUrl(segment, query).href),
+            Locale.urlFor(locale, pageUrl(where + segment, query).href),
             'https://eklund.com.br',
           );
           expect(Locale.detect({ pathname: built.pathname })).toBe(locale);
@@ -48,21 +54,22 @@ describe('Locale properties', () => {
       ),
     ));
 
-  it('urlFor is the page of the locale with every foreign parameter and the hash kept, and no lang', () =>
+  it('urlFor is the page of the locale in the same folder, with every foreign parameter and the hash kept, and no lang', () =>
     fc.assert(
       fc.property(
         fc.constantFrom(...Locale.SUPPORTED),
+        folder,
         pathSegment,
         extraQuery,
         hash,
         fc.boolean(),
-        (locale, segment, query, fragment, withLang) => {
-          const base = pageUrl(segment, query, fragment);
+        (locale, where, segment, query, fragment, withLang) => {
+          const base = pageUrl(where + segment, query, fragment);
           if (withLang) base.searchParams.set('lang', 'pt');
           const built = new URL(Locale.urlFor(locale, base.href), 'https://eklund.com.br');
-          const kept = pageUrl(segment, query, fragment);
+          const kept = pageUrl(where + segment, query, fragment);
           expect([built.pathname, built.search, built.hash]).toStrictEqual([
-            locale === 'en-US' ? '/en/' : '/',
+            locale === 'en-US' ? `/${where}en/` : `/${where}`,
             kept.search,
             kept.hash,
           ]);

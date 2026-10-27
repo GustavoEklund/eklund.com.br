@@ -56,7 +56,13 @@ describe('Locale.detect', () => {
     ['/pt/', 'pt-BR'],
     ['/english', 'pt-BR'],
     ['/enigma/', 'pt-BR'],
-    ['/a/en/', 'pt-BR'],
+    ['/1.1.0/', 'pt-BR'],
+    ['/1.1.0/index.html', 'pt-BR'],
+    ['/1.1.0/en/', 'en-US'],
+    ['/1.1.0/en', 'en-US'],
+    ['/1.1.0/en/index.html', 'en-US'],
+    ['/1.1.0-rc.1/en/', 'en-US'],
+    ['/1.1.0/english/', 'pt-BR'],
   ])('puts the page at %s in %s: the address says which language it is', (pathname, expected) =>
     expect(Locale.detect({ pathname })).toBe(expected),
   );
@@ -111,6 +117,22 @@ describe('Locale.urlFor', () => {
   });
   it('never includes the host', () =>
     expect(Locale.urlFor('en-US', 'https://other.example:8443/x')).toBe('/en/'));
+  it('stays in the folder of a version: its English page is its en/ folder, and its Portuguese page the folder itself', () =>
+    expect([
+      Locale.urlFor('en-US', 'https://eklund.com.br/1.1.0/'),
+      Locale.urlFor('en-US', 'https://eklund.com.br/1.1.0/index.html?x=1#carga'),
+      Locale.urlFor('pt-BR', 'https://eklund.com.br/1.1.0/en/'),
+      Locale.urlFor('pt-BR', 'https://eklund.com.br/1.1.0/en/index.html?lang=en#carga'),
+      Locale.urlFor('en-US', 'https://eklund.com.br/1.1.0/en/'),
+      Locale.urlFor('pt-BR', 'https://eklund.com.br/1.1.0/'),
+    ]).toStrictEqual([
+      '/1.1.0/en/',
+      '/1.1.0/en/?x=1#carga',
+      '/1.1.0/',
+      '/1.1.0/#carga',
+      '/1.1.0/en/',
+      '/1.1.0/',
+    ]));
   it('defaults to the current location', () => {
     history.replaceState(null, '', '/?z=9#top');
     expect(Locale.urlFor('en-US')).toBe('/en/?z=9#top');

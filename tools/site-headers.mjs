@@ -42,13 +42,16 @@ export class SiteHeaders {
   /** Only meaningful over HTTPS, so the plain-HTTP development server leaves it out. */
   static PRODUCTION_ONLY = { 'Strict-Transport-Security': 'max-age=31536000; includeSubDomains' };
 
-  /** The language of the markup as served. Each language has its own page: / is Portuguese and /en/ is English. */
+  /**
+   * The language of the markup as served. Each language has its own page: / is Portuguese and /en/ is English, and so are
+   * /1.1.0/ and /1.1.0/en/ in the copy of a version, where the .htaccess of en/ comes along with the folder.
+   */
   static DOCUMENT_LANGUAGE = 'pt-BR';
   static ENGLISH_LANGUAGE = 'en-US';
 
-  /** The Content-Language of the document at `pathname`. */
+  /** The Content-Language of the document at `pathname`: English inside an en/ folder. */
   static documentLanguage(pathname = '/') {
-    return pathname === '/en' || pathname.startsWith('/en/')
+    return /\/en(?:\/|$)/.test(pathname)
       ? SiteHeaders.ENGLISH_LANGUAGE
       : SiteHeaders.DOCUMENT_LANGUAGE;
   }
