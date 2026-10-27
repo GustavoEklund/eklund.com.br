@@ -25,7 +25,7 @@ gh repo edit GustavoEklund/eklund.com.br \
   --delete-branch-on-merge --enable-auto-merge --allow-update-branch
 ```
 
-Only squash merges are on, and the commit message is the pull request title, which the `Conventions` workflow has already checked, so `main` reads as a list of Conventional Commits.
+Only squash merges are on, and the commit message is the pull request title followed by its number, which the `Conventions` workflow has already checked, so `main` reads as a list of Conventional Commits.
 
 Upload [`docs/images/social-preview.png`](images/social-preview.png) under _Settings, General, Social preview_ (there is no command for it). It is the picture that appears when the repository is shared.
 

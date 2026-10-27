@@ -77,7 +77,7 @@ Three checks enforce this, so that no one has to remember it: the `commit-msg` h
 ## Pull requests
 
 - Keep it small and about one thing. Fill in the template.
-- The **title** follows the commit convention, because it becomes the message of the squash merge.
+- The **title** follows the commit convention, because it becomes the message of the squash merge. GitHub appends the number of the pull request to it (` (#123)`), and the header has to fit in 72 characters with that number.
 - CI has to be green. It runs the checks above, the unit to end-to-end tests, accessibility and W3C validation, the production build and its tests, and the security scans.
 - Say how you checked it: a command, a screenshot, a measurement.
 - Be ready to change it. I review on my own time, and I will say why when I decline something.

@@ -13,6 +13,7 @@ import {
   GitHistory,
   PushUpdates,
 } from '../../tools/commit-gate.mjs';
+import { RepositoryFiles } from '../support/repository-files.js';
 import { SiteSource } from '../support/site-source.js';
 
 // The first spell check of a run loads the dictionaries and every git call starts a process, so a loaded machine needs time.
@@ -340,5 +341,48 @@ describe('tools/commit-gate.mjs as a command', () => {
       stderr:
         'commit-gate: unknown command "bogus"; see the usage at the top of tools/commit-gate.mjs\n',
     });
+  });
+});
+
+describe('the title step of the Conventions workflow', () => {
+  /** The step as the workflow writes it: the command, and the environment it takes from the pull request. */
+  const step = () =>
+    RepositoryFiles.read('.github/workflows/conventions.yml').match(
+      /- run: (node tools\/commit-gate\.mjs title .+)\n {8}env:\n((?: {10}.+\n)+)/,
+    );
+  const check = (title, number) => {
+    const { status, stdout, stderr } = spawnSync('bash', ['-c', step()[1]], {
+      cwd: RepositoryFiles.root,
+      encoding: 'utf8',
+      env: { ...process.env, PR_TITLE: title, PR_NUMBER: String(number) },
+    });
+    return { status, stdout, stderr };
+  };
+
+  it('takes the title and the number of the pull request', () => {
+    expect(
+      step()[2]
+        .trim()
+        .split('\n')
+        .map((line) => line.trim()),
+    ).toStrictEqual([
+      'PR_TITLE: ${{ github.event.pull_request.title }}',
+      'PR_NUMBER: ${{ github.event.pull_request.number }}',
+    ]);
+  });
+
+  it('checks the header that the squash merge writes, with the number GitHub appends: the title of #8 fit alone and not on main', () => {
+    expect([
+      check('ci: use --strip-extra in the release zip, since zip rejects --no-extra', 8),
+      check('ci: use --strip-extra in the release zip', 8),
+    ]).toStrictEqual([
+      {
+        status: 1,
+        stdout: '',
+        stderr:
+          '✖ ci: use --strip-extra in the release zip, since zip rejects --no-extra (#8)\n    ✖ header must not be longer than 72 characters, current length is 75 [header-max-length]\ncommit-gate: 1 of 1 message failed (convention: CONTRIBUTING.md#commit-messages)\n',
+      },
+      { status: 0, stdout: 'commit-gate: 1 message checked, all good\n', stderr: '' },
+    ]);
   });
 });
