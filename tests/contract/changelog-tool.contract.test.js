@@ -200,6 +200,17 @@ describe('Changelog', () => {
     );
   });
 
+  it('points the relative links of the notes at the tagged files, because a release page would read them from /releases/tag/', () => {
+    const linked = GOOD.replace(
+      '- A thing that was broken.',
+      '- A thing that was broken: [notice](NOTICE.md), [docs](docs/), [policy](/SECURITY.md), [above](#unreleased), ![icon](source/icon.svg) and [site](https://eklund.com.br).',
+    );
+    expect(Changelog.parse(linked).released('1.1.1', '2026-12-15').notes('1.1.1')).toBe(
+      `### Fixed\n\n- A thing that was broken: [notice](${REPOSITORY}/blob/v1.1.1/NOTICE.md), [docs](${REPOSITORY}/tree/v1.1.1/docs/), [policy](${REPOSITORY}/blob/v1.1.1/SECURITY.md), [above](${REPOSITORY}/blob/v1.1.1/CHANGELOG.md#unreleased), ![icon](${REPOSITORY}/raw/v1.1.1/source/icon.svg) and [site](https://eklund.com.br).\n\n**Full changelog**: ${REPOSITORY}/compare/v1.1.0...v1.1.1\n`,
+    );
+    expect(Changelog.parse(linked).toString()).toBe(linked);
+  });
+
   it('refuses to release with nothing in [Unreleased], an older version or a bad date', () => {
     const empty = Changelog.parse(GOOD).released('1.1.1', '2026-12-15');
     expect(() => empty.released('1.1.2', '2026-12-16')).toThrow(
