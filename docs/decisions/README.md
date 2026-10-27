@@ -11,3 +11,4 @@ The choices that shaped the project, each with the reason and what it costs. The
 | [0005](0005-spelling-and-commit-gates.md)                  | Spelling and commit gates, and no grammar checker                                | Accepted |
 | [0006](0006-licenses.md)                                   | MIT for the code, CC BY-NC-ND 4.0 for the words and images                       | Accepted |
 | [0007](0007-supply-chain-policy.md)                        | Supply chain policy for dependencies, workflows and releases                     | Accepted |
+| [0008](0008-deploy-each-release-over-ftps.md)              | Each release goes online by itself, over FTP with TLS, and stays in a folder     | Accepted |

@@ -1,0 +1,136 @@
+# Puts a release online. The zip of the release, checked against its checksum and against the provenance attestation that the
+# Release workflow signed for it, goes to the hosting over FTP with TLS (tools/deploy.mjs): into public_html, and into
+# public_html/gustavo/, the folder of gustavo.eklund.com.br, which mirrors the site. The zip carries the copy of the version
+# for its own folder, which stays online at eklund.com.br/X.Y.Z/ after later releases. A pre-release goes only to its own
+# folder. Then every page online is compared with the page of the release.
+# The Release workflow calls this one once it publishes a release. Run it by hand to put an older release back online, or with
+# dry-run (the default by hand) to see what a deploy would change (docs/build-and-deploy.md).
+name: Deploy
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: The release to put online, like v1.1.0
+        required: true
+        type: string
+      dry-run:
+        description: Only say what would change on the server
+        required: false
+        type: boolean
+        default: false
+    # A workflow that another one calls gets a secret of its environment only when the caller passes it, and an empty string
+    # otherwise, with no error. Required, so that a caller that leaves the FTP account out fails before it starts.
+    secrets:
+      FTP_HOST:
+        description: The address of the FTP server
+        required: true
+      FTP_USER:
+        description: The FTP account of the deploy
+        required: true
+      FTP_PASSWORD:
+        description: The password of that account
+        required: true
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: The release to put online, like v1.1.0
+        required: true
+        type: string
+      dry-run:
+        description: Only say what would change on the server
+        required: false
+        type: boolean
+        default: true
+
+permissions: {}
+
+env:
+  CI: 'true'
+  VP_GIT_HOOKS: '0'
+
+jobs:
+  deploy:
+    name: Put the release online
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # One deploy at a time, and none is cancelled halfway. On the job, because a workflow that another one calls runs its jobs
+    # under the run of the caller.
+    concurrency:
+      group: deploy
+      cancel-in-progress: false
+    # The FTP account is in the secrets of this environment, which only main and the release tags can deploy from.
+    environment:
+      name: production
+      url: https://eklund.com.br/
+    permissions:
+      contents: read # downloads the release
+      attestations: read # verifies its provenance
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Download the release and check it
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::\"$TAG\" is not the tag of a release, like v1.1.0"
+            exit 1
+          fi
+          zip="eklund.com.br-${TAG}.zip"
+          gh release download "$TAG" --repo "$REPOSITORY" --dir release --pattern "$zip" --pattern "$zip.sha256"
+          (cd release && sha256sum --check "$zip.sha256")
+          gh attestation verify "release/$zip" --repo "$REPOSITORY" --deny-self-hosted-runners \
+            --signer-workflow "$REPOSITORY/.github/workflows/release.yml" --source-ref "refs/tags/$TAG"
+          unzip -q "release/$zip" -d site
+      # The pages of the release before can still be open in a browser, or come back from its cache for a day: the files they
+      # name stay on the server until the next deploy. Only their names are read, so that zip is not checked.
+      - name: Download the release online before this one
+        if: ${{ !contains(inputs.tag, '-') }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          previous=$(gh release list --repo "$REPOSITORY" --exclude-pre-releases --exclude-drafts --limit 1000 \
+            --json tagName --jq '.[].tagName' | node tools/deploy.mjs previous "$TAG")
+          if [ -n "$previous" ]; then
+            gh release download "$previous" --repo "$REPOSITORY" --dir previous-release --pattern "eklund.com.br-${previous}.zip"
+            unzip -q "previous-release/eklund.com.br-${previous}.zip" -d previous
+            echo "The files of $previous stay one more deploy."
+          fi
+      - name: Upload
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          # The server is reached by its address, and its certificate is issued to *.hstgr.io, Hostinger's own domain.
+          FTP_TLS_NAME: hstgr.io
+          TAG: ${{ inputs.tag }}
+          DRY_RUN: ${{ inputs.dry-run }}
+        run: |
+          version="${TAG#v}"
+          if [[ "$TAG" == *-* ]]; then
+            arguments=(upload "site/$version" --into "/gustavo/$version/" --into "/$version/")
+          else
+            arguments=(upload site --into /gustavo/ --into /)
+            if [ -d previous ]; then arguments+=(--keep previous); fi
+          fi
+          if [ "$DRY_RUN" = 'true' ]; then arguments+=(--dry-run); fi
+          node tools/deploy.mjs "${arguments[@]}"
+      - name: Check the pages online
+        if: ${{ !inputs.dry-run }}
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          version="${TAG#v}"
+          if [[ "$TAG" == *-* ]]; then
+            node tools/deploy.mjs check "site/$version" \
+              --at "https://eklund.com.br/$version/" --at "https://gustavo.eklund.com.br/$version/"
+          else
+            node tools/deploy.mjs check site --at https://eklund.com.br/ --at https://gustavo.eklund.com.br/
+          fi

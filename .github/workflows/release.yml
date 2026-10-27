@@ -1,7 +1,7 @@
 # A release is a tag. Pushing vX.Y.Z checks the tag against package.json and CHANGELOG.md and that CI passed on the tagged
 # commit, builds the site, and publishes a GitHub release with the zip of the site, its checksum, a software bill of materials
-# and a signed provenance attestation for the zip, with the notes taken from CHANGELOG.md. It does not deploy: uploading
-# the zip to the host is a separate step (docs/releasing.md, docs/build-and-deploy.md).
+# and a signed provenance attestation for the zip, with the notes taken from CHANGELOG.md. Then the Deploy workflow puts the
+# release online (docs/releasing.md, docs/build-and-deploy.md).
 name: Release
 
 on:
@@ -104,3 +104,19 @@ jobs:
           flags=(--verify-tag --title "$TAG" --notes-file release/notes.md)
           if [[ "$TAG" == *-* ]]; then flags+=(--prerelease); fi
           gh release create "$TAG" release/eklund.com.br-* --repo "$REPOSITORY" "${flags[@]}"
+
+  deploy:
+    name: Put the release online
+    needs: publish
+    permissions:
+      contents: read # downloads the release
+      attestations: read # verifies its provenance
+    uses: ./.github/workflows/deploy.yml
+    with:
+      tag: ${{ github.ref_name }}
+    # The FTP account, which the job of Deploy reads from the production environment. Passed by name, so Deploy gets these
+    # three and no other secret.
+    secrets:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USER: ${{ secrets.FTP_USER }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}

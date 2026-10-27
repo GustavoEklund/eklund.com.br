@@ -9,3 +9,4 @@ rules:
       - conventions.yml
       - security.yml
       - release.yml
+      - deploy.yml

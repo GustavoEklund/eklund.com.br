@@ -132,6 +132,7 @@ describe('the documents', () => {
         'docs/decisions/0005-spelling-and-commit-gates.md',
         'docs/decisions/0006-licenses.md',
         'docs/decisions/0007-supply-chain-policy.md',
+        'docs/decisions/0008-deploy-each-release-over-ftps.md',
         'docs/decisions/README.md',
         'docs/internationalization.md',
         'docs/releasing.md',
@@ -226,11 +227,13 @@ describe('the workflows', () => {
   });
 
   it('give every job a time limit, so that a hung job does not hold a runner for hours', () => {
+    // A job that calls another workflow (`uses:` on the job) cannot have one: the jobs of that workflow carry theirs.
     expect(
       workflows
         .filter(
           ({ text, jobCount }) =>
-            [...text.matchAll(/^ {4}timeout-minutes: \d+$/gm)].length !== jobCount,
+            [...text.matchAll(/^ {4}timeout-minutes: \d+$/gm)].length !==
+            jobCount - [...text.matchAll(/^ {4}uses: /gm)].length,
         )
         .map(({ file }) => file),
     ).toStrictEqual([]);
