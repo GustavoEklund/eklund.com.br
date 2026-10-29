@@ -1,6 +1,6 @@
 # 0001. No framework, no runtime dependency, and every module is a class
 
-Status: accepted, 2026-10-16.
+Status: accepted, 2026-10-16. Amended by [0011](0011-two-libraries-to-measure.md), which lets two libraries measure the site.
 
 ## Context
 

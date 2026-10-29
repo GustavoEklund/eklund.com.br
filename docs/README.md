@@ -11,4 +11,5 @@
 | [`continuous-integration.md`](continuous-integration.md) | The hooks, the workflows and the gates, and the security measures                                              |
 | [`releasing.md`](releasing.md)                           | Semantic Versioning for a website, the changelog and how a release is made                                     |
 | [`repository-settings.md`](repository-settings.md)       | The GitHub settings the repository relies on, with the commands                                                |
+| [`privacy.md`](privacy.md)                               | What the site measures and on which legal basis, the balancing test and the record of processing               |
 | [`decisions/`](decisions/)                               | The choices behind all of this, with the reasons and the costs                                                 |
