@@ -1,38 +1,18 @@
 // What the production build saves a visitor: the same page loaded from source/ (the site as it is written, 60 modules
 // and 20 stylesheets, the way it was deployed before the build) and from dist/ (the build), cold cache each time, in a few
 // network and CPU conditions, with the files and the bytes they cost and the times the page reaches its marks.
-// Both folders are served by the same server: HTTP/2 over TLS (as the hosting does, so a hundred requests cost what they
-// cost there and not what they would over six HTTP/1.1 connections) with brotli, from a throwaway certificate.
+// Both folders are served by tools/production-server.mjs: HTTP/2 over TLS (as the hosting does, so a hundred requests cost
+// what they cost there and not what they would over six HTTP/1.1 connections) with brotli, from a throwaway certificate.
 // usage: node tools/measure-build.mjs [--runs 7] [--json FILE]      (build first: pnpm run build; needs openssl)
-import { execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync, mkdtempSync, rmSync, statSync } from 'node:fs';
-import { createSecureServer } from 'node:http2';
-import { tmpdir } from 'node:os';
-import { extname, join, normalize, resolve } from 'node:path';
-import { brotliCompressSync, constants } from 'node:zlib';
-import { fileURLToPath } from 'node:url';
+import { writeFileSync } from 'node:fs';
 import { chromium } from '@playwright/test';
-import { SiteHeaders } from './site-headers.mjs';
+import { Certificate, ProductionServer } from './production-server.mjs';
 
-const PROJECT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const SOFTWARE_GL = [
   '--use-angle=swiftshader',
   '--enable-unsafe-swiftshader',
   '--ignore-gpu-blocklist',
 ];
-const MIME = {
-  '.html': 'text/html; charset=utf-8',
-  '.js': 'text/javascript; charset=utf-8',
-  '.css': 'text/css; charset=utf-8',
-  '.json': 'application/json; charset=utf-8',
-  '.svg': 'image/svg+xml',
-  '.jpg': 'image/jpeg',
-  '.png': 'image/png',
-  '.ico': 'image/x-icon',
-  '.woff2': 'font/woff2',
-  '.webmanifest': 'application/manifest+json; charset=utf-8',
-};
-const COMPRESSIBLE = new Set(['.html', '.js', '.css', '.json', '.svg', '.webmanifest', '.ico']);
 
 /** What a visitor's connection and phone are like. Throughput in kilobits per second, as DevTools and Lighthouse state it. */
 const SCENARIOS = [
@@ -64,96 +44,6 @@ const DEVICES = {
     deviceScaleFactor: 2.625,
   },
 };
-
-/** A certificate for 127.0.0.1 that lives as long as the run. */
-class Certificate {
-  static create() {
-    const folder = mkdtempSync(join(tmpdir(), 'measure-build-'));
-    execFileSync(
-      'openssl',
-      [
-        'req',
-        '-x509',
-        '-newkey',
-        'rsa:2048',
-        '-nodes',
-        '-days',
-        '1',
-        '-subj',
-        '/CN=127.0.0.1',
-        '-addext',
-        'subjectAltName=IP:127.0.0.1',
-        '-keyout',
-        join(folder, 'key.pem'),
-        '-out',
-        join(folder, 'cert.pem'),
-      ],
-      { stdio: 'ignore' },
-    );
-    const certificate = {
-      key: readFileSync(join(folder, 'key.pem')),
-      cert: readFileSync(join(folder, 'cert.pem')),
-    };
-    rmSync(folder, { recursive: true, force: true });
-    return certificate;
-  }
-}
-
-/** One folder served over HTTP/2 with brotli. The compressed copies are made once, so the run does not pay for them. */
-class SiteServer {
-  #root;
-  #cache = new Map();
-  #server;
-
-  constructor(root) {
-    this.#root = resolve(PROJECT, root);
-  }
-
-  async start(certificate) {
-    this.#server = createSecureServer({ ...certificate, allowHTTP1: false });
-    this.#server.on('request', (request, response) => this.#answer(request, response));
-    await new Promise((done) => this.#server.listen(0, '127.0.0.1', done));
-    return `https://127.0.0.1:${this.#server.address().port}`;
-  }
-
-  stop() {
-    this.#server.close();
-    this.#server.closeAllConnections?.();
-  }
-
-  #answer(request, response) {
-    const pathname = decodeURIComponent(new URL(request.url, 'https://x').pathname);
-    let file = join(this.#root, normalize(pathname));
-    try {
-      if (statSync(file).isDirectory()) file = join(file, 'index.html');
-      if (!statSync(file).isFile()) throw new Error('not a file');
-    } catch {
-      response.writeHead(404, { 'content-type': 'text/plain' }).end('Not found');
-      return;
-    }
-    const extension = extname(file);
-    const wantsBrotli =
-      /\bbr\b/.test(request.headers['accept-encoding'] ?? '') && COMPRESSIBLE.has(extension);
-    const key = `${file}|${wantsBrotli}`;
-    if (!this.#cache.has(key)) {
-      const body = readFileSync(file);
-      this.#cache.set(key, {
-        body: wantsBrotli
-          ? brotliCompressSync(body, { params: { [constants.BROTLI_PARAM_QUALITY]: 6 } })
-          : body,
-        html: extension === '.html' ? body.toString('utf8') : '',
-      });
-    }
-    const { body, html } = this.#cache.get(key);
-    response.writeHead(200, {
-      'content-type': MIME[extension] ?? 'application/octet-stream',
-      'cache-control': 'no-store',
-      ...(wantsBrotli ? { 'content-encoding': 'br', vary: 'Accept-Encoding' } : {}),
-      ...SiteHeaders.development({ html, isDocument: extension === '.html', pathname }),
-    });
-    response.end(body);
-  }
-}
 
 /** One cold load of the home page, and what it cost. */
 class PageLoad {
@@ -309,7 +199,7 @@ const argument = (name, fallback) => {
 };
 const runs = Number(argument('runs', 7));
 const certificate = Certificate.create();
-const servers = { source: new SiteServer('source'), dist: new SiteServer('dist') };
+const servers = { source: new ProductionServer('source'), dist: new ProductionServer('dist') };
 const origins = {
   source: await servers.source.start(certificate),
   dist: await servers.dist.start(certificate),
@@ -331,6 +221,6 @@ try {
   if (file) writeFileSync(file, JSON.stringify(results, null, 2));
 } finally {
   await browser.close();
-  servers.source.stop();
-  servers.dist.stop();
+  await servers.source.stop();
+  await servers.dist.stop();
 }
