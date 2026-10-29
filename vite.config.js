@@ -137,6 +137,8 @@ export default defineConfig({
       node('contract', ['tests/contract/**/*.contract.test.js']),
       node('architecture', ['tests/architecture/**/*.architecture.test.js']),
       node('build', ['tests/build/**/*.build.test.js']),
+      // The collector of edge/: its classes in Node, and the whole Worker in workerd through wrangler's test harness.
+      node('edge', ['tests/edge/**/*.edge.test.js']),
     ],
   },
 });

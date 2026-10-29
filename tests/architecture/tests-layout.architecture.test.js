@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { EdgeSource } from '../support/edge-source.js';
 import { SiteSource } from '../support/site-source.js';
 
 const TESTS = join(import.meta.dirname, '..');
@@ -116,12 +117,25 @@ describe('where the tests live', () => {
     ]);
   });
 
+  it('mirrors edge/src: every test of tests/edge sits beside a module of the collector with the same name', () => {
+    expect(
+      ALL_TESTS.filter((path) => path.startsWith('edge/')).filter(
+        (path) =>
+          !path.endsWith('.edge.test.js') ||
+          !existsSync(
+            join(EdgeSource.root, 'src', path.slice(5).replace(/\.edge\.test\.js$/, '.js')),
+          ),
+      ),
+    ).toStrictEqual([]);
+  });
+
   it('puts end-to-end, BDD, build, contract, integration and architecture tests in their own folders', () => {
     expect([...new Set(ALL_TESTS.map((path) => path.split('/')[0]))].sort()).toStrictEqual([
       'architecture',
       'build',
       'contract',
       'e2e',
+      'edge',
       'features',
       'integration',
       'js',

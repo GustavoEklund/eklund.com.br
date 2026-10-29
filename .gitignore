@@ -8,3 +8,6 @@ test-results/
 dist/
 .cspellcache
 .lighthouseci/
+# What wrangler keeps for a local run of the collector (the local D1), and the secrets of a local run.
+.wrangler/
+.dev.vars

@@ -77,8 +77,14 @@ source/                    everything that is deployed
     history/ contact/ command-palette/ theme/ cursor/ hero/ marquee/ scrollbar/ navigation/
   .htaccess                security headers, cache and compression rules for Hostinger
   robots.txt sitemap.xml site.webmanifest icon.svg favicon.ico apple-touch-icon.png .well-known/security.txt
+edge/                      the collector of real visits, a Cloudflare Worker on workers.dev (docs/decisions/0009); no site code
+  src/                     Router, Collector, PageReport and ReportVocabulary (the contract it reads), VisitorAgent, ReportStore (D1),
+                           Retention (daily totals and deletions, from the Cron Trigger), Replies, Calendar; index.js wires them
+  migrations/              the D1 schema, applied by wrangler before each deploy
+  wrangler.jsonc           the Worker: D1 in the EU jurisdiction, the Cron Trigger, the origins that may send, no request logs
 tests/
   js/<feature>/<module>.<kind>.test.js   unit, property and component tests, beside the module they test
+  edge/<module>.edge.test.js             the collector's tests, beside its modules; the Worker runs in workerd through wrangler
   integration/ contract/ architecture/ features/ e2e/   cross-cutting suites (see Tests)
   support/                 helpers shared by the suites (fake WebGL context, recording canvas, dictionary text, site reader)
 tools/

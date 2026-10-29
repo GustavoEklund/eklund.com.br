@@ -93,6 +93,31 @@ The second command proves that the zip was built by this repository's release wo
 
 Caching is set by `.htaccess`: hashed files for a year with `immutable`, HTML for ten minutes, and `robots.txt`, `sitemap.xml`, `favicon.ico` and `security.txt` for one day. Check compression with `curl -sI -H 'Accept-Encoding: br' https://eklund.com.br/ | grep -i content-encoding`.
 
+## The collector
+
+The collector of real visits is a Cloudflare Worker on `workers.dev`, in [`edge/`](../edge/) ([0009](decisions/0009-measurement-on-a-cloudflare-worker.md)). It is not part of the site, and it goes online by itself: the [`Edge`](../.github/workflows/edge.yml) workflow runs when a push to `main` changes `edge/`. It tests the collector, applies the D1 migrations that have not run yet, and deploys the Worker. Every release stays online in its folder, so a change to what a page may send keeps the older forms working.
+
+### Set the collector up once
+
+1. A Cloudflare account on the free plan, and the `workers.dev` subdomain that the dashboard asks for the first time Workers is opened.
+2. An API token made from the template "Edit Cloudflare Workers", with "D1: Edit" added, limited to that account and to no zone.
+3. The database, created in the EU jurisdiction, whose id then goes into [`edge/wrangler.jsonc`](../edge/wrangler.jsonc):
+
+   ```sh
+   pnpm exec wrangler login
+   pnpm exec wrangler d1 create eklund --jurisdiction=eu
+   ```
+
+4. The `cloudflare` environment of the repository, with the token and the account id ([`repository-settings.md`](repository-settings.md#the-collector)).
+
+### Run the collector locally
+
+```sh
+pnpm exec wrangler d1 migrations apply DB --local --config edge/wrangler.jsonc   # once, for the local D1 in edge/.wrangler/
+pnpm run edge:dev        # the Worker at http://127.0.0.1:8787, taking reports from the dev server and the preview
+pnpm run test:edge       # its tests, with the Worker in workerd
+```
+
 ## Lighthouse
 
 CI runs Lighthouse on the production build (mobile profile, three runs per page) and fails when accessibility or SEO drops from 100, best practices under 90, layout shift above 0.02, the page weighs more than 360 kB or the console shows an error. Performance only warns below 75. The limits are in [`lighthouserc.json`](../lighthouserc.json). Measured on 2026-10-18: accessibility 100, SEO 100, best practices 96, performance 84, layout shift 0. The 4 points of best practices are the audit "legible font sizes" (about half of the text is under 12 px, which is a design choice), and the missing performance points are the blocking time described above.
