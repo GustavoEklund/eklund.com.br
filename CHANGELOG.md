@@ -7,6 +7,7 @@ All notable changes to this project are written here. The format follows [Keep a
 ### Added
 
 - A collector of my own for the visits to the site: a Cloudflare Worker on workers.dev, with its database in the EU, whose code lives in `edge/`. It stores no IP address and nothing that links one visit to another. The pages do not send it anything yet.
+- An uptime monitor in that Worker. Every five minutes it checks the home page, the English page and the mirror, and when one of them stays down for ten minutes it opens an issue in a private repository, which it closes once the page answers again.
 
 ## [1.1.0] - 2026-10-27
 
