@@ -1,0 +1,660 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://eklund.com.br/contracts/edge/page-report.json",
+  "title": "page report",
+  "description": "What a page of the site sends to the collector (POST /v1/page, as text/plain) about one load of itself. Every value comes from a closed list or has a fixed form, so nothing a visitor typed can be sent. The collector refuses a report with anything else (edge/src/page-report.js). The same load may be reported again, with a growing seq: the visit keeps its first values and each metric its last. A metric appears at most once per report, which JSON Schema cannot say and the collector checks.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "v",
+    "view",
+    "seq",
+    "version",
+    "page",
+    "language",
+    "referrer",
+    "navigation",
+    "visible",
+    "device",
+    "vitals",
+    "events",
+    "errors"
+  ],
+  "properties": {
+    "v": {
+      "const": 1
+    },
+    "view": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "description": "A random UUID made in memory for one load, never stored on the device."
+    },
+    "seq": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1000
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}(?:-[0-9a-z.]{1,20})?$"
+    },
+    "page": {
+      "enum": [
+        "/",
+        "/en/",
+        "/privacidade/",
+        "/cookies/",
+        "/termos/",
+        "/en/privacy/",
+        "/en/cookies/",
+        "/en/terms/"
+      ]
+    },
+    "language": {
+      "enum": ["pt-BR", "en-US"]
+    },
+    "referrer": {
+      "type": "string",
+      "pattern": "^(?:|(?=.{1,253}$)[a-z0-9-]+(?:\\.[a-z0-9-]+)+)$",
+      "description": "The host of the page the visitor came from, or empty."
+    },
+    "navigation": {
+      "enum": ["navigate", "reload", "back-forward", "back-forward-cache", "prerender", "restore"]
+    },
+    "visible": {
+      "$ref": "#/definitions/milliseconds"
+    },
+    "device": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "viewport",
+        "pixelRatio",
+        "memory",
+        "cores",
+        "roundTrip",
+        "saveData",
+        "colorScheme",
+        "reducedMotion"
+      ],
+      "description": "Ranges, never the exact values: together, exact sizes and counts could single a device out.",
+      "properties": {
+        "viewport": {
+          "enum": ["0-359", "360-413", "414-767", "768-1023", "1024-1279", "1280-1535", "1536+"]
+        },
+        "pixelRatio": {
+          "enum": ["1", "1.5", "2", "3+"]
+        },
+        "memory": {
+          "enum": ["0-2", "4", "8+", "unknown"]
+        },
+        "cores": {
+          "enum": ["1-2", "3-4", "5-8", "9+", "unknown"]
+        },
+        "roundTrip": {
+          "enum": ["0-99", "100-299", "300-599", "600+", "unknown"]
+        },
+        "saveData": {
+          "type": "boolean"
+        },
+        "colorScheme": {
+          "enum": ["dark", "light"]
+        },
+        "reducedMotion": {
+          "type": "boolean"
+        }
+      }
+    },
+    "vitals": {
+      "type": "array",
+      "maxItems": 5,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "value", "rating", "attribution"],
+            "properties": {
+              "name": {
+                "const": "LCP"
+              },
+              "value": {
+                "$ref": "#/definitions/duration"
+              },
+              "rating": {
+                "enum": ["good", "needs-improvement", "poor"]
+              },
+              "attribution": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "target": {
+                    "$ref": "#/definitions/label"
+                  },
+                  "url": {
+                    "$ref": "#/definitions/path"
+                  },
+                  "timeToFirstByte": {
+                    "$ref": "#/definitions/duration"
+                  },
+                  "resourceLoadDelay": {
+                    "$ref": "#/definitions/duration"
+                  },
+                  "resourceLoadDuration": {
+                    "$ref": "#/definitions/duration"
+                  },
+                  "elementRenderDelay": {
+                    "$ref": "#/definitions/duration"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "value", "rating", "attribution"],
+            "properties": {
+              "name": {
+                "const": "INP"
+              },
+              "value": {
+                "$ref": "#/definitions/duration"
+              },
+              "rating": {
+                "enum": ["good", "needs-improvement", "poor"]
+              },
+              "attribution": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "interactionTarget": {
+                    "$ref": "#/definitions/label"
+                  },
+                  "scriptUrl": {
+                    "$ref": "#/definitions/path"
+                  },
+                  "scriptFunction": {
+                    "$ref": "#/definitions/label"
+                  },
+                  "scriptInvoker": {
+                    "$ref": "#/definitions/label"
+                  },
+                  "inputDelay": {
+                    "$ref": "#/definitions/duration"
+                  },
+                  "processingDuration": {
+                    "$ref": "#/definitions/duration"
+                  },
+                  "presentationDelay": {
+                    "$ref": "#/definitions/duration"
+                  },
+                  "scriptDuration": {
+                    "$ref": "#/definitions/duration"
+                  },
+                  "totalScriptDuration": {
+                    "$ref": "#/definitions/duration"
+                  },
+                  "totalStyleAndLayoutDuration": {
+                    "$ref": "#/definitions/duration"
+                  },
+                  "totalPaintDuration": {
+                    "$ref": "#/definitions/duration"
+                  },
+                  "totalUnattributedDuration": {
+                    "$ref": "#/definitions/duration"
+                  },
+                  "interactionType": {
+                    "enum": ["pointer", "keyboard"]
+                  },
+                  "loadState": {
+                    "enum": ["loading", "dom-interactive", "dom-content-loaded", "complete"]
+                  },
+                  "scriptSubpart": {
+                    "enum": ["input-delay", "processing-duration", "presentation-delay"]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "value", "rating", "attribution"],
+            "properties": {
+              "name": {
+                "const": "CLS"
+              },
+              "value": {
+                "$ref": "#/definitions/shift"
+              },
+              "rating": {
+                "enum": ["good", "needs-improvement", "poor"]
+              },
+              "attribution": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "largestShiftTarget": {
+                    "$ref": "#/definitions/label"
+                  },
+                  "largestShiftTime": {
+                    "$ref": "#/definitions/duration"
+                  },
+                  "largestShiftValue": {
+                    "$ref": "#/definitions/shift"
+                  },
+                  "loadState": {
+                    "enum": ["loading", "dom-interactive", "dom-content-loaded", "complete"]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "value", "rating", "attribution"],
+            "properties": {
+              "name": {
+                "const": "FCP"
+              },
+              "value": {
+                "$ref": "#/definitions/duration"
+              },
+              "rating": {
+                "enum": ["good", "needs-improvement", "poor"]
+              },
+              "attribution": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "timeToFirstByte": {
+                    "$ref": "#/definitions/duration"
+                  },
+                  "firstByteToFCP": {
+                    "$ref": "#/definitions/duration"
+                  },
+                  "loadState": {
+                    "enum": ["loading", "dom-interactive", "dom-content-loaded", "complete"]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "value", "rating", "attribution"],
+            "properties": {
+              "name": {
+                "const": "TTFB"
+              },
+              "value": {
+                "$ref": "#/definitions/duration"
+              },
+              "rating": {
+                "enum": ["good", "needs-improvement", "poor"]
+              },
+              "attribution": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "waitingDuration": {
+                    "$ref": "#/definitions/duration"
+                  },
+                  "cacheDuration": {
+                    "$ref": "#/definitions/duration"
+                  },
+                  "dnsDuration": {
+                    "$ref": "#/definitions/duration"
+                  },
+                  "connectionDuration": {
+                    "$ref": "#/definitions/duration"
+                  },
+                  "requestDuration": {
+                    "$ref": "#/definitions/duration"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "events": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "detail", "at"],
+            "properties": {
+              "name": {
+                "const": "section"
+              },
+              "detail": {
+                "enum": ["status", "perfil", "arquitetura", "carga", "historico", "contato"]
+              },
+              "value": {
+                "$ref": "#/definitions/duration"
+              },
+              "at": {
+                "$ref": "#/definitions/milliseconds"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "detail", "at"],
+            "properties": {
+              "name": {
+                "const": "outbound"
+              },
+              "detail": {
+                "enum": ["github", "linkedin", "source", "email"]
+              },
+              "value": {
+                "$ref": "#/definitions/duration"
+              },
+              "at": {
+                "$ref": "#/definitions/milliseconds"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "detail", "at"],
+            "properties": {
+              "name": {
+                "const": "copy-email"
+              },
+              "detail": {
+                "const": ""
+              },
+              "value": {
+                "$ref": "#/definitions/duration"
+              },
+              "at": {
+                "$ref": "#/definitions/milliseconds"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "detail", "at"],
+            "properties": {
+              "name": {
+                "const": "language"
+              },
+              "detail": {
+                "enum": ["pt-BR", "en-US"]
+              },
+              "value": {
+                "$ref": "#/definitions/duration"
+              },
+              "at": {
+                "$ref": "#/definitions/milliseconds"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "detail", "at"],
+            "properties": {
+              "name": {
+                "const": "theme"
+              },
+              "detail": {
+                "enum": ["dark", "light"]
+              },
+              "value": {
+                "$ref": "#/definitions/duration"
+              },
+              "at": {
+                "$ref": "#/definitions/milliseconds"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "detail", "at"],
+            "properties": {
+              "name": {
+                "const": "hue"
+              },
+              "detail": {
+                "const": ""
+              },
+              "value": {
+                "$ref": "#/definitions/duration"
+              },
+              "at": {
+                "$ref": "#/definitions/milliseconds"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "detail", "at"],
+            "properties": {
+              "name": {
+                "const": "motion"
+              },
+              "detail": {
+                "enum": ["paused", "full"]
+              },
+              "value": {
+                "$ref": "#/definitions/duration"
+              },
+              "at": {
+                "$ref": "#/definitions/milliseconds"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "detail", "at"],
+            "properties": {
+              "name": {
+                "const": "palette-open"
+              },
+              "detail": {
+                "enum": ["shortcut", "button"]
+              },
+              "value": {
+                "$ref": "#/definitions/duration"
+              },
+              "at": {
+                "$ref": "#/definitions/milliseconds"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "detail", "at"],
+            "properties": {
+              "name": {
+                "const": "palette-command"
+              },
+              "detail": {
+                "enum": [
+                  "status",
+                  "profile",
+                  "architecture",
+                  "followPix",
+                  "load",
+                  "runLoad",
+                  "history",
+                  "contact",
+                  "copyEmail",
+                  "toggleTheme",
+                  "randomHue",
+                  "goHome",
+                  "shader",
+                  "github",
+                  "source",
+                  "linkedin",
+                  "switchLocale",
+                  "pauseMotion",
+                  "resumeMotion",
+                  "hueUp",
+                  "hueDown",
+                  "speedUp",
+                  "speedDown",
+                  "pointsUp",
+                  "pointsDown",
+                  "spinGlobe"
+                ]
+              },
+              "value": {
+                "$ref": "#/definitions/duration"
+              },
+              "at": {
+                "$ref": "#/definitions/milliseconds"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "detail", "at"],
+            "properties": {
+              "name": {
+                "const": "load-test"
+              },
+              "detail": {
+                "enum": ["start", "finish", "stop"]
+              },
+              "value": {
+                "$ref": "#/definitions/duration"
+              },
+              "at": {
+                "$ref": "#/definitions/milliseconds"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "detail", "at"],
+            "properties": {
+              "name": {
+                "const": "interact"
+              },
+              "detail": {
+                "enum": ["globe", "architecture-map", "trace-viewer", "history"]
+              },
+              "value": {
+                "$ref": "#/definitions/duration"
+              },
+              "at": {
+                "$ref": "#/definitions/milliseconds"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "detail", "at"],
+            "properties": {
+              "name": {
+                "const": "rage-click"
+              },
+              "detail": {
+                "enum": [
+                  "status",
+                  "perfil",
+                  "arquitetura",
+                  "carga",
+                  "historico",
+                  "contato",
+                  "header",
+                  "footer",
+                  "other"
+                ]
+              },
+              "value": {
+                "$ref": "#/definitions/duration"
+              },
+              "at": {
+                "$ref": "#/definitions/milliseconds"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "errors": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "message", "source", "line", "column", "at"],
+        "properties": {
+          "kind": {
+            "enum": ["error", "rejection", "worker", "csp", "deprecation", "intervention"]
+          },
+          "message": {
+            "type": "string",
+            "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f]{0,200}$"
+          },
+          "source": {
+            "$ref": "#/definitions/path"
+          },
+          "line": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000000
+          },
+          "column": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000000
+          },
+          "at": {
+            "$ref": "#/definitions/milliseconds"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "milliseconds": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 86400000
+    },
+    "duration": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 86400000
+    },
+    "shift": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "label": {
+      "type": "string",
+      "pattern": "^[ -~]{0,200}$",
+      "description": "A selector or a function name, in printable ASCII."
+    },
+    "path": {
+      "type": "string",
+      "pattern": "^(?:|other|/[!-\"$->@-~]{0,199})$",
+      "description": "A path of this site without query or fragment, other for a file from another origin, or empty."
+    }
+  }
+}

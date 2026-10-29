@@ -19,6 +19,7 @@ autoplays
 autorun
 axxb
 badware
+bingbot
 bitangent
 branas
 brulee
@@ -49,7 +50,9 @@ domcontentloaded
 easylist
 easyprivacy
 eklund
+embedly
 esatto
+esbuild
 etdjw
 etec
 facebookexternalhit
@@ -108,6 +111,7 @@ mediump
 mensageria
 microsservicos
 milhões
+mobi
 monday
 networkidle
 noext
@@ -122,6 +126,7 @@ oneof
 opsz
 ossf
 pageerror
+pagespeed
 parsererror
 participação
 peucker
@@ -130,6 +135,7 @@ playhead
 portugues
 português
 postgres
+prerender
 prerendering
 privacidade
 ramer
@@ -147,6 +153,7 @@ rrweb
 rsfn
 résumé
 saida
+samsung
 sarif
 sbom
 schemaorg
@@ -183,6 +190,8 @@ wcag
 wdth
 webgl
 webp
+whatsapp
+workerd
 xmld
 zizmor
 zizmorcore

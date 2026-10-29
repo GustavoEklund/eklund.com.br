@@ -83,6 +83,22 @@ gh secret set FTP_PASSWORD --env production --repo GustavoEklund/eklund.com.br
 
 The values come from the FTP account made for the deploy, whose folder is `/public_html` ([`build-and-deploy.md`](build-and-deploy.md#set-it-up-once)). `FTP_HOST` is the IP address that hPanel shows as the FTP host under Files, FTP Accounts, without `ftp://`. It is a secret because it is the address of the server behind the CDN, and for the same reason the deploy does not use the `ftp.` name that the list of accounts offers to activate: that name would publish the address in the DNS. `FTP_USER` is the user name as that list shows it, with its prefix, like `u123456789.deploy`. The environment asks for no approval: a release goes online as soon as it is published.
 
+### The collector
+
+The [`Edge`](../.github/workflows/edge.yml) workflow reads the Cloudflare token from the secrets of the `cloudflare` environment, which only `main` can deploy from:
+
+```sh
+gh api --method PUT repos/GustavoEklund/eklund.com.br/environments/cloudflare \
+  -F 'deployment_branch_policy[protected_branches]=false' -F 'deployment_branch_policy[custom_branch_policies]=true'
+gh api --method POST repos/GustavoEklund/eklund.com.br/environments/cloudflare/deployment-branch-policies -f name=main -f type=branch
+
+# Each command asks for the value
+gh secret set CLOUDFLARE_API_TOKEN --env cloudflare --repo GustavoEklund/eklund.com.br
+gh secret set CLOUDFLARE_ACCOUNT_ID --env cloudflare --repo GustavoEklund/eklund.com.br
+```
+
+The token is the one [`build-and-deploy.md`](build-and-deploy.md#set-the-collector-up-once) describes: it can deploy Workers and edit D1, R2 and KV in that account, and touches no zone. The account id is on the Workers page of the dashboard.
+
 ## Labels
 
 The issue forms and Dependabot use these labels. GitHub creates `bug`, `enhancement` and `dependencies` by itself.

@@ -1,0 +1,25 @@
+// The collector of real visits (docs/decisions/0009-measurement-on-a-cloudflare-worker.md), on the free plan and on
+// workers.dev. .github/workflows/edge.yml applies the migrations and deploys it from main.
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "eklund",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-20",
+  "workers_dev": true,
+  "preview_urls": false,
+  // No Workers Logs: they would keep each request, address included, and docs/privacy.md says no address is stored.
+  "observability": { "enabled": false },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "eklund",
+      // Created in the EU jurisdiction: `wrangler d1 create eklund --jurisdiction=eu`.
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations",
+    },
+  ],
+  // The daily totals and the retention, at a quiet hour for Brazil.
+  "triggers": { "crons": ["17 6 * * *"] },
+  // The origins whose pages may send reports, separated by spaces. Tests and local runs add their own.
+  "vars": { "ORIGINS": "https://eklund.com.br https://gustavo.eklund.com.br" },
+}
