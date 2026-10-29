@@ -11,6 +11,7 @@ addext
 aleatorio
 aneis
 anhanguera
+anpd
 antimeridian
 autoplay
 autoplaying
@@ -28,6 +29,8 @@ ccaa
 certpia
 claude
 cldr
+cloudflare
+cnil
 cobranca
 cobv
 codigo
@@ -85,10 +88,13 @@ jsonld
 keepachangelog
 keyout
 khtml
+klaro
 klingon
 kubernetes
 labelledby
+laravel
 lerp
+lgpd
 lhci
 lighthouseci
 lighthouserc
@@ -124,6 +130,8 @@ playhead
 portugues
 português
 postgres
+prerendering
+privacidade
 ramer
 rasterizes
 rdfs
@@ -135,6 +143,7 @@ retentativa
 retentativas
 rjct
 roteiro
+rrweb
 rsfn
 résumé
 saida
@@ -152,10 +161,13 @@ stryker
 stylesheet
 swiftshader
 taubate
+taubaté
+termos
 tinos
 treosh
 ttfb
 txid
+umami
 unbreak
 unhashed
 unjudged

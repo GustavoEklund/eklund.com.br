@@ -1,6 +1,6 @@
 # 0007. Supply chain policy for dependencies, workflows and releases
 
-Status: accepted, 2026-10-18.
+Status: accepted, 2026-10-18. Amended by [0011](0011-two-libraries-to-measure.md): the shipped site now carries two libraries, copied from npm and pinned.
 
 ## Context
 
