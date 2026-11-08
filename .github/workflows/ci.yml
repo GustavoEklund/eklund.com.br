@@ -176,10 +176,10 @@ jobs:
           browser: 'true'
       - run: vp run build
       # The action carries its own copy of Lighthouse CI, so the audit tool and its dependencies stay out of pnpm-lock.yaml.
+      # It reads the pages, the number of runs and the server to start from lighthouserc.json.
       - uses: treosh/lighthouse-ci-action@3e7e23fb74242897f95c0ba9cabad3d0227b9b18 # 12.6.2
         with:
           configPath: ./lighthouserc.json
-          runs: 3
           uploadArtifacts: true
           temporaryPublicStorage: false
 

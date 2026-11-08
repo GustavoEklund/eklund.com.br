@@ -95,4 +95,15 @@ Caching is set by `.htaccess`: hashed files for a year with `immutable`, HTML fo
 
 ## Lighthouse
 
-CI runs Lighthouse on the production build (mobile profile, three runs per page) and fails when accessibility or SEO drops from 100, best practices under 90, layout shift above 0.02, the page weighs more than 360 kB or the console shows an error. Performance only warns below 75. The limits are in [`lighthouserc.json`](../lighthouserc.json). Measured on 2026-10-18: accessibility 100, SEO 100, best practices 96, performance 84, layout shift 0. The 4 points of best practices are the audit "legible font sizes" (about half of the text is under 12 px, which is a design choice), and the missing performance points are the blocking time described above.
+CI runs Lighthouse on the production build, mobile profile, five times on `/` and five times on `/en/`. [`tools/production-server.mjs`](../tools/production-server.mjs) serves the build the way the hosting does: HTTP/2 over TLS, brotli, and the headers and cache rules of the `.htaccess` files. Every assertion reads the median run, the one whose performance metrics sit in the middle, and not the best of the five.
+
+Chrome runs in Portuguese (`--accept-lang=pt-BR`). In English, the head script sends a visitor of `/` to `/en/`, and Lighthouse measured both pages in one run: the fonts, the script and the stylesheet were downloaded twice, 557 kB instead of 286 kB. That is also what an English browser pays the first time it opens `/`.
+
+A pull request fails when:
+
+- accessibility or SEO drops from 100, or best practices under 90;
+- layout shift goes above 0.02, or the console shows an error;
+- the page weighs more than 360 kB, its scripts more than 70 kB or its fonts more than 200 kB, or it makes more than 12 requests;
+- the page cannot be restored from the back/forward cache.
+
+Performance warns below 75, LCP above 2.5 s and TBT above 200 ms. The limits are in [`lighthouserc.json`](../lighthouserc.json). Measured in CI on 2026-10-28, median run of `/`: accessibility 100, SEO 100, best practices 96, performance 80, LCP 2.6 s, TBT 663 ms, layout shift 0, 286 kB in 9 requests (58 kB of script, 185 kB of fonts). On a laptop the same median gives performance 93 and TBT 232 ms: the CI machine is slower, and the blocking time is what moves. The 4 points of best practices are the audit "legible font sizes" (about half of the text is under 12 px, which is a design choice), and the missing performance points are the blocking time described above.

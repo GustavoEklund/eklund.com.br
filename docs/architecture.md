@@ -83,7 +83,8 @@ tests/
   support/                 helpers shared by the suites (fake WebGL context, recording canvas, dictionary text, site reader)
 tools/
   serve.mjs                static server for source/ (dev and E2E), no dependencies; sends the same security headers as .htaccess
-  site-headers.mjs         SiteHeaders: the Content-Security-Policy and the other headers, shared by .htaccess (checked by a test) and serve.mjs
+  site-headers.mjs         SiteHeaders: the Content-Security-Policy, the other headers and the cache rules, shared by .htaccess (checked by a test), serve.mjs and production-server.mjs
+  production-server.mjs    serves a folder as the hosting does (HTTP/2 over TLS, brotli, the production headers and cache rules); Lighthouse CI and measure-build.mjs load the build through it
   render-brand-assets.mjs  renders favicon.ico, the touch and manifest icons and the social card from icon.svg and the fonts
   schema-org-subset.mjs    extracts the schema.org types and properties the JSON-LD uses into a test fixture
   i18n-check.mjs           audits the dictionaries (same keys and placeholders in both languages, every referenced key defined, none unused) and writes or checks index.html's defaults and en/index.html

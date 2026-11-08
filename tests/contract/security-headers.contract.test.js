@@ -11,6 +11,16 @@ const HTACCESS = SiteSource.read('.htaccess');
 const INDEX = SiteSource.read('index.html');
 const ENGLISH = SiteSource.read('en/index.html');
 const ENGLISH_HTACCESS = SiteSource.read('en/.htaccess');
+const BRAND_HTACCESS = SiteSource.read('assets/brand/.htaccess');
+/** Every <FilesMatch> of an .htaccess that sets Cache-Control, as [pattern, value], in the order Apache applies them. */
+const cacheRulesOf = (htaccess) =>
+  [...htaccess.matchAll(/<FilesMatch "([^"]+)">/g)]
+    .map(([, pattern]) => [
+      pattern,
+      HtaccessHeaders.forFilesMatching(htaccess, pattern)['Cache-Control'],
+    ])
+    .filter(([, value]) => value !== undefined);
+const sourcesOf = (rules) => rules.map(([pattern, value]) => [pattern.source, value]);
 /** The text of every inline classic script of the page, found without any help from SiteHeaders. */
 const inlineScripts = [...INDEX.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(([, code]) => code);
 const sha256 = (text) => `'sha256-${createHash('sha256').update(text, 'utf8').digest('base64')}'`;
@@ -188,5 +198,57 @@ describe('security headers', () => {
         'frame-ancestors': ["'none'"],
       });
     });
+  });
+});
+
+describe('cache rules', () => {
+  const PAGE = 'public, max-age=600, stale-while-revalidate=86400';
+  const HASHED = 'public, max-age=31536000, immutable';
+  const NAMED = 'public, max-age=86400, stale-while-revalidate=604800';
+
+  it('are the rules of the root .htaccess, in its order', () => {
+    expect(sourcesOf(SiteHeaders.CACHE_RULES)).toStrictEqual(cacheRulesOf(HTACCESS));
+  });
+
+  it('add the rule of assets/brand/.htaccess, whose icons and social card keep their names', () => {
+    expect(sourcesOf(SiteHeaders.BRAND_CACHE_RULES)).toStrictEqual(cacheRulesOf(BRAND_HTACCESS));
+  });
+
+  it('give each file what production sends, the last matching rule winning as in Apache', () => {
+    expect(
+      [
+        '/index.html',
+        '/en/index.html',
+        '/1.1.0/en/index.html',
+        '/assets/main-AbC123.js',
+        '/assets/main-AbC123.css',
+        '/assets/inter-latin-AbC123.woff2',
+        '/manifest-AbC123.webmanifest',
+        '/favicon.ico',
+        '/robots.txt',
+        '/sitemap.xml',
+        '/.well-known/security.txt',
+        '/assets/brand/icon-192.png',
+        '/1.1.0/assets/brand/social-card.png',
+        '/assets/brands-AbC123.png',
+        '/.well-known/gpc.json',
+      ].map((pathname) => SiteHeaders.cacheControl(pathname)),
+    ).toStrictEqual([
+      PAGE,
+      PAGE,
+      PAGE,
+      HASHED,
+      HASHED,
+      HASHED,
+      HASHED,
+      NAMED,
+      NAMED,
+      NAMED,
+      NAMED,
+      NAMED,
+      NAMED,
+      HASHED,
+      undefined,
+    ]);
   });
 });
