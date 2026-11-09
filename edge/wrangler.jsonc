@@ -14,7 +14,7 @@
       "binding": "DB",
       "database_name": "eklund",
       // Created in the EU jurisdiction: `wrangler d1 create eklund --jurisdiction=eu`.
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "8dd0a071-e6e3-459e-868f-9ba8d116f692",
       "migrations_dir": "migrations",
     },
   ],
