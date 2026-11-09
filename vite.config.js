@@ -60,13 +60,16 @@ const WEAK_MATCHERS = {
 };
 
 export default defineConfig({
-  // Oxfmt, which follows Prettier's style. The generated land data and the HTML that tools/i18n-check.mjs rewrites (index.html and en/index.html) stay as they are.
+  // Oxfmt, which follows Prettier's style. The generated land data and the HTML that tools/i18n-check.mjs rewrites (index.html,
+  // en/index.html and the head script of the legal pages, which has to stay byte for byte) stay as they are.
   fmt: {
     singleQuote: true,
     printWidth: 100,
     ignorePatterns: [
       'source/index.html',
       'source/en/index.html',
+      'source/{privacidade,cookies,termos}/index.html',
+      'source/en/{privacy,cookies,terms}/index.html',
       'dist/**',
       'source/js/globe/land-bitset.js',
       'tools/land.json',

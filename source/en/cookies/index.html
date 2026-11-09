@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en-US" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cookie Policy | eklund.com.br</title>
+<meta name="description" content="eklund.com.br uses no cookies. This page lists what the site keeps in your browser, what it is for and how to clear it.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#111318">
+<link rel="canonical" href="https://eklund.com.br/en/cookies/">
+<link rel="alternate" hreflang="pt-BR" href="https://eklund.com.br/cookies/">
+<link rel="alternate" hreflang="en" href="https://eklund.com.br/en/cookies/">
+<link rel="alternate" hreflang="x-default" href="https://eklund.com.br/cookies/">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+<!-- The inline script of the head of index.html, byte for byte, so the Content-Security-Policy allows it by the same hash: here it only applies the theme, hue and motion the visitor chose. tools/i18n-check.mjs copies it, with its fix-html option. -->
+<script>document.documentElement.classList.add('js');
+let motion, language;
+try {
+  const theme = localStorage.getItem('theme');
+  if (theme) document.documentElement.dataset.theme = theme;
+  const hue = localStorage.getItem('hue');
+  if (hue) document.documentElement.style.setProperty('--hue', hue);
+  motion = localStorage.getItem('motion');
+  language = localStorage.getItem('lang');
+} catch {}
+document.documentElement.dataset.motion = motion === 'paused' || motion === 'full' ? motion : matchMedia('(prefers-reduced-motion: reduce)').matches ? 'paused' : 'full';
+if (location.pathname === '/' || location.pathname === '/index.html') {
+  const query = new URLSearchParams(location.search);
+  const translated = (tag) => {
+    const language = String(tag || '').toLowerCase().split(/[-_]/)[0];
+    return language === 'en' || language === 'pt' ? language : '';
+  };
+  if ((translated(query.get('lang')) || translated(language)) === 'en') {
+    query.delete('lang');
+    location.replace('/en/' + (query.toString() ? '?' + query : '') + location.hash);
+  }
+}</script>
+
+<link rel="stylesheet" href="/css/legal.css">
+</head>
+<body>
+<div class="legal-page">
+<header class="legal-header">
+  <a class="logo" translate="no" href="/en/" aria-label="eklund.com.br, home">eklund<i>.</i></a>
+  <div class="locale-switcher" role="group" aria-label="Language"><a href="/cookies/" lang="pt-BR" hreflang="pt-BR" aria-label="PT, Português (Brasil)" title="Português (Brasil)">PT</a><a href="/en/cookies/" lang="en-US" hreflang="en" aria-label="EN, English (United States)" title="English (United States)" aria-current="true">EN</a></div>
+</header>
+
+<main class="legal-text">
+<h1>Cookie Policy</h1>
+<p class="updated">Last updated: November 9, 2026</p>
+
+<p>This site uses no cookies, neither mine nor anyone else's. The pages load nothing from other addresses, so no other company can set cookies through them.</p>
+
+<h2>What stays in your browser</h2>
+<p>The site keeps your preferences in the browser's local storage (<code translate="no">localStorage</code>), which only the site's own pages read. None of these values is sent to me.</p>
+<div class="table-scroller">
+<table>
+<thead>
+<tr><th scope="col">Name</th><th scope="col">What it keeps</th><th scope="col">For how long</th></tr>
+</thead>
+<tbody>
+<tr><td><code translate="no">theme</code></td><td>The theme you chose, light (<code translate="no">light</code>) or dark (<code translate="no">dark</code>).</td><td>Until you clear the site's data</td></tr>
+<tr><td><code translate="no">hue</code></td><td>The accent color you chose on the globe, an angle from 0 to 360.</td><td>Until you clear the site's data</td></tr>
+<tr><td><code translate="no">motion</code></td><td>Whether the animations are paused (<code translate="no">paused</code>) or on (<code translate="no">full</code>).</td><td>Until you clear the site's data</td></tr>
+<tr><td><code translate="no">lang</code></td><td>The language you chose (<code translate="no">pt-BR</code> or <code translate="no">en-US</code>). It is also how the Portuguese page knows you already said whether you want the English version.</td><td>Until you clear the site's data</td></tr>
+</tbody>
+</table>
+</div>
+<p>The privacy notice also keeps your choice, for six months, together with the version of the purposes. If you accept session recording, the browser also keeps the random codes of your recordings, for 30 days, so that you can delete them. Those codes go with each recording and with the request to delete it.</p>
+<p>The anonymous measurement keeps nothing in the browser: the code of each page load exists only in the page's memory and is gone when the page closes. The <a href="/en/privacy/">Privacy Policy</a> says what the measurement sends and why.</p>
+
+<h2>Why this needs no consent</h2>
+<p>These preferences only exist because you chose them, they stay on your device, and they let the site remember them. They do not identify you and are sent to no one. Session recording and the heat map, which depend on your consent, only start if you accept.</p>
+
+<h2>How to clear them</h2>
+<p>In your browser's settings, clear the data of the site eklund.com.br (usually under Privacy, Cookies and site data). The site goes back to its default theme, color and animations, and the privacy notice shows again.</p>
+
+<h2>Changes to this policy</h2>
+<p>When the site starts keeping anything else in your browser, this page changes first, and the date at the top shows when.</p>
+</main>
+
+<footer class="legal-footer">
+  <p>© 2026 Gustavo Eklund · Taubaté, Brazil</p>
+  <nav aria-label="Legal pages">
+    <ul>
+      <li><a href="/en/privacy/">Privacy Policy</a></li>
+      <li><a href="/en/cookies/" aria-current="page">Cookie Policy</a></li>
+      <li><a href="/en/terms/">Terms of Use</a></li>
+    </ul>
+  </nav>
+</footer>
+</div>
+</body>
+</html>

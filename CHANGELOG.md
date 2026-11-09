@@ -11,6 +11,7 @@ All notable changes to this project are written here. The format follows [Keep a
 - A lab job that measures the site every night: PageSpeed Insights five times on each page, on mobile and on desktop, the field data of Chrome users from CrUX, the clicks and searches of Google Search Console and Bing Webmaster Tools, and when the certificates expire. It all goes to the collector, with the full report of the run in the middle kept in R2.
 - Each release now tells Bing and the other engines that take IndexNow that its pages changed, once it is online.
 - The collector serves what it stored, read-only, to an AI agent through an MCP server and as JSON: visits, Core Web Vitals, events, errors, uptime, the lab nights, CrUX, search and certificates, with a Mann-Whitney U test between two releases or periods and the nights where the lab's numbers shifted. Only my GitHub account can sign in, and every answer says when its sample is too small to compare.
+- A privacy policy, a cookie policy and terms of use, in Portuguese and in English, at `/privacidade/`, `/cookies/`, `/termos/` and their English pages under `/en/`, linked from the footer. They say what the site measures, on which legal basis, where the data is kept and for how long, and how to use the rights the LGPD gives.
 
 ### Fixed
 

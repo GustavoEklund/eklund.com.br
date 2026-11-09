@@ -78,6 +78,8 @@ source/                    everything that is deployed
   .htaccess                security headers, cache and compression rules for Hostinger
   robots.txt sitemap.xml site.webmanifest icon.svg favicon.ico apple-touch-icon.png .well-known/security.txt
   <key>.txt                the IndexNow key, a file named after its content (tools/index-now.mjs)
+  privacidade/ cookies/ termos/   the legal pages in Portuguese, and en/privacy/, en/cookies/, en/terms/ in English: static HTML with
+                           one stylesheet, css/legal.css, and the head script of index.html (docs/decisions/0014)
 edge/                      the collector of real visits, a Cloudflare Worker on workers.dev (docs/decisions/0009); no site code
   src/                     Router, Collector, PageReport and ReportVocabulary (the contract it reads), VisitorAgent, ReportStore (D1),
                            Retention (daily totals and deletions), UptimeMonitor and IncidentIssues (the site checked every five
@@ -102,6 +104,7 @@ tools/
   render-brand-assets.mjs  renders favicon.ico, the touch and manifest icons and the social card from icon.svg and the fonts
   schema-org-subset.mjs    extracts the schema.org types and properties the JSON-LD uses into a test fixture
   i18n-check.mjs           audits the dictionaries (same keys and placeholders in both languages, every referenced key defined, none unused) and writes or checks index.html's defaults and en/index.html
+  legal-pages.mjs          the six legal pages, and the head script that i18n-check.mjs copies into them from index.html
   html-defaults.mjs        reads the dictionaries and writes the default text of a page from them; english-page.mjs turns index.html into en/index.html
   land.py                  rasterizes Natural Earth land polygons into the latitude-ring bitset (source/js/globe/land-bitset.js)
   preview.mjs              screenshots, clicks, drags and runtime exceptions through the Chrome DevTools Protocol
@@ -126,7 +129,7 @@ playwright.config.js  cucumber.mjs  stryker.config.mjs  .dependency-cruiser.cjs
 - Popovers: the custom cursor (`.cursor-dot`, `.cursor-ring`) and the copy toast are popovers so they live in the top layer above modal dialogs. Never style the bare `[popover]` selector; give each its own class (`.toast`), or every popover inherits it.
 - Copy voice: plain words, first person, concrete facts. No slogans, no "X, not Y" contrasts, no metaphors in headings (a heading says what the section is or what it shows), no em-dashes. Say a Banco Central term in everyday words the first time it appears (SPI is "the Central Bank system that settles Pix"). Say each number once where it matters instead of repeating it in every section. Claim no more than the CV supports: "we" for what the team delivered, "I" for what was done alone, never "I build the company's system". The headline and the page description say what the person does, never where he works: employers belong in the experience section. A heading in a showcase section names the skill the section demonstrates, because the large heading is what the eye reads first and the lead underneath is small and dim. No bold in running text. Write round large numbers in words ("2 milhões", "2 million"), because a string of zeros with dots or commas is easy to misread by a factor of ten.
 - File names are what ad blockers match (EasyPrivacy has the rule `/performance-metrics.js`), so no file uses tracker words (metrics, analytics, stats, tracking, telemetry, performance, beacon, pixel…); an architecture test enforces it and `pnpm run adblock` checks the site against the real EasyList, EasyPrivacy and uBlock Origin lists (network rules and element-hiding rules, both languages). Run it before a deploy.
-- UI text lives in the dictionaries, never in code: no Portuguese or English sentence in a `.js` file outside `source/js/i18n/locales/`. Numbers and times go through `Formatter`, never `toLocale*` or a hard-coded locale.
+- UI text lives in the dictionaries, never in code: no Portuguese or English sentence in a `.js` file outside `source/js/i18n/locales/`. The legal pages are the one exception, written in HTML in each language ([0014](decisions/0014-legal-pages-written-in-html.md)). Numbers and times go through `Formatter`, never `toLocale*` or a hard-coded locale.
 
 ## Regenerate the globe data
 

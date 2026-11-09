@@ -639,6 +639,15 @@ export const PT_BR = {
     stack: 'Feito só com HTML, CSS e JavaScript, sem frameworks e sem bibliotecas ·',
     uncompressed: 'de código, sem comprimir ·',
     source: 'Código-fonte no GitHub',
+    // The legal pages (0014) are one page per language, so each link names the page of the language on screen.
+    legal: {
+      privacy: 'Política de Privacidade',
+      privacyAddress: '/privacidade/',
+      cookies: 'Política de Cookies',
+      cookiesAddress: '/cookies/',
+      terms: 'Termos de Uso',
+      termsAddress: '/termos/',
+    },
   },
 
   shader: {

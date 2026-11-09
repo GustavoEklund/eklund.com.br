@@ -6,6 +6,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { defineConfig } from 'vite-plus';
+import { LegalPages } from './tools/legal-pages.mjs';
 import { SiteBuild } from './tools/site-build.mjs';
 
 const SOURCE = resolve(import.meta.dirname, 'source');
@@ -39,6 +40,13 @@ export default defineConfig(({ mode }) => {
         input: {
           index: resolve(SOURCE, 'index.html'),
           en: resolve(SOURCE, 'en/index.html'),
+          // The legal pages (0014), each with its own stylesheet and no script but the inline one of the head.
+          ...Object.fromEntries(
+            LegalPages.PAGES.map(({ file }) => [
+              file.replace(/\/index\.html$/, '').replace('/', '-'),
+              resolve(SOURCE, file),
+            ]),
+          ),
         },
       },
     },

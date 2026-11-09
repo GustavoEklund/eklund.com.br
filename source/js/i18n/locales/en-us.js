@@ -636,6 +636,15 @@ export const EN_US = {
     stack: 'Built with just HTML, CSS and JavaScript, no frameworks and no libraries ·',
     uncompressed: 'of code, uncompressed ·',
     source: 'Source code on GitHub',
+    // The legal pages (0014) are one page per language, so each link names the page of the language on screen.
+    legal: {
+      privacy: 'Privacy Policy',
+      privacyAddress: '/en/privacy/',
+      cookies: 'Cookie Policy',
+      cookiesAddress: '/en/cookies/',
+      terms: 'Terms of Use',
+      termsAddress: '/en/terms/',
+    },
   },
 
   shader: {
