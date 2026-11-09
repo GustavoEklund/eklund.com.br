@@ -56,6 +56,14 @@ describe('Retention.run, against D1 in workerd', () => {
         "INSERT INTO error VALUES (?, 0, 0, 'error', 'TypeError: x', '/assets/main.js', 1, 2, 0)",
       )
       .bind(viewId);
+  const check = (checkedAt, day, duration, problem = null) =>
+    database
+      .prepare("INSERT INTO uptime_check VALUES (?, ?, 'https://eklund.com.br/', 200, ?, ?)")
+      .bind(checkedAt, day, duration, problem);
+  const oldUptime = (day) =>
+    database
+      .prepare("INSERT INTO daily_uptime VALUES (?, 'https://eklund.com.br/', 288, 0, 90, 300)")
+      .bind(day);
   const oldTotal = (day) =>
     database
       .prepare(
@@ -99,6 +107,14 @@ describe('Retention.run, against D1 in workerd', () => {
       error('e'),
       oldTotal('2024-09-28'),
       oldTotal('2024-09-29'),
+      check(1, '2026-10-28', 300),
+      check(2, '2026-10-28', 100),
+      check(3, '2026-10-28', 400, 'status 503'),
+      check(4, '2026-10-28', 200),
+      check(5, '2026-07-30', 150),
+      check(6, '2026-07-31', 150),
+      oldUptime('2024-09-28'),
+      oldUptime('2024-09-29'),
     ]);
   });
 
@@ -111,6 +127,7 @@ describe('Retention.run, against D1 in workerd', () => {
       await worker.rows('SELECT * FROM daily_vital ORDER BY page'),
       await worker.rows('SELECT * FROM daily_event ORDER BY name'),
       await worker.rows('SELECT * FROM daily_error'),
+      await worker.rows("SELECT * FROM daily_uptime WHERE day > '2026-01-01' ORDER BY day"),
     ]).toStrictEqual([
       [
         {
@@ -204,10 +221,20 @@ describe('Retention.run, against D1 in workerd', () => {
           total: 2,
         },
       ],
+      [
+        {
+          day: '2026-10-28',
+          target: 'https://eklund.com.br/',
+          checks: 4,
+          failures: 1,
+          p50_ms: 200,
+          p95_ms: 400,
+        },
+      ],
     ]);
   });
 
-  it('deletes rows older than 13 months, errors older than 90 days and totals older than 25 months', async () => {
+  it('deletes rows older than 13 months, errors and uptime checks older than 90 days, totals older than 25 months', async () => {
     await new Retention(database).run(NOW);
     expect([
       await worker.rows('SELECT id, day FROM page_view ORDER BY id'),
@@ -215,6 +242,8 @@ describe('Retention.run, against D1 in workerd', () => {
       await worker.rows('SELECT view_id FROM event ORDER BY view_id, position'),
       await worker.rows('SELECT view_id FROM error ORDER BY view_id'),
       await worker.rows("SELECT day FROM daily_view WHERE day < '2026-01-01'"),
+      await worker.rows('SELECT day FROM uptime_check GROUP BY day ORDER BY day'),
+      await worker.rows("SELECT day FROM daily_uptime WHERE day < '2026-01-01'"),
     ]).toStrictEqual([
       [
         { id: 'a', day: '2026-10-28' },
@@ -228,6 +257,8 @@ describe('Retention.run, against D1 in workerd', () => {
       [{ view_id: 'a' }, { view_id: 'b' }, { view_id: 'c' }, { view_id: 'g' }, { view_id: 'h' }],
       [{ view_id: 'a' }, { view_id: 'a' }, { view_id: 'b' }],
       [{ view_id: 'a' }, { view_id: 'b' }],
+      [{ day: '2024-09-29' }],
+      [{ day: '2026-07-31' }, { day: '2026-10-28' }],
       [{ day: '2024-09-29' }],
     ]);
   });
