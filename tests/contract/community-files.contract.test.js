@@ -136,6 +136,7 @@ describe('the documents', () => {
         'docs/decisions/0009-measurement-on-a-cloudflare-worker.md',
         'docs/decisions/0010-privacy-by-the-anpd-guidance.md',
         'docs/decisions/0011-two-libraries-to-measure.md',
+        'docs/decisions/0012-no-redirect-by-browser-language.md',
         'docs/decisions/README.md',
         'docs/internationalization.md',
         'docs/privacy.md',

@@ -1,6 +1,6 @@
 # 0002. One page per language, with the language links as real links
 
-Status: accepted, 2026-10-18. It replaces an earlier design that used `/?lang=en` on a single page.
+Status: accepted, 2026-10-18, amended by [0012](0012-no-redirect-by-browser-language.md): the browser language no longer sends a visitor to `/en/`. It replaces an earlier design that used `/?lang=en` on a single page.
 
 ## Context
 
