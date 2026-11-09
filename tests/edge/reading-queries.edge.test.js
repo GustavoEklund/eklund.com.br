@@ -157,7 +157,7 @@ describe('ReadingQueries, against D1 in workerd', () => {
     expect(await queries.run('overview', WEEK)).toStrictEqual({
       ...WEEK,
       views: 20,
-      days_with_totals: 2,
+      days_with_views: 2,
       top: {
         page: top(['/', 15], ['/en/', 5]),
         language: top(['pt-BR', 15], ['en-US', 5]),
@@ -361,6 +361,179 @@ describe('ReadingQueries, against D1 in workerd', () => {
       ],
       sample: { size: 864, minimum: 20, enough: true },
     });
+  });
+
+  it('counts the days the retention still rewrites from their rows, and each day only once', async () => {
+    const period = { from: '2026-11-01', to: '2026-11-09' };
+    // 3 November is settled: its stored totals count, and its row does not. 8 November is recent: its stale totals do
+    // not count, and its rows do. 9 November, today, has rows and no totals yet.
+    await load({}, [['LCP', 1_000, 'good']]);
+    await load({ day: '2026-11-08', page: '/en/', language: 'en-US' }, [['LCP', 1_000, 'good']]);
+    await load({ day: '2026-11-09', country: null, referrer: 'www.google.com' }, [
+      ['LCP', 1_000, 'good'],
+    ]);
+    await insert('event', [
+      {
+        view_id: 'view-1',
+        seq: 0,
+        position: 0,
+        name: 'theme',
+        detail: 'dark',
+        value: null,
+        at_ms: 1,
+      },
+      {
+        view_id: 'view-2',
+        seq: 0,
+        position: 0,
+        name: 'section',
+        detail: 'hero',
+        value: null,
+        at_ms: 1,
+      },
+      {
+        view_id: 'view-3',
+        seq: 0,
+        position: 0,
+        name: 'section',
+        detail: 'hero',
+        value: null,
+        at_ms: 1,
+      },
+      { view_id: 'view-3', seq: 0, position: 1, name: 'copy', detail: null, value: null, at_ms: 2 },
+    ]);
+    const error = (viewId, message) => ({
+      view_id: viewId,
+      seq: 0,
+      position: 0,
+      kind: 'error',
+      message,
+      source: '/assets/main-AbC123.js',
+      line: 1,
+      column_number: 2,
+      at_ms: 1,
+    });
+    await insert('error', [error('view-1', 'old'), error('view-3', 'TypeError: x is null')]);
+    const settled = { host: 'eklund.com.br', version: '1.2.0', device: 'phone', browser: 'chrome' };
+    await insert('daily_view', [
+      {
+        day: '2026-11-03',
+        page: '/',
+        language: 'pt-BR',
+        country: 'BR',
+        referrer: '',
+        views: 5,
+        visible_ms: 5_000,
+        ...settled,
+      },
+      {
+        day: '2026-11-08',
+        page: '/en/',
+        language: 'en-US',
+        country: 'BR',
+        referrer: '',
+        views: 99,
+        visible_ms: 1,
+        ...settled,
+      },
+    ]);
+    await insert('daily_event', [
+      { day: '2026-11-03', page: '/', version: '1.2.0', name: 'section', detail: 'hero', total: 4 },
+      {
+        day: '2026-11-08',
+        page: '/en/',
+        version: '1.2.0',
+        name: 'section',
+        detail: 'hero',
+        total: 99,
+      },
+    ]);
+    await insert('daily_error', [
+      {
+        day: '2026-11-08',
+        version: '1.2.0',
+        kind: 'error',
+        source: '/assets/main-AbC123.js',
+        message: 'TypeError: x is null',
+        total: 99,
+      },
+    ]);
+    const check = (day, at, durationMs, problem = null) => ({
+      checked_at: Date.parse(`${day}T${at}:00Z`),
+      day,
+      target: HOME,
+      status: problem ? 503 : 200,
+      duration_ms: durationMs,
+      problem,
+    });
+    await insert('uptime_check', [
+      check('2026-11-03', '10:00', 999),
+      check('2026-11-08', '10:00', 100),
+      check('2026-11-08', '10:05', 300, 'status 503'),
+      check('2026-11-09', '00:00', 200),
+    ]);
+    await insert('daily_uptime', [
+      { day: '2026-11-03', target: HOME, checks: 288, failures: 0, p50_ms: 120, p95_ms: 400 },
+      { day: '2026-11-08', target: HOME, checks: 1, failures: 1, p50_ms: 9_999, p95_ms: 9_999 },
+    ]);
+    const [overview, events, errors, uptime] = await Promise.all([
+      queries.run('overview', period),
+      queries.run('events', period),
+      queries.run('errors', period),
+      queries.run('uptime', period),
+    ]);
+    expect([
+      [
+        overview.views,
+        overview.days_with_views,
+        overview.top.page,
+        overview.top.country,
+        overview.top.referrer,
+      ],
+      events.events,
+      errors.errors,
+      uptime.pages,
+    ]).toStrictEqual([
+      [
+        7,
+        3,
+        [
+          { value: '/', views: 6 },
+          { value: '/en/', views: 1 },
+        ],
+        [
+          { value: 'BR', views: 6 },
+          { value: '', views: 1 },
+        ],
+        [
+          { value: '', views: 6 },
+          { value: 'www.google.com', views: 1 },
+        ],
+      ],
+      [
+        { name: 'section', detail: 'hero', total: 6 },
+        { name: 'copy', detail: '', total: 1 },
+      ],
+      [
+        {
+          kind: 'error',
+          source: '/assets/main-AbC123.js',
+          message: 'TypeError: x is null',
+          total: 1,
+        },
+      ],
+      [
+        {
+          target: HOME,
+          days: 3,
+          checks: 291,
+          failures: 1,
+          typical_ms: 140,
+          worst_p95_ms: 400,
+          availability: 0.99656,
+        },
+      ],
+    ]);
   });
 
   it("gives the lab's median run of each night, counting nights against the series minimum", async () => {

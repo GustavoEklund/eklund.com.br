@@ -1,5 +1,7 @@
 import { ChangePoints } from './change-points.js';
+import { Calendar } from './calendar.js';
 import { MannWhitney } from './mann-whitney.js';
+import { Retention } from './retention.js';
 import { Sample } from './sample.js';
 
 const DAY_MS = 86_400_000;
@@ -27,8 +29,9 @@ const DIMENSIONS = [
 
 /**
  * The readings of the MCP server and the JSON API: read-only queries on D1 for inputs that ReadingInputs has already checked.
- * Counts come from the daily totals; percentiles and comparisons come from the visits' own rows, because percentiles of
- * days cannot be added up. Every answer says how large its sample is and whether it is enough to compare.
+ * Counts come from the daily totals, except for the days the retention still rewrites, which are counted from their rows so
+ * that today and yesterday show up at once; percentiles and comparisons come from the visits' own rows, because percentiles
+ * of days cannot be added up. Every answer says how large its sample is and whether it is enough to compare.
  */
 export class ReadingQueries {
   /** A difference is called one when a test gives less than this. */
@@ -83,7 +86,7 @@ export class ReadingQueries {
   }
 
   async #overview({ from, to }) {
-    const where = 'FROM daily_view WHERE day BETWEEN ?1 AND ?2';
+    const where = `FROM ${this.#days('daily_view')}`;
     const [[totals], ...tops] = await this.#batch(
       [
         `SELECT coalesce(sum(views), 0) AS views, count(DISTINCT day) AS days ${where}`,
@@ -95,12 +98,13 @@ export class ReadingQueries {
       ],
       from,
       to,
+      this.#firstRecentDay(),
     );
     return {
       from,
       to,
       views: totals.views,
-      days_with_totals: totals.days,
+      days_with_views: totals.days,
       top: Object.fromEntries(DIMENSIONS.map((column, index) => [column, tops[index]])),
       sample: Sample.of(totals.views),
     };
@@ -163,7 +167,7 @@ export class ReadingQueries {
   }
 
   async #events({ from, to, page = null }) {
-    const where = 'FROM daily_event WHERE day BETWEEN ?1 AND ?2 AND (?3 IS NULL OR page = ?3)';
+    const where = `FROM ${this.#days('daily_event')} WHERE ?4 IS NULL OR page = ?4`;
     const [[totals], events] = await this.#batch(
       [
         `SELECT coalesce(sum(total), 0) AS total ${where}`,
@@ -172,13 +176,14 @@ export class ReadingQueries {
       ],
       from,
       to,
+      this.#firstRecentDay(),
       page,
     );
     return { from, to, page, events, sample: Sample.of(totals.total) };
   }
 
   async #errors({ from, to, version = null }) {
-    const where = 'FROM daily_error WHERE day BETWEEN ?1 AND ?2 AND (?3 IS NULL OR version = ?3)';
+    const where = `FROM ${this.#days('daily_error')} WHERE ?4 IS NULL OR version = ?4`;
     const [[totals], errors] = await this.#batch(
       [
         `SELECT coalesce(sum(total), 0) AS total ${where}`,
@@ -187,6 +192,7 @@ export class ReadingQueries {
       ],
       from,
       to,
+      this.#firstRecentDay(),
       version,
     );
     return { from, to, version, errors, sample: Sample.of(totals.total) };
@@ -198,9 +204,9 @@ export class ReadingQueries {
         .prepare(
           `SELECT target, count(*) AS days, sum(checks) AS checks, sum(failures) AS failures,
              CAST(round(avg(p50_ms)) AS INTEGER) AS typical_ms, max(p95_ms) AS worst_p95_ms
-           FROM daily_uptime WHERE day BETWEEN ?1 AND ?2 GROUP BY target ORDER BY target`,
+           FROM ${this.#days('daily_uptime')} GROUP BY target ORDER BY target`,
         )
-        .bind(from, to),
+        .bind(from, to, this.#firstRecentDay()),
       this.#db.prepare(
         'SELECT target, failures, failing_since, issue FROM uptime_target ORDER BY target',
       ),
@@ -373,6 +379,19 @@ export class ReadingQueries {
       })),
       sample: Sample.of(hosts.length, 1),
     };
+  }
+
+  /**
+   * The rows of a daily table from ?1 to ?2: its stored totals before the first recent day ?3, and from ?3 on the same totals
+   * computed from the rows, so no day is counted twice.
+   */
+  #days(table) {
+    const recent = Retention.totals((day) => `${day} BETWEEN ?1 AND ?2 AND ${day} >= ?3`)[table];
+    return `(SELECT * FROM ${table} WHERE day BETWEEN ?1 AND ?2 AND day < ?3 UNION ALL ${recent})`;
+  }
+
+  #firstRecentDay() {
+    return Retention.firstRecentDay(Calendar.day(new Date(this.#clock.now())));
   }
 
   /** Two groups compared: each one's size, median and 75th percentile, the test, and what it means. */
