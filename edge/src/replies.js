@@ -16,6 +16,13 @@ export class Replies {
     return Replies.text(413, 'the report is too long\n', origin);
   }
 
+  /** A request to the lab routes without the lab job's token. */
+  static unauthorized() {
+    return Replies.text(401, 'This needs the token of the lab job.\n', null, {
+      'www-authenticate': 'Bearer',
+    });
+  }
+
   static notFound() {
     return Replies.text(404, 'Not found\n');
   }

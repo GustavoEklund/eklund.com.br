@@ -19,6 +19,7 @@ autoplays
 autorun
 axxb
 badware
+bing
 bingbot
 bitangent
 branas
@@ -47,6 +48,7 @@ depcruise
 describedby
 direta
 domcontentloaded
+duckduckgo
 easylist
 easyprivacy
 eklund
