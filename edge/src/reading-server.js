@@ -3,7 +3,8 @@ import { ReadingInputs } from './reading-inputs.js';
 
 const INSTRUCTIONS = `Read-only measurements of eklund.com.br, a personal site with a Portuguese page at / and an English one at /en/.
 Real visits are anonymous: no address, no cookie and nothing that links one visit to another. The collector keeps the rows of
-visits 13 months, errors 90 days, and daily totals 25 months; the daily totals of a day are complete two days later. The lab job
+visits 13 months, errors 90 days, and daily totals 25 months. The daily totals of a day are complete two days later, so the
+readings count the last three days from their rows, and today shows up at once, still growing. The lab job
 runs PageSpeed Insights every night on / and /en/, five runs for mobile and five for desktop, and reads CrUX, Search Console
 and Bing. Every answer says how large its sample is; when it is too small, say so instead of drawing a conclusion. Days are UTC.`;
 

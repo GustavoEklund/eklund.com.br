@@ -15,6 +15,7 @@ All notable changes to this project are written here. The format follows [Keep a
 ### Fixed
 
 - A browser in English that opens `eklund.com.br` for the first time stays on the Portuguese page, which offers the English one in a small note under the header, instead of being sent to `/en/`. The redirect made it download the fonts, the stylesheet and the script twice, about 180 kB more ([#19](https://github.com/GustavoEklund/eklund.com.br/issues/19)). A visitor who chose English is still sent to `/en/`.
+- The readings of the AI agent count today and the two days before it from the stored rows, so the uptime, the visits, the events and the errors of the last days show up at once instead of two days later.
 
 ## [1.1.0] - 2026-10-27
 
