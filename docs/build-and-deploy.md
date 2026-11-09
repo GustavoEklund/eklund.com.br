@@ -97,6 +97,8 @@ Caching is set by `.htaccess`: hashed files for a year with `immutable`, HTML fo
 
 The collector of real visits is a Cloudflare Worker on `workers.dev`, in [`edge/`](../edge/) ([0009](decisions/0009-measurement-on-a-cloudflare-worker.md)). It is not part of the site, and it goes online by itself: the [`Edge`](../.github/workflows/edge.yml) workflow runs when a push to `main` changes `edge/`. It tests the collector, applies the D1 migrations that have not run yet, and deploys the Worker. Every release stays online in its folder, so a change to what a page may send keeps the older forms working.
 
+The Worker also watches the site. Every five minutes it checks the home page, the English page, the mirror and the folder of the release the home page names: each must answer 200 with HTML, a Content-Security-Policy and Strict-Transport-Security. Every check is stored for 90 days. When a page fails twice in a row, it opens an issue in the private repository `GustavoEklund/eklund.com.br-operations`, and when the page answers again it says for how long it was down and closes the issue. A Worker cannot see the certificate of a site it fetches, so the nightly job checks when the certificate expires.
+
 ### Set the collector up once
 
 1. A Cloudflare account on the free plan, and the `workers.dev` subdomain that the dashboard asks for the first time Workers is opened.
@@ -109,6 +111,11 @@ The collector of real visits is a Cloudflare Worker on `workers.dev`, in [`edge/
    ```
 
 4. The `cloudflare` environment of the repository, with the token and the account id ([`repository-settings.md`](repository-settings.md#the-collector)).
+5. For the issues of an outage: the private repository `GustavoEklund/eklund.com.br-operations`, and a fine-grained token that reaches only that repository with "Issues: Read and write", stored in the Worker. Without it the checks are still stored, and no one is told.
+
+   ```sh
+   pnpm exec wrangler secret put OPERATIONS_TOKEN --config edge/wrangler.jsonc
+   ```
 
 ### Run the collector locally
 

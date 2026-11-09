@@ -79,7 +79,8 @@ source/                    everything that is deployed
   robots.txt sitemap.xml site.webmanifest icon.svg favicon.ico apple-touch-icon.png .well-known/security.txt
 edge/                      the collector of real visits, a Cloudflare Worker on workers.dev (docs/decisions/0009); no site code
   src/                     Router, Collector, PageReport and ReportVocabulary (the contract it reads), VisitorAgent, ReportStore (D1),
-                           Retention (daily totals and deletions, from the Cron Trigger), Replies, Calendar; index.js wires them
+                           Retention (daily totals and deletions), UptimeMonitor and IncidentIssues (the site checked every five
+                           minutes, an issue when a page is down), Replies, Calendar; index.js wires them to the requests and the Cron Triggers
   migrations/              the D1 schema, applied by wrangler before each deploy
   wrangler.jsonc           the Worker: D1 in the EU jurisdiction, the Cron Trigger, the origins that may send, no request logs
 tests/
