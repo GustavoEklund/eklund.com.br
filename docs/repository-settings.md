@@ -99,6 +99,24 @@ gh secret set CLOUDFLARE_ACCOUNT_ID --env cloudflare --repo GustavoEklund/eklund
 
 The token is the one [`build-and-deploy.md`](build-and-deploy.md#set-the-collector-up-once) describes: it can deploy Workers and edit D1, R2 and KV in that account, and touches no zone. The account id is on the Workers page of the dashboard.
 
+### The lab
+
+The [`Lab`](../.github/workflows/lab.yml) workflow reads its keys from the secrets of the `lab` environment, which only `main` can use:
+
+```sh
+gh api --method PUT repos/GustavoEklund/eklund.com.br/environments/lab \
+  -F 'deployment_branch_policy[protected_branches]=false' -F 'deployment_branch_policy[custom_branch_policies]=true'
+gh api --method POST repos/GustavoEklund/eklund.com.br/environments/lab/deployment-branch-policies -f name=main -f type=branch
+
+# Each command asks for the value; run them in a terminal, where gh can ask
+gh secret set GOOGLE_API_KEY --env lab --repo GustavoEklund/eklund.com.br
+gh secret set GOOGLE_SERVICE_ACCOUNT --env lab --repo GustavoEklund/eklund.com.br < service-account.json
+gh secret set BING_API_KEY --env lab --repo GustavoEklund/eklund.com.br
+gh secret set LAB_TOKEN --env lab --repo GustavoEklund/eklund.com.br
+```
+
+`GOOGLE_SERVICE_ACCOUNT` is the whole JSON key that Google Cloud downloads for the service account, read from its file; delete the file afterwards. `LAB_TOKEN` is the same value the Worker has ([`build-and-deploy.md`](build-and-deploy.md#set-the-lab-up-once)). A secret left out turns its source off, and the job says so in its log.
+
 ## Labels
 
 The issue forms and Dependabot use these labels. GitHub creates `bug`, `enhancement` and `dependencies` by itself.

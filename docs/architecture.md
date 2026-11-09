@@ -77,12 +77,15 @@ source/                    everything that is deployed
     history/ contact/ command-palette/ theme/ cursor/ hero/ marquee/ scrollbar/ navigation/
   .htaccess                security headers, cache and compression rules for Hostinger
   robots.txt sitemap.xml site.webmanifest icon.svg favicon.ico apple-touch-icon.png .well-known/security.txt
+  <key>.txt                the IndexNow key, a file named after its content (tools/index-now.mjs)
 edge/                      the collector of real visits, a Cloudflare Worker on workers.dev (docs/decisions/0009); no site code
   src/                     Router, Collector, PageReport and ReportVocabulary (the contract it reads), VisitorAgent, ReportStore (D1),
                            Retention (daily totals and deletions), UptimeMonitor and IncidentIssues (the site checked every five
-                           minutes, an issue when a page is down), Replies, Calendar; index.js wires them to the requests and the Cron Triggers
+                           minutes, an issue when a page is down), LabInbox, LabBatch and LabStore (what the nightly lab job sends,
+                           behind LAB_TOKEN: rows into D1, full reports into R2), Replies, Calendar; index.js wires them to the requests
+                           and the Cron Triggers
   migrations/              the D1 schema, applied by wrangler before each deploy
-  wrangler.jsonc           the Worker: D1 in the EU jurisdiction, the Cron Trigger, the origins that may send, no request logs
+  wrangler.jsonc           the Worker: D1 and R2 in the EU jurisdiction, the Cron Triggers, the origins that may send, no request logs
 tests/
   js/<feature>/<module>.<kind>.test.js   unit, property and component tests, beside the module they test
   edge/<module>.edge.test.js             the collector's tests, beside its modules; the Worker runs in workerd through wrangler
@@ -102,6 +105,8 @@ tools/
   site-build.mjs           the parts of the production build that Vite+ does not do itself (see Build and deploy)
   measure-build.mjs        loads the page from source/ and from dist/ in several network and CPU conditions and prints what the build saves
   deploy.mjs               puts a release online over FTP with TLS, and compares the pages online with it (the Deploy workflow)
+  lab-run.mjs              the nightly lab job: PageSpeed Insights, CrUX, Search Console, Bing Webmaster Tools and the certificates, sent to the collector (the Lab workflow)
+  index-now.mjs            tells the IndexNow engines that a release changed the pages (the last job of the Release workflow)
 vite.config.js             Vitest projects (one per kind of test) and the strict lint rules for tests/
 vite.build.config.js       the production build (Vite+): source/ in, dist/ out; dist/ is generated and not in git
 playwright.config.js  cucumber.mjs  stryker.config.mjs  .dependency-cruiser.cjs

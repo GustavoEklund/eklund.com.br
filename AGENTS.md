@@ -18,6 +18,7 @@ pnpm run verify             # what pre-push runs: check, i18n audit, spelling, e
 pnpm test                   # verify, then the Playwright suite
 pnpm run test:unit          # also test:property, test:component, test:integration, test:contract, test:architecture, test:build, test:edge
 pnpm run edge:dev           # the collector of edge/ in workerd at http://127.0.0.1:8787, with a local D1
+pnpm run lab                # the nightly lab job, with its keys in the environment (docs/build-and-deploy.md#the-lab-job)
 pnpm run test:bdd           # Cucumber, Gherkin in Portuguese
 pnpm run test:e2e           # Playwright, desktop and mobile; starts tools/serve.mjs on port 8735 itself
 pnpm run test:e2e:dist      # the same suite against dist/ (build first)
@@ -45,7 +46,7 @@ The suffix of a test file is its Vitest project ([`vite.config.js`](vite.config.
 - The load test runs `PixEngine` in Web Workers through `WorkerPool`. JSON Schemas in `tests/contract/schemas/` pin the message protocol, with a consumer and a provider contract test, so a change to a message changes both sides and the schema.
 - The status page and the trace viewer read the browser's Performance API through `PageReadings` (in `shared/`), which feeds `HealthChecks` and `TraceBuilder`. Nothing on them is hard-coded.
 - CSS: tokens in `css/foundation/tokens.css` (`--hue` recolors the whole site), one file per feature, every file inside a cascade layer (`@layer`), and state classes named `is-*`.
-- `edge/` is the collector of real visits, a Cloudflare Worker on workers.dev ([0009](docs/decisions/0009-measurement-on-a-cloudflare-worker.md)). It is not part of the site, imports nothing from it, follows the same class rules, and deploys from `main` by itself (`.github/workflows/edge.yml`). What a page may send is `tests/contract/schemas/page-report.schema.json`, checked on both sides.
+- `edge/` is the collector of real visits, a Cloudflare Worker on workers.dev ([0009](docs/decisions/0009-measurement-on-a-cloudflare-worker.md)). It is not part of the site, imports nothing from it, follows the same class rules, and deploys from `main` by itself (`.github/workflows/edge.yml`). What a page may send is `tests/contract/schemas/page-report.schema.json`, and what the nightly lab job (`tools/lab-run.mjs`, `.github/workflows/lab.yml`) sends is `tests/contract/schemas/lab-batch.schema.json`, each checked on both sides.
 - `tools/` holds the dev server, the parts of the build that Vite+ does not do ([`tools/site-build.mjs`](tools/site-build.mjs)), the audits and the gates, and they have contract tests too.
 
 ## Languages
