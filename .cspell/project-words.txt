@@ -87,6 +87,7 @@ hstgr
 icom
 ietf
 ihdr
+indexnow
 ispb
 jetbrains
 jmax
@@ -165,6 +166,7 @@ scrollers
 seguir
 segurança
 serviços
+seznam
 sgntr
 sparkline
 sparklines

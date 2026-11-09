@@ -1,7 +1,7 @@
 // The parts of the production build (vite.build.config.js) that Vite+ does not do by itself:
 // - the hand-written <link rel="modulepreload"> list of index.html, which keeps the unbundled site from loading its modules one
 //   after another, makes way for the one bundle Vite writes (and for the preload links it adds itself);
-// - the files that nothing in the HTML or the CSS points at (.htaccess, robots.txt, the sitemap, the manifest icons and the
+// - the files that nothing in the HTML or the CSS points at (.htaccess, robots.txt, the sitemap, the IndexNow key, the manifest icons and the
 //   social card, whose address is written inside a JSON file and a meta tag), copied as they are;
 // - the markup, the JSON-LD and the web manifest, minified (the CSS and the JavaScript are minified by Vite+);
 // - the links between the pages and the addresses in the web manifest, moved into the folder a build is for (vite.build.config.js
@@ -31,6 +31,8 @@ export class SiteBuild {
     'sitemap.xml',
     'favicon.ico',
     '.well-known/security.txt',
+    // The IndexNow key (tools/index-now.mjs): a file named after its content proves that a list of pages came from the site.
+    'dae891d401f577ebb14b9f13900c6235.txt',
   ];
 
   /** Folders copied as they are, with everything in them, relative to source/. */

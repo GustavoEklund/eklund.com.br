@@ -95,6 +95,7 @@ describe('the production build', () => {
           '.htaccess',
           '.well-known',
           'assets',
+          'dae891d401f577ebb14b9f13900c6235.txt',
           'en',
           'favicon.ico',
           'index.html',
@@ -130,6 +131,7 @@ describe('the production build', () => {
         'sitemap.xml',
         'favicon.ico',
         '.well-known/security.txt',
+        'dae891d401f577ebb14b9f13900c6235.txt',
       ].concat(
         [
           '.htaccess',
