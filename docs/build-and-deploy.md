@@ -126,7 +126,7 @@ The rows go to `POST /v1/lab` and the reports to `PUT /v1/lab/report/<key>`, bot
    pnpm exec wrangler secret put LAB_TOKEN --config edge/wrangler.jsonc
    ```
 
-3. A Google Cloud project with an API key limited to the PageSpeed Insights API and the Chrome UX Report API, and a service account for Search Console. The organization forbids service account keys, so the workflow signs in as that account through Workload Identity Federation: Google trusts the tokens GitHub gives a job of this repository's `lab` environment, and nothing else. With `PROJECT_ID` and `PROJECT_NUMBER` of the project:
+3. A Google Cloud project with an API key limited to the PageSpeed Insights API and the Chrome UX Report API, and a service account for Search Console. The organization forbids service account keys, so the workflow signs in as that account through Workload Identity Federation: Google trusts the tokens GitHub gives a job of this repository's `lab` environment, and nothing else. The repository uses GitHub's immutable subjects (`repo:GustavoEklund@49698654/eklund.com.br@1424732018:environment:lab`), so the condition reads the repository's number, which survives a rename, and the environment. With `PROJECT_ID` and `PROJECT_NUMBER` of the project:
 
    ```sh
    gcloud services enable pagespeedonline.googleapis.com chromeuxreport.googleapis.com searchconsole.googleapis.com \
@@ -134,11 +134,12 @@ The rows go to `POST /v1/lab` and the reports to `PUT /v1/lab/report/<key>`, bot
    gcloud iam service-accounts create eklund-lab --display-name "eklund.com.br lab" --project PROJECT_ID
    gcloud iam workload-identity-pools create github --location global --display-name GitHub --project PROJECT_ID
    gcloud iam workload-identity-pools providers create-oidc eklund-com-br --location global --workload-identity-pool github \
-     --issuer-uri https://token.actions.githubusercontent.com --attribute-mapping google.subject=assertion.sub \
-     --attribute-condition "assertion.sub == 'repo:GustavoEklund/eklund.com.br:environment:lab'" --project PROJECT_ID
+     --issuer-uri https://token.actions.githubusercontent.com \
+     --attribute-mapping google.subject=assertion.sub,attribute.repository_id=assertion.repository_id,attribute.environment=assertion.environment \
+     --attribute-condition "assertion.repository_id == '1424732018' && assertion.environment == 'lab'" --project PROJECT_ID
    gcloud iam service-accounts add-iam-policy-binding eklund-lab@PROJECT_ID.iam.gserviceaccount.com \
      --role roles/iam.workloadIdentityUser --project PROJECT_ID \
-     --member "principal://iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/github/subject/repo:GustavoEklund/eklund.com.br:environment:lab"
+     --member "principalSet://iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/github/attribute.repository_id/1424732018"
    ```
 
    The service account needs no role in the project, and has no key. The provider is `projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/github/providers/eklund-com-br`.
