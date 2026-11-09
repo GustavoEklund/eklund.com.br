@@ -1,0 +1,44 @@
+# The nightly lab job (docs/decisions/0009-measurement-on-a-cloudflare-worker.md): PageSpeed Insights five times on each page,
+# mobile and desktop, CrUX, Google Search Console, Bing Webmaster Tools and the certificates of the site, all sent to the
+# collector by tools/lab-run.mjs. It runs here and not in the Worker because a Worker cannot read a certificate, and twenty
+# PageSpeed runs, one after the other, come close to the 15 minutes a Cron Trigger may last. Run it by hand to measure again.
+name: Lab
+
+on:
+  schedule:
+    # 04:23 in Brazil, after the collector's daily totals (06:17 UTC).
+    - cron: '23 7 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: lab
+  cancel-in-progress: false
+
+env:
+  CI: 'true'
+  VP_GIT_HOOKS: '0'
+
+jobs:
+  measure:
+    name: Measure the site and send it to the collector
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    # The keys are in the secrets of this environment, which only main can use.
+    environment:
+      name: lab
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Run the lab
+        env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
+          BING_API_KEY: ${{ secrets.BING_API_KEY }}
+          LAB_TOKEN: ${{ secrets.LAB_TOKEN }}
+        run: node tools/lab-run.mjs

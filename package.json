@@ -34,6 +34,7 @@
     "build": "vp build --config vite.build.config.js && vp build --config vite.build.config.js --mode version",
     "preview": "vp run build && node tools/serve.mjs --port 8737 --root dist",
     "measure:build": "node tools/measure-build.mjs",
+    "lab": "node tools/lab-run.mjs",
     "screenshots": "node tools/readme-screenshots.mjs",
     "check": "vp check",
     "fmt": "vp fmt",

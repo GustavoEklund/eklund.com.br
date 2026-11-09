@@ -11,3 +11,4 @@ rules:
       - release.yml
       - deploy.yml
       - edge.yml
+      - lab.yml
