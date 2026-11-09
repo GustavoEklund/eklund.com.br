@@ -1,7 +1,7 @@
 # A release is a tag. Pushing vX.Y.Z checks the tag against package.json and CHANGELOG.md and that CI passed on the tagged
 # commit, builds the site, and publishes a GitHub release with the zip of the site, its checksum, a software bill of materials
 # and a signed provenance attestation for the zip, with the notes taken from CHANGELOG.md. Then the Deploy workflow puts the
-# release online (docs/releasing.md, docs/build-and-deploy.md).
+# release online (docs/releasing.md, docs/build-and-deploy.md), and IndexNow tells the search engines that the pages changed.
 name: Release
 
 on:
@@ -120,3 +120,19 @@ jobs:
       FTP_HOST: ${{ secrets.FTP_HOST }}
       FTP_USER: ${{ secrets.FTP_USER }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+
+  index-now:
+    name: Tell the search engines the pages changed
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - env:
+          TAG: ${{ github.ref_name }}
+        run: node tools/index-now.mjs "${TAG#v}"

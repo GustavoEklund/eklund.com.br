@@ -15,6 +15,7 @@ import {
 } from '../../tools/commit-gate.mjs';
 import { RepositoryFiles } from '../support/repository-files.js';
 import { SiteSource } from '../support/site-source.js';
+import { GitEnvironment } from '../support/git-environment.js';
 
 // The first spell check of a run loads the dictionaries and every git call starts a process, so a loaded machine needs time.
 vi.setConfig({ testTimeout: 30_000, hookTimeout: 30_000 });
@@ -226,6 +227,7 @@ describe('CommitGate in a repository', () => {
   const noStdin = async () => '';
 
   beforeAll(async () => {
+    GitEnvironment.isolate();
     folder = mkdtempSync(join(tmpdir(), 'commit-gate-repo-'));
     git('init', '-b', 'main');
     commit('chore: initialize the repository');

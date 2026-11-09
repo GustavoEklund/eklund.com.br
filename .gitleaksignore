@@ -1,0 +1,3 @@
+# Findings of gitleaks that are not secrets, by fingerprint (commit:file:rule:line); the "Look for secrets" job reads this file.
+# The IndexNow key of the site, public by design (it is served at the root of the site), written once into a test.
+89cc22d7621bbf567bf1d7ce37e2830d9b5c84a5:tests/contract/index-now-tool.contract.test.js:generic-api-key:9

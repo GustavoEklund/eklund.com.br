@@ -10,6 +10,7 @@ import {
   ChangelogPolicy,
   SemanticVersion,
 } from '../../tools/changelog.mjs';
+import { GitEnvironment } from '../support/git-environment.js';
 
 // Every test here starts a process or makes a git repository, which a loaded machine does slowly.
 vi.setConfig({ testTimeout: 30_000, hookTimeout: 30_000 });
@@ -277,6 +278,7 @@ describe('tools/changelog.mjs as a command', () => {
   };
 
   beforeAll(() => {
+    GitEnvironment.isolate();
     folder = mkdtempSync(join(tmpdir(), 'changelog-repo-'));
     git('init', '-b', 'main');
     writeFileSync(join(folder, 'CHANGELOG.md'), GOOD);

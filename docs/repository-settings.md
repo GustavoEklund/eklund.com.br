@@ -99,6 +99,29 @@ gh secret set CLOUDFLARE_ACCOUNT_ID --env cloudflare --repo GustavoEklund/eklund
 
 The token is the one [`build-and-deploy.md`](build-and-deploy.md#set-the-collector-up-once) describes: it can deploy Workers and edit D1, R2 and KV in that account, and touches no zone. The account id is on the Workers page of the dashboard.
 
+### The lab
+
+The [`Lab`](../.github/workflows/lab.yml) workflow reads its keys from the secrets of the `lab` environment, which only `main` can use, and signs in to Google for Search Console with the two variables of that environment:
+
+```sh
+gh api --method PUT repos/GustavoEklund/eklund.com.br/environments/lab \
+  -F 'deployment_branch_policy[protected_branches]=false' -F 'deployment_branch_policy[custom_branch_policies]=true'
+gh api --method POST repos/GustavoEklund/eklund.com.br/environments/lab/deployment-branch-policies -f name=main -f type=branch
+
+# Each command asks for the value; run them in a terminal, where gh can ask
+gh secret set GOOGLE_API_KEY --env lab --repo GustavoEklund/eklund.com.br
+gh secret set BING_API_KEY --env lab --repo GustavoEklund/eklund.com.br
+gh secret set LAB_TOKEN --env lab --repo GustavoEklund/eklund.com.br
+
+# Not secrets: Google accepts a token only from a job of this repository's lab environment
+gh variable set GOOGLE_WORKLOAD_IDENTITY_PROVIDER --env lab --repo GustavoEklund/eklund.com.br \
+  --body projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/github/providers/eklund-com-br
+gh variable set GOOGLE_SERVICE_ACCOUNT_EMAIL --env lab --repo GustavoEklund/eklund.com.br \
+  --body eklund-lab@PROJECT_ID.iam.gserviceaccount.com
+```
+
+`LAB_TOKEN` is the same value the Worker has. The pool, the provider and the service account are set up once in Google Cloud ([`build-and-deploy.md`](build-and-deploy.md#set-the-lab-up-once)); the job gets an access token to Search Console that lasts an hour, and no key of the account exists. A secret left out turns its source off, and so do the variables, and the job says so in its log.
+
 ## Labels
 
 The issue forms and Dependabot use these labels. GitHub creates `bug`, `enhancement` and `dependencies` by itself.

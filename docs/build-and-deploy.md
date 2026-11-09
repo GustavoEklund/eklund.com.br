@@ -97,7 +97,63 @@ Caching is set by `.htaccess`: hashed files for a year with `immutable`, HTML fo
 
 The collector of real visits is a Cloudflare Worker on `workers.dev`, in [`edge/`](../edge/) ([0009](decisions/0009-measurement-on-a-cloudflare-worker.md)). It is not part of the site, and it goes online by itself: the [`Edge`](../.github/workflows/edge.yml) workflow runs when a push to `main` changes `edge/`. It tests the collector, applies the D1 migrations that have not run yet, and deploys the Worker. Every release stays online in its folder, so a change to what a page may send keeps the older forms working.
 
-The Worker also watches the site. Every five minutes it checks the home page, the English page, the mirror and the folder of the release the home page names: each must answer 200 with HTML, a Content-Security-Policy and Strict-Transport-Security. Every check is stored for 90 days. When a page fails twice in a row, it opens an issue in the private repository `GustavoEklund/eklund.com.br-operations`, and when the page answers again it says for how long it was down and closes the issue. A Worker cannot see the certificate of a site it fetches, so the nightly job checks when the certificate expires.
+The Worker also watches the site. Every five minutes it checks the home page, the English page, the mirror and the folder of the release the home page names: each must answer 200 with HTML, a Content-Security-Policy and Strict-Transport-Security. Every check is stored for 90 days. When a page fails twice in a row, it opens an issue in the private repository `GustavoEklund/eklund.com.br-operations`, and when the page answers again it says for how long it was down and closes the issue. A Worker cannot see the certificate of a site it fetches, so the lab job checks when the certificate expires.
+
+## The lab job
+
+Every night at 04:23 in Brazil, the [`Lab`](../.github/workflows/lab.yml) workflow runs [`tools/lab-run.mjs`](../tools/lab-run.mjs), which measures the site from outside and sends what it found to the collector:
+
+- PageSpeed Insights, five runs of `/` and of `/en/`, on mobile and on desktop. Every run's score, LCP, FCP, CLS, TBT, Speed Index and server response time go to D1, and the full Lighthouse report of the run in the middle by score goes to R2, at `lab/<day>/<page>-<form factor>.json`.
+- CrUX, the 75th percentile and the shares of good, needs-improvement and poor loads of the last 28 days, for the origin and each page, on phones and on desktops. A page with too few visits has no reading, and that is not an error.
+- Google Search Console, the clicks, impressions and position of each page, query, country and device on the day three days back, the first one whose numbers have settled.
+- Bing Webmaster Tools, the clicks and impressions of each day and of each query.
+- The certificate of `eklund.com.br` and of `gustavo.eklund.com.br`, over a connection that validates it as a browser does: when it expires and who issued it, or, when the connection refuses it (expired, not yet valid, for another name, from an unknown authority), the code Node gives the problem, such as `CERT_HAS_EXPIRED`. A refused certificate is a row like any other, so it shows up in the data; a host that does not answer fails the job.
+
+The rows go to `POST /v1/lab` and the reports to `PUT /v1/lab/report/<key>`, both with the token `LAB_TOKEN`. What a batch may hold is [`tests/contract/schemas/lab-batch.schema.json`](../tests/contract/schemas/lab-batch.schema.json), checked by the tool's tests and by the collector. A source whose key is missing is left out with a note in the log, and a source that fails makes the job fail after the others are sent. Running the workflow again on the same day writes the same rows over the old ones.
+
+### Set the lab up once
+
+1. The R2 bucket for the reports, in the EU jurisdiction, before `edge/wrangler.jsonc` with its `REPORTS` binding reaches `main`: the deploy fails on a bucket that does not exist. R2 needs a payment method on the account, even on the free plan.
+
+   ```sh
+   pnpm exec wrangler r2 bucket create eklund --jurisdiction eu
+   ```
+
+2. The token of the lab routes: a long random value, given to the Worker and to the `lab` environment. Without it in the Worker, the lab routes answer 404.
+
+   ```sh
+   openssl rand -hex 32                                                       # the value, copied into both prompts below
+   pnpm exec wrangler secret put LAB_TOKEN --config edge/wrangler.jsonc
+   ```
+
+3. A Google Cloud project with an API key limited to the PageSpeed Insights API and the Chrome UX Report API, and a service account for Search Console. The organization forbids service account keys, so the workflow signs in as that account through Workload Identity Federation: Google trusts the tokens GitHub gives a job of this repository's `lab` environment, and nothing else. With `PROJECT_ID` and `PROJECT_NUMBER` of the project:
+
+   ```sh
+   gcloud services enable pagespeedonline.googleapis.com chromeuxreport.googleapis.com searchconsole.googleapis.com \
+     iamcredentials.googleapis.com sts.googleapis.com --project PROJECT_ID
+   gcloud iam service-accounts create eklund-lab --display-name "eklund.com.br lab" --project PROJECT_ID
+   gcloud iam workload-identity-pools create github --location global --display-name GitHub --project PROJECT_ID
+   gcloud iam workload-identity-pools providers create-oidc eklund-com-br --location global --workload-identity-pool github \
+     --issuer-uri https://token.actions.githubusercontent.com --attribute-mapping google.subject=assertion.sub \
+     --attribute-condition "assertion.sub == 'repo:GustavoEklund/eklund.com.br:environment:lab'" --project PROJECT_ID
+   gcloud iam service-accounts add-iam-policy-binding eklund-lab@PROJECT_ID.iam.gserviceaccount.com \
+     --role roles/iam.workloadIdentityUser --project PROJECT_ID \
+     --member "principal://iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/github/subject/repo:GustavoEklund/eklund.com.br:environment:lab"
+   ```
+
+   The service account needs no role in the project, and has no key. The provider is `projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/github/providers/eklund-com-br`.
+
+4. The domain property `eklund.com.br` in Search Console, verified with a TXT record in the DNS, with the service account's address (`eklund-lab@PROJECT_ID.iam.gserviceaccount.com`) added as a user with restricted access.
+5. The site in Bing Webmaster Tools (it can be imported from Search Console) and its API key, under Settings, API access.
+6. The `lab` environment of the repository, with three secrets and the two variables that name the provider and the service account ([`repository-settings.md`](repository-settings.md#the-lab)).
+
+### Run the lab by hand
+
+`gh workflow run lab.yml` runs it on GitHub. On a machine, `pnpm run lab` does the same with the keys in its environment, and `LAB_ENDPOINT=http://127.0.0.1:8787` sends to the collector of `pnpm run edge:dev` instead.
+
+## IndexNow
+
+When a release is online, the last job of the [`Release`](../.github/workflows/release.yml) workflow runs [`tools/index-now.mjs`](../tools/index-now.mjs), which posts `/`, `/en/` and the folder of the release to IndexNow. Bing and the other engines that take IndexNow fetch those pages again without waiting for their next visit. The key is the name and the content of the text file at the root of `source/`, which the build copies as it is: it is public by design, since it only proves that the list came from the site.
 
 ### Set the collector up once
 
@@ -123,6 +179,7 @@ The Worker also watches the site. Every five minutes it checks the home page, th
 pnpm exec wrangler d1 migrations apply DB --local --config edge/wrangler.jsonc   # once, for the local D1 in edge/.wrangler/
 pnpm run edge:dev        # the Worker at http://127.0.0.1:8787, taking reports from the dev server and the preview
 pnpm run test:edge       # its tests, with the Worker in workerd
+pnpm exec wrangler dev --config edge/wrangler.jsonc --var LAB_TOKEN:local   # the same, with the lab routes open to the token local
 ```
 
 ## Lighthouse

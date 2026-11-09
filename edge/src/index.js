@@ -1,5 +1,7 @@
 import { Collector } from './collector.js';
 import { IncidentIssues } from './incident-issues.js';
+import { LabInbox } from './lab-inbox.js';
+import { LabStore } from './lab-store.js';
 import { ReportStore } from './report-store.js';
 import { Retention } from './retention.js';
 import { Router } from './router.js';
@@ -13,7 +15,10 @@ export default {
   fetch(request, env) {
     const origins = env.ORIGINS.split(' ');
     const collector = new Collector({ origins, store: new ReportStore(env.DB) });
-    return new Router({ origins, collector }).handle(request);
+    const lab = env.LAB_TOKEN
+      ? new LabInbox({ token: env.LAB_TOKEN, store: new LabStore(env.DB), reports: env.REPORTS })
+      : null;
+    return new Router({ origins, collector, lab }).handle(request);
   },
 
   scheduled(controller, env, context) {

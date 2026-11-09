@@ -1,0 +1,314 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://eklund.com.br/contracts/edge/lab-batch.json",
+  "title": "lab batch",
+  "description": "What the nightly lab job (tools/lab-run.mjs) sends to the collector (POST /v1/lab, with the bearer token LAB_TOKEN): PageSpeed Insights runs, CrUX readings, the rows of Google Search Console and Bing Webmaster Tools, and the certificates of the site. None of it is about a visitor. The collector refuses a batch with anything else (edge/src/lab-batch.js), and writes the rest over a row of the same key.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["v", "runs", "field", "search", "certificates"],
+  "properties": {
+    "v": {
+      "const": 1
+    },
+    "runs": {
+      "type": "array",
+      "maxItems": 40,
+      "description": "Each PageSpeed Insights run of the night: five for each page and form factor.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "day",
+          "page",
+          "formFactor",
+          "run",
+          "median",
+          "score",
+          "lcp",
+          "fcp",
+          "cls",
+          "tbt",
+          "speedIndex",
+          "ttfb",
+          "report"
+        ],
+        "properties": {
+          "day": {
+            "type": "string",
+            "pattern": "^\\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\\d|3[01])$",
+            "description": "A day as YYYY-MM-DD, in UTC."
+          },
+          "page": {
+            "enum": ["/", "/en/"]
+          },
+          "formFactor": {
+            "enum": ["mobile", "desktop"]
+          },
+          "run": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9,
+            "description": "The position of the run among those of its page and form factor."
+          },
+          "median": {
+            "type": "boolean",
+            "description": "The run in the middle by score, whose full report is kept in R2."
+          },
+          "score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "The Lighthouse performance score."
+          },
+          "lcp": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 600000,
+            "description": "Largest Contentful Paint, in milliseconds."
+          },
+          "fcp": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 600000,
+            "description": "First Contentful Paint, in milliseconds."
+          },
+          "cls": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Cumulative Layout Shift."
+          },
+          "tbt": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 600000,
+            "description": "Total Blocking Time, in milliseconds."
+          },
+          "speedIndex": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 600000,
+            "description": "Speed Index, in milliseconds."
+          },
+          "ttfb": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 600000,
+            "description": "The server response time of the document, in milliseconds."
+          },
+          "report": {
+            "type": ["string", "null"],
+            "pattern": "^\\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\\d|3[01])\\/(?:home|en)-(?:mobile|desktop)\\.json$",
+            "description": "Where the full report of the median run is, under lab/ in R2; null for every other run."
+          }
+        },
+        "if": {
+          "properties": {
+            "median": {
+              "const": true
+            }
+          }
+        },
+        "then": {
+          "properties": {
+            "report": {
+              "type": "string"
+            }
+          }
+        },
+        "else": {
+          "properties": {
+            "report": {
+              "type": "null"
+            }
+          }
+        }
+      }
+    },
+    "field": {
+      "type": "array",
+      "maxItems": 60,
+      "description": "The CrUX readings of the last 28 days, for the origin and for each page with enough visits.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "day",
+          "scope",
+          "formFactor",
+          "metric",
+          "p75",
+          "good",
+          "needsImprovement",
+          "poor"
+        ],
+        "properties": {
+          "day": {
+            "type": "string",
+            "pattern": "^\\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\\d|3[01])$"
+          },
+          "scope": {
+            "enum": ["origin", "/", "/en/"]
+          },
+          "formFactor": {
+            "enum": ["phone", "desktop"]
+          },
+          "metric": {
+            "enum": ["LCP", "INP", "CLS", "FCP", "TTFB"]
+          },
+          "p75": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 600000,
+            "description": "The 75th percentile, in milliseconds, or the shift for CLS."
+          },
+          "good": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "needsImprovement": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "poor": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "if": {
+          "properties": {
+            "metric": {
+              "const": "CLS"
+            }
+          }
+        },
+        "then": {
+          "properties": {
+            "p75": {
+              "type": "number",
+              "maximum": 100
+            }
+          }
+        }
+      }
+    },
+    "search": {
+      "type": "array",
+      "maxItems": 500,
+      "description": "Clicks and impressions as each search engine aggregates them. Bing has no page, country or device, and its totals of a day have an empty query.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "engine",
+          "day",
+          "page",
+          "query",
+          "country",
+          "device",
+          "clicks",
+          "impressions",
+          "position"
+        ],
+        "properties": {
+          "engine": {
+            "enum": ["google", "bing"]
+          },
+          "day": {
+            "type": "string",
+            "pattern": "^\\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\\d|3[01])$"
+          },
+          "page": {
+            "type": "string",
+            "pattern": "^(?:|https:\\/\\/(?:gustavo\\.)?eklund\\.com\\.br\\/[!-~]{0,250})$"
+          },
+          "query": {
+            "type": "string",
+            "pattern": "^[^\\p{Cc}]{0,200}$",
+            "description": "What people searched for, as the engine reports it: the engine itself leaves rare queries out."
+          },
+          "country": {
+            "type": "string",
+            "pattern": "^(?:|[a-z]{3})$",
+            "description": "ISO 3166-1 alpha-3, in lower case, as Search Console gives it."
+          },
+          "device": {
+            "enum": ["", "desktop", "mobile", "tablet"]
+          },
+          "clicks": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000000
+          },
+          "impressions": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000000
+          },
+          "position": {
+            "type": ["number", "null"],
+            "minimum": 0,
+            "maximum": 1000
+          }
+        }
+      }
+    },
+    "certificates": {
+      "type": "array",
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["day", "host", "validTo", "issuer", "problem"],
+        "properties": {
+          "day": {
+            "type": "string",
+            "pattern": "^\\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\\d|3[01])$"
+          },
+          "host": {
+            "enum": ["eklund.com.br", "gustavo.eklund.com.br"]
+          },
+          "validTo": {
+            "type": ["integer", "null"],
+            "minimum": 0,
+            "maximum": 4102444800000,
+            "description": "When the certificate expires, in milliseconds since 1970; null when the lab's connection refused it."
+          },
+          "issuer": {
+            "type": "string",
+            "pattern": "^[^\\p{Cc}]{0,200}$"
+          },
+          "problem": {
+            "type": ["string", "null"],
+            "pattern": "^[A-Z][A-Z0-9_]{2,63}$",
+            "description": "Why the lab's connection refused the certificate, as Node names it (CERT_HAS_EXPIRED, ERR_TLS_CERT_ALTNAME_INVALID); null for a valid one."
+          }
+        },
+        "if": {
+          "properties": {
+            "problem": {
+              "type": "null"
+            }
+          }
+        },
+        "then": {
+          "properties": {
+            "validTo": {
+              "type": "integer"
+            }
+          }
+        },
+        "else": {
+          "properties": {
+            "validTo": {
+              "type": "null"
+            }
+          }
+        }
+      }
+    }
+  }
+}

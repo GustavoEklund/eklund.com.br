@@ -8,6 +8,8 @@ All notable changes to this project are written here. The format follows [Keep a
 
 - A collector of my own for the visits to the site: a Cloudflare Worker on workers.dev, with its database in the EU, whose code lives in `edge/`. It stores no IP address and nothing that links one visit to another. The pages do not send it anything yet.
 - An uptime monitor in that Worker. Every five minutes it checks the home page, the English page and the mirror, and when one of them stays down for ten minutes it opens an issue in a private repository, which it closes once the page answers again.
+- A lab job that measures the site every night: PageSpeed Insights five times on each page, on mobile and on desktop, the field data of Chrome users from CrUX, the clicks and searches of Google Search Console and Bing Webmaster Tools, and when the certificates expire. It all goes to the collector, with the full report of the run in the middle kept in R2.
+- Each release now tells Bing and the other engines that take IndexNow that its pages changed, once it is online.
 
 ## [1.1.0] - 2026-10-27
 

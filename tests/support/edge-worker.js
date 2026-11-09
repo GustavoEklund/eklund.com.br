@@ -1,6 +1,6 @@
 import { createTestHarness } from 'wrangler';
 
-/** The Worker of edge/, run by wrangler in workerd with a local D1 that starts empty for every test. */
+/** The Worker of edge/, run by wrangler in workerd with a local D1 and R2 that start empty for every test. */
 export class EdgeWorker {
   static ORIGIN = 'https://eklund.com.br';
   static MIRROR = 'https://gustavo.eklund.com.br';
@@ -64,6 +64,11 @@ export class EdgeWorker {
 
   async database() {
     return (await this.#worker.getEnv()).DB;
+  }
+
+  /** The R2 bucket of the lab reports. */
+  async reports() {
+    return (await this.#worker.getEnv()).REPORTS;
   }
 
   /** Every row of a query, in the order the query gives them. */

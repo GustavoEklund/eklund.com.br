@@ -13,12 +13,14 @@ aneis
 anhanguera
 anpd
 antimeridian
+apikey
 autoplay
 autoplaying
 autoplays
 autorun
 axxb
 badware
+bing
 bingbot
 bitangent
 branas
@@ -28,6 +30,7 @@ carga
 catálogo
 ccaa
 certpia
+chromeuxreport
 claude
 cldr
 cloudflare
@@ -47,6 +50,7 @@ depcruise
 describedby
 direta
 domcontentloaded
+duckduckgo
 easylist
 easyprivacy
 eklund
@@ -81,8 +85,11 @@ hostinger
 hreflang
 hrefs
 hstgr
+iamcredentials
 icom
+ietf
 ihdr
+indexnow
 ispb
 jetbrains
 jmax
@@ -127,6 +134,7 @@ opsz
 ossf
 pageerror
 pagespeed
+pagespeedonline
 parsererror
 participação
 peucker
@@ -158,9 +166,11 @@ sarif
 sbom
 schemaorg
 scrollers
+searchconsole
 seguir
 segurança
 serviços
+seznam
 sgntr
 sparkline
 sparklines

@@ -6,14 +6,19 @@ This is the collector of eklund.com.br. It receives anonymous measurements of th
 https://github.com/GustavoEklund/eklund.com.br/tree/main/edge
 `;
 
-/** Sends each request to what answers it. */
+/** Where the lab job keeps the full report of a median run. */
+const LAB_REPORT = '/v1/lab/report/';
+
+/** Sends each request to what answers it. Without a `lab` inbox, the routes of the lab job do not exist. */
 export class Router {
   #origins;
   #collector;
+  #lab;
 
-  constructor({ origins, collector }) {
+  constructor({ origins, collector, lab = null }) {
     this.#origins = origins;
     this.#collector = collector;
+    this.#lab = lab;
   }
 
   async handle(request) {
@@ -23,11 +28,18 @@ export class Router {
       const origin = request.headers.get('origin');
       return this.#origins.includes(origin) ? Replies.preflight(origin) : Replies.forbidden();
     }
+    if (this.#lab && pathname.startsWith(LAB_REPORT))
+      return method === 'PUT'
+        ? this.#lab.keep(request, pathname.slice(LAB_REPORT.length))
+        : Replies.methodNotAllowed('PUT');
     switch (pathname) {
       case '/v1/page':
         return method === 'POST'
           ? this.#collector.take(request)
           : Replies.methodNotAllowed('POST, OPTIONS');
+      case '/v1/lab':
+        if (!this.#lab) return Replies.notFound();
+        return method === 'POST' ? this.#lab.take(request) : Replies.methodNotAllowed('POST');
       case '/':
         return Router.#read(method, ABOUT);
       case '/robots.txt':
