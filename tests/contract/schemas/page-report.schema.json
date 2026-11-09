@@ -653,7 +653,7 @@
     },
     "path": {
       "type": "string",
-      "pattern": "^(?:|other|/[!-\"$->@-~]{0,199})$",
+      "pattern": "^(?:|other|/(?:(?![#?])[!-~]){0,199})$",
       "description": "A path of this site without query or fragment, other for a file from another origin, or empty."
     }
   }

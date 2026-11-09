@@ -1,6 +1,7 @@
-// The response headers the site depends on: a strict Content-Security-Policy, a few other security headers and the
-// document language. Production sets them in source/.htaccess; tools/serve.mjs (development, Playwright, Cucumber)
-// sets the same ones from this class, and tests/contract/security-headers.contract.test.js fails when the two differ.
+// The response headers the site depends on: a strict Content-Security-Policy, a few other security headers, the
+// document language and how long each file is cached. Production sets them in source/.htaccess; tools/serve.mjs
+// (development, Playwright, Cucumber) and tools/production-server.mjs (Lighthouse) set the same ones from this class, and
+// tests/contract/security-headers.contract.test.js fails when they differ.
 import { createHash } from 'node:crypto';
 
 /**
@@ -41,6 +42,37 @@ export class SiteHeaders {
 
   /** Only meaningful over HTTPS, so the plain-HTTP development server leaves it out. */
   static PRODUCTION_ONLY = { 'Strict-Transport-Security': 'max-age=31536000; includeSubDomains' };
+
+  /**
+   * How long production lets a file be kept, as the root .htaccess writes it: pages for ten minutes, files with a hash in
+   * their name for a year, the few that keep their name for a day. Apache applies every <FilesMatch> that matches, in order,
+   * so the last one wins (favicon.ico is kept a day).
+   */
+  static CACHE_RULES = [
+    [/\.html?$/, 'public, max-age=600, stale-while-revalidate=86400'],
+    [
+      /\.(css|js|svg|webmanifest|woff2|png|jpg|webp|avif|ico)$/,
+      'public, max-age=31536000, immutable',
+    ],
+    [
+      /^(robots\.txt|sitemap\.xml|favicon\.ico|security\.txt)$/,
+      'public, max-age=86400, stale-while-revalidate=604800',
+    ],
+  ];
+
+  /** The .htaccess of assets/brand/ adds a rule after those: the manifest icons and the social card keep their names. */
+  static BRAND_CACHE_RULES = [
+    [/\.(png|svg|ico)$/, 'public, max-age=86400, stale-while-revalidate=604800'],
+  ];
+
+  /** The Cache-Control production sends for the file at `pathname`, or undefined when no rule names it. */
+  static cacheControl(pathname) {
+    const rules = /(?:^|\/)assets\/brand\/[^/]+$/.test(pathname)
+      ? [...SiteHeaders.CACHE_RULES, ...SiteHeaders.BRAND_CACHE_RULES]
+      : SiteHeaders.CACHE_RULES;
+    const name = pathname.split('/').at(-1);
+    return rules.findLast(([pattern]) => pattern.test(name))?.[1];
+  }
 
   /**
    * The language of the markup as served. Each language has its own page: / is Portuguese and /en/ is English, and so are
