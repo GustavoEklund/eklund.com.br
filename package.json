@@ -68,6 +68,11 @@
     "coverage": "vp test run --coverage",
     "edge:dev": "wrangler dev --config edge/wrangler.jsonc --var ORIGINS:\"http://127.0.0.1:8734 http://127.0.0.1:8737\""
   },
+  "dependencies": {
+    "@cloudflare/workers-oauth-provider": "1.2.4",
+    "@modelcontextprotocol/server": "2.4.0",
+    "zod": "4.6.7"
+  },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
     "@commitlint/cli": "^21.2.4",
