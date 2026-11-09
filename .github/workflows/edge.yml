@@ -1,0 +1,51 @@
+# Puts the collector of edge/ online (docs/decisions/0009-measurement-on-a-cloudflare-worker.md): its tests first, then the D1
+# migrations that have not run yet, then the Worker itself, on workers.dev. It runs when a push to main changes edge/, apart
+# from the releases of the site, because the Worker accepts every report a release has ever sent. Run it by hand to deploy
+# main again.
+name: Edge
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'edge/**'
+      - '.github/workflows/edge.yml'
+  workflow_dispatch:
+
+permissions: {}
+
+env:
+  CI: 'true'
+  VP_GIT_HOOKS: '0'
+
+jobs:
+  deploy:
+    name: Put the collector online
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # One deploy at a time, and none is cancelled halfway.
+    concurrency:
+      group: edge
+      cancel-in-progress: false
+    # The Cloudflare token is in the secrets of this environment, which only main can deploy from.
+    environment:
+      name: cloudflare
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Test the collector
+        run: vp test run --project edge
+      - name: Apply the D1 migrations
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: vp exec wrangler d1 migrations apply DB --remote --config edge/wrangler.jsonc
+      - name: Deploy the Worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: vp exec wrangler deploy --config edge/wrangler.jsonc

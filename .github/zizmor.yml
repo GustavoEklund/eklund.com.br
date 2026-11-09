@@ -10,3 +10,4 @@ rules:
       - security.yml
       - release.yml
       - deploy.yml
+      - edge.yml

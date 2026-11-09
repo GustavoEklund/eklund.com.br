@@ -15,8 +15,12 @@ trustPolicy: no-downgrade
 blockExoticSubdeps: true
 
 # No install script runs unless it is listed here. vnu-jar's would download a Java runtime, and the validator uses the Java on the PATH.
+# esbuild's and workerd's (both brought by wrangler) only check the binary that their optional dependency for this platform
+# already installed, and both find it without the script.
 allowBuilds:
   vnu-jar: false
+  esbuild: false
+  workerd: false
 
 # `pnpm audit` fails the build on a high or critical advisory. This one has no fixed version yet: braces, which stylelint
 # reaches through fast-glob and micromatch, can exhaust the stack on a malicious brace pattern. Stylelint runs on this

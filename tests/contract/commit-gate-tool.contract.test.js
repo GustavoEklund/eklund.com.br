@@ -22,7 +22,7 @@ vi.setConfig({ testTimeout: 30_000, hookTimeout: 30_000 });
 const TOOL = join(import.meta.dirname, '..', '..', 'tools', 'commit-gate.mjs');
 const ZERO = '0'.repeat(40);
 const SCOPE_LIST =
-  'scope must be one of [accessibility, architecture-map, command-palette, contact, cursor, dashboard, globe, hero, history, i18n, load-test, marquee, navigation, scrollbar, shared, status-page, theme, trace-viewer, build, ci, deps, docs, hooks, release, security, seo, site, tests, tools] [scope-enum]';
+  'scope must be one of [accessibility, architecture-map, command-palette, contact, cursor, dashboard, globe, hero, history, i18n, load-test, marquee, navigation, scrollbar, shared, status-page, theme, trace-viewer, build, ci, deps, docs, edge, hooks, release, security, seo, site, tests, tools] [scope-enum]';
 
 describe('CommitMessage', () => {
   it('takes the git comments and the trailing spaces out, and names itself by its short hash and its subject', () => {

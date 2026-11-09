@@ -26,6 +26,7 @@ const AREAS = [
   'ci',
   'deps',
   'docs',
+  'edge',
   'hooks',
   'release',
   'security',

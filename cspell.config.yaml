@@ -35,6 +35,7 @@ ignorePaths:
   - .stryker-tmp/**
   - .vitest/**
   - .lighthouseci/**
+  - edge/.wrangler/**
   - .vite-hooks/_/**
   - .cspellcache
   # What `ai-memory install-instructions` writes and rewrites on every refresh.

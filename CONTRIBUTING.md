@@ -64,7 +64,7 @@ Closes #12
 ```
 
 - **Types:** `feat`, `fix`, `perf`, `refactor`, `docs`, `style`, `test`, `build`, `ci`, `chore`, `revert`.
-- **Scopes:** a feature folder of `source/js` (`globe`, `status-page`, `i18n`, ...) or one of `build`, `ci`, `deps`, `docs`, `hooks`, `release`, `security`, `seo`, `site`, `tests`, `tools`. The list is in [`commitlint.config.mjs`](commitlint.config.mjs), and a test keeps it equal to the folders.
+- **Scopes:** a feature folder of `source/js` (`globe`, `status-page`, `i18n`, ...) or one of `build`, `ci`, `deps`, `docs`, `edge` (the collector in `edge/`), `hooks`, `release`, `security`, `seo`, `site`, `tests`, `tools`. The list is in [`commitlint.config.mjs`](commitlint.config.mjs), and a test keeps it equal to the folders.
 - **Header:** at most 72 characters. Write `!` after the scope for a breaking change (`feat(hero)!: drop the intro`).
 - **Spelling:** the message is spell-checked in English like the rest of the repository.
 
