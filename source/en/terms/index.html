@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en-US" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Terms of Use | eklund.com.br</title>
+<meta name="description" content="The terms of use of eklund.com.br, the personal site of Gustavo Eklund: what the site is, the rights to its code and words, and the law that applies.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#111318">
+<link rel="canonical" href="https://eklund.com.br/en/terms/">
+<link rel="alternate" hreflang="pt-BR" href="https://eklund.com.br/termos/">
+<link rel="alternate" hreflang="en" href="https://eklund.com.br/en/terms/">
+<link rel="alternate" hreflang="x-default" href="https://eklund.com.br/termos/">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+<!-- The inline script of the head of index.html, byte for byte, so the Content-Security-Policy allows it by the same hash: here it only applies the theme, hue and motion the visitor chose. tools/i18n-check.mjs copies it, with its fix-html option. -->
+<script>document.documentElement.classList.add('js');
+let motion, language;
+try {
+  const theme = localStorage.getItem('theme');
+  if (theme) document.documentElement.dataset.theme = theme;
+  const hue = localStorage.getItem('hue');
+  if (hue) document.documentElement.style.setProperty('--hue', hue);
+  motion = localStorage.getItem('motion');
+  language = localStorage.getItem('lang');
+} catch {}
+document.documentElement.dataset.motion = motion === 'paused' || motion === 'full' ? motion : matchMedia('(prefers-reduced-motion: reduce)').matches ? 'paused' : 'full';
+if (location.pathname === '/' || location.pathname === '/index.html') {
+  const query = new URLSearchParams(location.search);
+  const translated = (tag) => {
+    const language = String(tag || '').toLowerCase().split(/[-_]/)[0];
+    return language === 'en' || language === 'pt' ? language : '';
+  };
+  if ((translated(query.get('lang')) || translated(language)) === 'en') {
+    query.delete('lang');
+    location.replace('/en/' + (query.toString() ? '?' + query : '') + location.hash);
+  }
+}</script>
+
+<link rel="stylesheet" href="/css/legal.css">
+</head>
+<body>
+<div class="legal-page">
+<header class="legal-header">
+  <a class="logo" translate="no" href="/en/" aria-label="eklund.com.br, home">eklund<i>.</i></a>
+  <div class="locale-switcher" role="group" aria-label="Language"><a href="/termos/" lang="pt-BR" hreflang="pt-BR" aria-label="PT, Português (Brasil)" title="Português (Brasil)">PT</a><a href="/en/terms/" lang="en-US" hreflang="en" aria-label="EN, English (United States)" title="English (United States)" aria-current="true">EN</a></div>
+</header>
+
+<main class="legal-text">
+<h1>Terms of Use</h1>
+<p class="updated">Last updated: November 9, 2026</p>
+
+<p>These terms cover eklund.com.br and gustavo.eklund.com.br, my personal site. By using the site, you agree to them.</p>
+
+<h2>Who I am</h2>
+<p>I am Gustavo Eklund, a developer in Taubaté, Brazil. You can reach me at <a href="mailto:gustavo@eklund.com.br">gustavo@eklund.com.br</a>.</p>
+
+<h2>What the site is</h2>
+<p>The site shows who I am and how I work. The demonstrations (the globe, the architecture map, the load test, the status page and the panels) run in your browser. Their numbers are simulated or measured in your own browser, and they are there to show how things work.</p>
+<p>The site is free and has no accounts, forms or purchases. You can browse it as you like. The load test runs on your device, and you can stop it at any time.</p>
+
+<h2>Rights to the content</h2>
+<ul>
+<li>The site's code is free, under the <a href="https://github.com/GustavoEklund/eklund.com.br/blob/main/LICENSE">MIT license</a>. You may use, copy and adapt it, keeping the license notice.</li>
+<li>My words and images, these pages included, are under the <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/">Creative Commons Attribution-NonCommercial-NoDerivatives 4.0</a> license. You may copy and share them, with credit and a link to the site's repository, for non-commercial purposes and without changing them. For any other use, write to me first.</li>
+<li>The fonts, the technology icons and the logos of the companies where I worked or studied have their own licenses and belong to their owners. The repository's <a href="https://github.com/GustavoEklund/eklund.com.br/blob/main/NOTICE.md">NOTICE.md</a> says which is which.</li>
+</ul>
+
+<h2>Using the site</h2>
+<p>Do not use the site to attack it or other people, or to overload its servers on purpose. If you find a security flaw, the <a href="https://github.com/GustavoEklund/eklund.com.br/blob/main/SECURITY.md">security policy</a> says how to tell me privately.</p>
+
+<h2>No warranty</h2>
+<p>I look after the site, but it is offered as it is, with no warranty that it is always up or free of errors. As far as the law allows, I am not liable for damages that come from using the site. Links to other sites, such as GitHub and LinkedIn, lead to services with their own terms.</p>
+
+<h2>Privacy</h2>
+<p>The <a href="/en/privacy/">Privacy Policy</a> says what the site does with the data of its visitors, and the <a href="/en/cookies/">Cookie Policy</a> says what it keeps in your browser.</p>
+
+<h2>Law and courts</h2>
+<p>These terms follow Brazilian law. Any dispute about them goes to the courts of Taubaté, São Paulo, Brazil, unless the law gives you the right to the courts where you live.</p>
+
+<h2>Changes to these terms</h2>
+<p>When I change these terms, the date at the top changes, and every version stays in the history of the site's repository.</p>
+</main>
+
+<footer class="legal-footer">
+  <p>© 2026 Gustavo Eklund · Taubaté, Brazil</p>
+  <nav aria-label="Legal pages">
+    <ul>
+      <li><a href="/en/privacy/">Privacy Policy</a></li>
+      <li><a href="/en/cookies/">Cookie Policy</a></li>
+      <li><a href="/en/terms/" aria-current="page">Terms of Use</a></li>
+    </ul>
+  </nav>
+</footer>
+</div>
+</body>
+</html>

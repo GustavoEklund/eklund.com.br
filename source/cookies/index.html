@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Política de Cookies | eklund.com.br</title>
+<meta name="description" content="eklund.com.br não usa cookies. Esta página lista o que o site guarda no seu navegador, para que serve e como apagar.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#111318">
+<link rel="canonical" href="https://eklund.com.br/cookies/">
+<link rel="alternate" hreflang="pt-BR" href="https://eklund.com.br/cookies/">
+<link rel="alternate" hreflang="en" href="https://eklund.com.br/en/cookies/">
+<link rel="alternate" hreflang="x-default" href="https://eklund.com.br/cookies/">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+<!-- The inline script of the head of index.html, byte for byte, so the Content-Security-Policy allows it by the same hash: here it only applies the theme, hue and motion the visitor chose. tools/i18n-check.mjs copies it, with its fix-html option. -->
+<script>document.documentElement.classList.add('js');
+let motion, language;
+try {
+  const theme = localStorage.getItem('theme');
+  if (theme) document.documentElement.dataset.theme = theme;
+  const hue = localStorage.getItem('hue');
+  if (hue) document.documentElement.style.setProperty('--hue', hue);
+  motion = localStorage.getItem('motion');
+  language = localStorage.getItem('lang');
+} catch {}
+document.documentElement.dataset.motion = motion === 'paused' || motion === 'full' ? motion : matchMedia('(prefers-reduced-motion: reduce)').matches ? 'paused' : 'full';
+if (location.pathname === '/' || location.pathname === '/index.html') {
+  const query = new URLSearchParams(location.search);
+  const translated = (tag) => {
+    const language = String(tag || '').toLowerCase().split(/[-_]/)[0];
+    return language === 'en' || language === 'pt' ? language : '';
+  };
+  if ((translated(query.get('lang')) || translated(language)) === 'en') {
+    query.delete('lang');
+    location.replace('/en/' + (query.toString() ? '?' + query : '') + location.hash);
+  }
+}</script>
+
+<link rel="stylesheet" href="/css/legal.css">
+</head>
+<body>
+<div class="legal-page">
+<header class="legal-header">
+  <a class="logo" translate="no" href="/" aria-label="eklund.com.br, início">eklund<i>.</i></a>
+  <div class="locale-switcher" role="group" aria-label="Idioma"><a href="/cookies/" lang="pt-BR" hreflang="pt-BR" aria-label="PT, Português (Brasil)" title="Português (Brasil)" aria-current="true">PT</a><a href="/en/cookies/" lang="en-US" hreflang="en" aria-label="EN, English (United States)" title="English (United States)">EN</a></div>
+</header>
+
+<main class="legal-text">
+<h1>Política de Cookies</h1>
+<p class="updated">Última atualização: 9 de novembro de 2026</p>
+
+<p>Este site não usa cookies, nem meus nem de terceiros. As páginas não carregam nada de outros endereços, por isso nenhuma outra empresa consegue gravar cookies por meio delas.</p>
+
+<h2>O que fica no seu navegador</h2>
+<p>O site guarda as suas preferências no armazenamento local do navegador (o <code translate="no">localStorage</code>), que só as próprias páginas do site leem. Nenhum desses valores é enviado para mim.</p>
+<div class="table-scroller">
+<table>
+<thead>
+<tr><th scope="col">Nome</th><th scope="col">O que guarda</th><th scope="col">Por quanto tempo</th></tr>
+</thead>
+<tbody>
+<tr><td><code translate="no">theme</code></td><td>O tema que você escolheu, claro (<code translate="no">light</code>) ou escuro (<code translate="no">dark</code>).</td><td>Até você apagar os dados do site</td></tr>
+<tr><td><code translate="no">hue</code></td><td>A cor de destaque que você escolheu no globo, um ângulo de 0 a 360.</td><td>Até você apagar os dados do site</td></tr>
+<tr><td><code translate="no">motion</code></td><td>Se as animações ficam paradas (<code translate="no">paused</code>) ou ligadas (<code translate="no">full</code>).</td><td>Até você apagar os dados do site</td></tr>
+<tr><td><code translate="no">lang</code></td><td>O idioma que você escolheu (<code translate="no">pt-BR</code> ou <code translate="no">en-US</code>). É também como a página em português sabe que você já disse se quer a versão em inglês.</td><td>Até você apagar os dados do site</td></tr>
+</tbody>
+</table>
+</div>
+<p>O aviso de privacidade guarda também a sua escolha, por seis meses, junto com a versão das finalidades. Se você aceitar a gravação de sessão, o navegador guarda ainda os códigos aleatórios das suas gravações, por 30 dias, para que você possa apagá-las. Esses códigos vão junto com cada gravação e com o pedido de apagar.</p>
+<p>A medição anônima não guarda nada no navegador: o código de cada carregamento existe só na memória da página e some quando ela fecha. A <a href="/privacidade/">Política de Privacidade</a> diz o que a medição envia e por quê.</p>
+
+<h2>Por que não preciso do seu consentimento para isso</h2>
+<p>Essas preferências só existem porque você as escolheu, ficam no seu aparelho e servem para o site se lembrar delas. Elas não identificam você e não são enviadas para ninguém. A gravação de sessão e o mapa de calor, que dependem do seu consentimento, só começam se você aceitar.</p>
+
+<h2>Como apagar</h2>
+<p>Nas configurações do seu navegador, apague os dados do site eklund.com.br (em geral, em Privacidade, Cookies e dados de sites). O site volta ao tema, à cor e às animações padrão, e o aviso de privacidade aparece de novo.</p>
+
+<h2>Mudanças nesta política</h2>
+<p>Quando o site passar a guardar outra coisa no seu navegador, esta página muda antes, e a data no topo mostra quando.</p>
+</main>
+
+<footer class="legal-footer">
+  <p>© 2026 Gustavo Eklund · Taubaté, SP</p>
+  <nav aria-label="Páginas legais">
+    <ul>
+      <li><a href="/privacidade/">Política de Privacidade</a></li>
+      <li><a href="/cookies/" aria-current="page">Política de Cookies</a></li>
+      <li><a href="/termos/">Termos de Uso</a></li>
+    </ul>
+  </nav>
+</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,202 @@
+/*
+ * The legal pages (privacy, cookies, terms of use, in both languages): long text to read once, with no script of their own.
+ * This is their only stylesheet, so the build gives each of them one file of its own: the tokens and the fonts come in by
+ * @import, and the layout of the home page, which they do not use, stays out.
+ */
+@import url('foundation/tokens.css');
+@import url('foundation/fonts.css');
+@import url('locale-switcher.css');
+
+@layer components {
+  /* The home page swaps the native scrollbar for its own; these pages have none of their own, so the native one stays. */
+  @media (pointer: fine) {
+    html.js {
+      scrollbar-width: thin;
+    }
+
+    html.js::-webkit-scrollbar {
+      display: block;
+    }
+  }
+
+  .legal-page {
+    width: min(100% - 2 * var(--gutter), 46rem);
+    margin-inline: auto;
+  }
+
+  .legal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block: 1.25rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .legal-header .logo {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.15rem;
+    letter-spacing: -0.03em;
+    font-variation-settings:
+      'opsz' 96,
+      'wdth' 88;
+  }
+
+  .legal-header .logo i {
+    font-style: normal;
+    color: var(--accent-text);
+  }
+
+  .legal-header .locale-switcher {
+    font-size: 0.75rem;
+  }
+
+  .legal-text {
+    padding-block: clamp(2.5rem, 7vw, 4.5rem);
+    font-family: var(--font-display);
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    letter-spacing: 0;
+  }
+
+  .legal-text h1 {
+    font-size: clamp(2.1rem, 6vw, 3.2rem);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    font-variation-settings:
+      'opsz' 96,
+      'wdth' 88;
+    text-wrap: balance;
+    margin-bottom: 0.75rem;
+  }
+
+  .legal-text .updated {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    color: var(--fg-2);
+    margin-bottom: 2rem;
+  }
+
+  .legal-text h2 {
+    font-size: 1.45rem;
+    font-weight: 650;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+    margin-top: 2.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .legal-text h3 {
+    font-size: 1.1rem;
+    font-weight: 650;
+    margin-top: 1.5rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .legal-text p,
+  .legal-text ul,
+  .legal-text dl,
+  .legal-text table {
+    margin-bottom: 1rem;
+  }
+
+  .legal-text ul {
+    list-style: disc;
+    padding-inline-start: 1.25rem;
+  }
+
+  .legal-text li + li {
+    margin-top: 0.4rem;
+  }
+
+  .legal-text li::marker {
+    color: var(--accent-text);
+  }
+
+  .legal-text dt {
+    font-weight: 650;
+    margin-top: 0.75rem;
+  }
+
+  .legal-text dd {
+    margin-inline-start: 0;
+    color: var(--fg-2);
+  }
+
+  .legal-text a {
+    color: var(--accent-text);
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+    text-decoration-thickness: 1px;
+    overflow-wrap: anywhere;
+  }
+
+  .legal-text a:hover {
+    text-decoration-thickness: 2px;
+  }
+
+  .legal-text code {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    padding: 0.05em 0.3em;
+    border-radius: 0.3em;
+    background: var(--bg-2);
+  }
+
+  .legal-text .table-scroller {
+    overflow-x: auto;
+  }
+
+  .legal-text table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+
+  .legal-text th,
+  .legal-text td {
+    text-align: start;
+    vertical-align: top;
+    padding: 0.55rem 0.75rem 0.55rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .legal-text th {
+    font-weight: 650;
+  }
+
+  .legal-footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.75rem 2rem;
+    padding: 2rem 0 calc(2rem + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    font-size: 0.75rem;
+    line-height: 1.6;
+    letter-spacing: 0.04em;
+    color: var(--fg-2);
+  }
+
+  .legal-footer ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.25rem;
+  }
+
+  .legal-footer a {
+    display: inline-block;
+    min-height: 24px;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .legal-footer a:hover,
+  .legal-footer a[aria-current='page'] {
+    color: var(--fg);
+  }
+}

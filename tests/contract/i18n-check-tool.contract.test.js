@@ -24,10 +24,18 @@ class SiteCopy {
   root = mkdtempSync(join(tmpdir(), 'i18n-check-'));
 
   constructor() {
-    for (const tool of ['i18n-check.mjs', 'html-defaults.mjs', 'english-page.mjs'])
+    for (const tool of [
+      'i18n-check.mjs',
+      'html-defaults.mjs',
+      'english-page.mjs',
+      'legal-pages.mjs',
+    ])
       cpSync(join(PROJECT, 'tools', tool), join(this.root, 'tools', tool));
     cpSync(join(PROJECT, 'source', 'index.html'), join(this.root, 'source', 'index.html'));
-    cpSync(join(PROJECT, 'source', 'en'), join(this.root, 'source', 'en'), { recursive: true });
+    for (const folder of ['en', 'privacidade', 'cookies', 'termos'])
+      cpSync(join(PROJECT, 'source', folder), join(this.root, 'source', folder), {
+        recursive: true,
+      });
     cpSync(join(PROJECT, 'source', 'js'), join(this.root, 'source', 'js'), { recursive: true });
   }
 
@@ -144,7 +152,7 @@ describe('tools/i18n-check.mjs', () => {
     });
 
     it('exits 1 when en/index.html does not exist', () => {
-      const result = inCopy((copy) => rmSync(join(copy.root, 'source', 'en'), { recursive: true }));
+      const result = inCopy((copy) => rmSync(join(copy.root, 'source', 'en', 'index.html')));
       expect(result).toStrictEqual({
         status: 1,
         stdout: `${KEYS} keys · 1 errors · 0 warnings\n`,
@@ -165,9 +173,45 @@ describe('tools/i18n-check.mjs', () => {
           readFileSync(join(copy.root, 'source', 'en', 'index.html'), 'utf8') === original,
         ]).toStrictEqual([
           0,
-          `index.html: 0 default texts rewritten from pt-BR\nen/index.html: written from index.html and en-US\n${KEYS} keys · 0 errors · 0 warnings\n`,
+          `index.html: 0 default texts rewritten from pt-BR\nen/index.html: written from index.html and en-US\nlegal pages: the head script of index.html copied into 6 pages\n${KEYS} keys · 0 errors · 0 warnings\n`,
           true,
         ]);
+      } finally {
+        copy.remove();
+      }
+    });
+
+    it('exits 1 and names the legal page whose head script is not the one of index.html', () => {
+      const result = inCopy((copy) =>
+        copy.edit('en/cookies/index.html', (code) =>
+          code.replace("localStorage.getItem('hue')", "localStorage.getItem('color')"),
+        ),
+      );
+      expect(result).toStrictEqual({
+        status: 1,
+        stdout: `${KEYS} keys · 1 errors · 0 warnings\n`,
+        stderr:
+          'error    en/cookies/index.html: its head script is not the one of index.html (run with --fix-html)\n',
+      });
+    });
+
+    it('copies the head script of index.html into every legal page with --fix-html, and leaves the rest of each page as it is', () => {
+      const copy = new SiteCopy();
+      try {
+        const read = (file) => readFileSync(join(copy.root, 'source', file), 'utf8');
+        const original = read('termos/index.html');
+        copy.edit('index.html', (code) =>
+          code.replace("localStorage.getItem('hue')", "localStorage.getItem('color')"),
+        );
+        copy.edit('termos/index.html', (code) => code.replace('Termos de Uso</h1>', 'Termos</h1>'));
+        const { status } = copy.run('--fix-html');
+        expect([
+          status,
+          read('termos/index.html') ===
+            original
+              .replace("localStorage.getItem('hue')", "localStorage.getItem('color')")
+              .replace('Termos de Uso</h1>', 'Termos</h1>'),
+        ]).toStrictEqual([0, true]);
       } finally {
         copy.remove();
       }

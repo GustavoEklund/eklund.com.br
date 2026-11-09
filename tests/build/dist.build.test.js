@@ -4,6 +4,7 @@ import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { LegalPages } from '../../tools/legal-pages.mjs';
 import { SiteHeaders } from '../../tools/site-headers.mjs';
 import { HtaccessHeaders } from '../contract/support/htaccess-headers.js';
 import { BuiltSite } from '../support/built-site.js';
@@ -30,6 +31,7 @@ const HASHED_ASSETS = [
   'instrument-serif-italic-latin-HASH.woff2',
   'jetbrains-mono-greek-HASH.woff2',
   'jetbrains-mono-latin-HASH.woff2',
+  'legal-HASH.css',
   'main-HASH.css',
   'main-HASH.js',
   'okto-payments-logo-200-x-200-HASH.jpg',
@@ -84,10 +86,13 @@ describe('the production build', () => {
   afterAll(() => site?.remove());
 
   describe('what is in it', () => {
-    it('is the two pages, the hashed assets, and the few files that keep their name', () => {
+    it('is the two pages, the legal pages, the hashed assets, and the few files that keep their name', () => {
       expect([
         site.list(),
         site.list('en'),
+        ...['privacidade', 'cookies', 'termos', 'en/privacy', 'en/cookies', 'en/terms'].map(
+          (folder) => site.list(folder),
+        ),
         site.list('.well-known'),
         site.list('assets/brand'),
       ]).toStrictEqual([
@@ -95,14 +100,18 @@ describe('the production build', () => {
           '.htaccess',
           '.well-known',
           'assets',
+          'cookies',
           'dae891d401f577ebb14b9f13900c6235.txt',
           'en',
           'favicon.ico',
           'index.html',
+          'privacidade',
           'robots.txt',
           'sitemap.xml',
+          'termos',
         ],
-        ['.htaccess', 'index.html'],
+        ['.htaccess', 'cookies', 'index.html', 'privacy', 'terms'],
+        ...Array(6).fill(['index.html']),
         ['security.txt'],
         ['.htaccess', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'social-card.png'],
       ]);
@@ -188,7 +197,8 @@ describe('the production build', () => {
         .map((element) => element.getAttribute('href') ?? element.getAttribute('src'))
         .filter((address) => address.startsWith('/') && !address.startsWith('//'))
         .map((address) => address.split(/[?#]/)[0])
-        .filter((address) => !['/', '/en/'].includes(address));
+        .filter((address) => !['/', '/en/'].includes(address))
+        .map((address) => (address.endsWith('/') ? `${address}index.html` : address));
       expect(addresses.filter((address) => !site.exists(address.slice(1)))).toStrictEqual([]);
     });
 
@@ -224,12 +234,61 @@ describe('the production build', () => {
     });
   });
 
-  describe('the headers the files go with', () => {
-    it.each(PAGES)('allow the inline script of %s by the hash its page has', (path) => {
-      expect(HtaccessHeaders.global(site.read('.htaccess'))).toStrictEqual(
-        SiteHeaders.production(site.read(path)),
-      );
+  describe.each(LegalPages.PAGES.map(({ file }) => file))('the legal page %s', (path) => {
+    let built, written;
+    beforeAll(() => {
+      built = parse(site.read(path));
+      written = parse(SiteSource.read(path));
     });
+
+    it('loads its one stylesheet from assets/, and no script but the inline one of the head', () => {
+      expect([
+        [...built.querySelectorAll('link[rel=stylesheet-not-loaded]')].map((link) =>
+          unhashed(link.getAttribute('href')),
+        ),
+        built.querySelectorAll('script').length,
+        inlineScript(site.read(path)),
+      ]).toStrictEqual([['assets/legal.css'], 1, inlineScript(site.read('index.html'))]);
+    });
+
+    it('points at files and pages that exist in the build', () => {
+      const addresses = [...built.querySelectorAll('[href], [src]')]
+        .map((element) => element.getAttribute('href') ?? element.getAttribute('src'))
+        .filter((address) => address.startsWith('/') && !address.startsWith('//'))
+        .map((address) => address.split(/[?#]/)[0].slice(1))
+        .map((file) => (file === '' || file.endsWith('/') ? `${file}index.html` : file));
+      expect(addresses.filter((file) => !site.exists(file))).toStrictEqual([]);
+    });
+
+    it('is the page as it is written: the same elements, attributes and text, and the same head', () => {
+      const body = (document) => [...document.body.querySelectorAll('*')].map(signature);
+      const head = (document) =>
+        [...document.head.querySelectorAll('meta, link[rel=canonical], link[rel=alternate]')].map(
+          signature,
+        );
+      expect([
+        body(built),
+        built.body.textContent.replace(/\s+/g, ' ').trim(),
+        built.title,
+        head(built),
+      ]).toStrictEqual([
+        body(written),
+        written.body.textContent.replace(/\s+/g, ' ').trim(),
+        written.title,
+        head(written),
+      ]);
+    });
+  });
+
+  describe('the headers the files go with', () => {
+    it.each([...PAGES, ...LegalPages.PAGES.map(({ file }) => [file])])(
+      'allow the inline script of %s by the hash its page has',
+      (path) => {
+        expect(HtaccessHeaders.global(site.read('.htaccess'))).toStrictEqual(
+          SiteHeaders.production(site.read(path)),
+        );
+      },
+    );
 
     it('say the English page is English, in the folder of the English page', () => {
       expect(

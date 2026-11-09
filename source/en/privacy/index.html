@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en-US" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Privacy Policy | eklund.com.br</title>
+<meta name="description" content="What eklund.com.br does with the data of its visitors, on which legal basis, where it is kept, for how long, and how you use your rights.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#111318">
+<link rel="canonical" href="https://eklund.com.br/en/privacy/">
+<link rel="alternate" hreflang="pt-BR" href="https://eklund.com.br/privacidade/">
+<link rel="alternate" hreflang="en" href="https://eklund.com.br/en/privacy/">
+<link rel="alternate" hreflang="x-default" href="https://eklund.com.br/privacidade/">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+<!-- The inline script of the head of index.html, byte for byte, so the Content-Security-Policy allows it by the same hash: here it only applies the theme, hue and motion the visitor chose. tools/i18n-check.mjs copies it, with its fix-html option. -->
+<script>document.documentElement.classList.add('js');
+let motion, language;
+try {
+  const theme = localStorage.getItem('theme');
+  if (theme) document.documentElement.dataset.theme = theme;
+  const hue = localStorage.getItem('hue');
+  if (hue) document.documentElement.style.setProperty('--hue', hue);
+  motion = localStorage.getItem('motion');
+  language = localStorage.getItem('lang');
+} catch {}
+document.documentElement.dataset.motion = motion === 'paused' || motion === 'full' ? motion : matchMedia('(prefers-reduced-motion: reduce)').matches ? 'paused' : 'full';
+if (location.pathname === '/' || location.pathname === '/index.html') {
+  const query = new URLSearchParams(location.search);
+  const translated = (tag) => {
+    const language = String(tag || '').toLowerCase().split(/[-_]/)[0];
+    return language === 'en' || language === 'pt' ? language : '';
+  };
+  if ((translated(query.get('lang')) || translated(language)) === 'en') {
+    query.delete('lang');
+    location.replace('/en/' + (query.toString() ? '?' + query : '') + location.hash);
+  }
+}</script>
+
+<link rel="stylesheet" href="/css/legal.css">
+</head>
+<body>
+<div class="legal-page">
+<header class="legal-header">
+  <a class="logo" translate="no" href="/en/" aria-label="eklund.com.br, home">eklund<i>.</i></a>
+  <div class="locale-switcher" role="group" aria-label="Language"><a href="/privacidade/" lang="pt-BR" hreflang="pt-BR" aria-label="PT, Português (Brasil)" title="Português (Brasil)">PT</a><a href="/en/privacy/" lang="en-US" hreflang="en" aria-label="EN, English (United States)" title="English (United States)" aria-current="true">EN</a></div>
+</header>
+
+<main class="legal-text">
+<h1>Privacy Policy</h1>
+<p class="updated">Last updated: November 9, 2026</p>
+
+<p>This page says what eklund.com.br does with the data of its visitors, on which legal basis, where it is kept, for how long, and how you use your rights. It also covers gustavo.eklund.com.br, which is the same site.</p>
+
+<h2>Who is responsible</h2>
+<p>I, Gustavo Eklund, of Taubaté, Brazil, am the controller of the data, as Brazil's General Data Protection Law (Law 13,709/2018, the LGPD) calls whoever decides about it. I am a small processing agent under the ANPD's Resolution 2/2022, so I have no data protection officer. Any request about your data goes to <a href="mailto:gustavo+privacidade@eklund.com.br">gustavo+privacidade@eklund.com.br</a>, and I answer within 15 days.</p>
+
+<h2>What I process, why, and for how long</h2>
+
+<h3>Your preferences</h3>
+<p>The theme, the accent color, the language, the animations and your privacy choice stay in your browser and are never sent to me. The <a href="/en/cookies/">Cookie Policy</a> lists each of them. They stay until you clear the site's data in your browser, and the privacy choice lasts six months.</p>
+
+<h3>Anonymous measurement</h3>
+<p>I measure how the site loads, what breaks and which parts are used, to make it faster and fix what goes wrong from one release to the next. Each page load sends:</p>
+<ul>
+<li>a random code for the page load, made in the page's memory and dropped when it closes, so that a later report of the same load updates the earlier one;</li>
+<li>the page, the language, the version of the site, the address of the site you came from (only its domain), the country, the type of device, the browser and its major version;</li>
+<li>ranges of screen width, pixel density, device memory, processor cores and connection round trip;</li>
+<li>whether your browser asks to save data, for a dark theme or for less motion, how the page was opened and how long it was visible;</li>
+<li>engagement events from fixed lists, such as reaching a section, copying the email address or running the load test;</li>
+<li>the Core Web Vitals, with the element or the script behind each value;</li>
+<li>errors in the site's own code.</li>
+</ul>
+<p>The legal basis is legitimate interest (Arts. 7, IX and 10 of the LGPD). The data is kept in Cloudflare D1, in the European Union jurisdiction. The rows of each visit are kept for 13 months, errors for 90 days and the daily totals for 25 months.</p>
+
+<h3>Session recording and heat map</h3>
+<p>They only happen if you accept. They record the page's content and its changes, with what you type masked, the clicks and where they landed, and a random code for each recording. The legal basis is your consent (Arts. 7, I and 8 of the LGPD). They are kept in Cloudflare R2 and D1, in the European Union jurisdiction, for 30 days, or until you withdraw your consent.</p>
+
+<h3>Uptime</h3>
+<p>A service of mine opens the site every five minutes to know whether it is up. No visitor data is involved. The checks are kept for 90 days, and their daily totals for 25 months.</p>
+
+<h3>Lab and search</h3>
+<p>Every night, Google's PageSpeed Insights measures the site from Google's machines, and I keep the result together with the percentiles of the Chrome UX Report, the clicks, impressions and position by page, query, country and device that Google Search Console and Bing Webmaster Tools report in aggregate (they leave rare queries out), and the expiry of the site's certificates. None of it is personal data, and it is kept without a limit, in Cloudflare D1 and R2, in the European Union jurisdiction.</p>
+
+<h2>What I never collect</h2>
+<p>IP addresses (the service that receives the measurement sees the address while the connection lasts, as any server does, and does not keep it), cookies, identifiers that link one visit to another, browser fingerprints, what you type, and the path or the parameters of the page you came from. Each recording has its own code, so two recordings of the same person cannot be linked.</p>
+
+<h2>Legitimate interest and your right to object</h2>
+<p>I ran the balancing test that the ANPD asks for legitimate interest, in the three phases of its guide, and it is public, together with the record of processing, in the <a href="https://github.com/GustavoEklund/eklund.com.br/blob/main/docs/privacy.md">site's repository</a>. In short:</p>
+<ul>
+<li>I want to know how the site loads, where it breaks and which parts are used, to improve it with each release. The site is my portfolio, and how it performs is part of what it shows.</li>
+<li>Lab tests do not show real devices, networks and use, and Chrome publishes no data for a site with so few visits.</li>
+<li>Nothing I keep links the measurement to a person. There is no profiling, no advertising, no sharing and no sale, and the data serves this purpose only.</li>
+</ul>
+<p>You can object at any time. Refusing everything in the privacy notice, or later through the preferences link in the footer, turns the measurement off in your browser from then on, and the page does not even download the code that measures.</p>
+<p>If your browser sends the Global Privacy Control signal, I treat it as a refusal of everything: the notice does not show and nothing is sent.</p>
+
+<h2>Your choice</h2>
+<p>I keep your choice in your browser for six months, together with the version of the purposes. The notice asks again when that time runs out or when a purpose changes.</p>
+
+<h2>Who else takes part</h2>
+<ul>
+<li>Cloudflare runs the service that receives the measurement and keeps the data as processor, in the European Union jurisdiction, which Brazil has recognized as adequate since January 26, 2026.</li>
+<li>Hostinger hosts the pages. Like any host, its servers and its content delivery network see the address of each request, and I do not read those logs.</li>
+<li>Only I read the data, through an access that requires signing in with my GitHub account. It returns totals, percentiles and statistical tests, never the row of a single visit. When an AI agent, such as Claude Code, reads those totals for me, they go to that agent's provider as part of the conversation. That sign-in is kept in Cloudflare KV and holds nothing about the site's visitors.</li>
+</ul>
+
+<h2>Your rights</h2>
+<p>The LGPD (Art. 18) gives you, among other rights, the right to confirm whether I process data about you, to access it, to correct it, to ask for it to be anonymized, blocked or deleted, to take it to another provider, to know whom I share it with, to withdraw consent, and to object to processing based on legitimate interest.</p>
+<ul>
+<li>The anonymous measurement cannot be linked to anyone, so I cannot find, correct or delete the data of one person. Refusing the measurement stops it from then on.</li>
+<li>Recordings are deleted at once when you withdraw consent or use the option to delete your recordings in the preferences. For that, your browser keeps the codes of your recordings for 30 days. Without those codes, no recording can be tied to a person.</li>
+<li>Any other request goes to <a href="mailto:gustavo+privacidade@eklund.com.br">gustavo+privacidade@eklund.com.br</a>.</li>
+</ul>
+<p>If you think I did not answer as I should, you can complain to Brazil's National Data Protection Authority, the <a href="https://www.gov.br/anpd/" hreflang="pt-BR">ANPD</a>.</p>
+
+<h2>Security</h2>
+<p>Everything travels over TLS. The service that receives the measurement only accepts reports from the site's own pages, keeps no IP address, and the data can only be read through my sign-in. The code of the site and of that service is public on <a href="https://github.com/GustavoEklund/eklund.com.br">GitHub</a>.</p>
+
+<h2>Changes to this policy</h2>
+<p>When I change this policy, the date at the top changes, and every version stays in the history of the site's repository. If the change is a new purpose, the privacy notice asks again.</p>
+</main>
+
+<footer class="legal-footer">
+  <p>© 2026 Gustavo Eklund · Taubaté, Brazil</p>
+  <nav aria-label="Legal pages">
+    <ul>
+      <li><a href="/en/privacy/" aria-current="page">Privacy Policy</a></li>
+      <li><a href="/en/cookies/">Cookie Policy</a></li>
+      <li><a href="/en/terms/">Terms of Use</a></li>
+    </ul>
+  </nav>
+</footer>
+</div>
+</body>
+</html>

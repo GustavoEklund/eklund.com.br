@@ -1,4 +1,5 @@
-// Validates the pages with the W3C Nu HTML Checker (vnu): the two files as shipped (index.html and en/index.html), and the DOM the scripts build, in both languages.
+// Validates the pages with the W3C Nu HTML Checker (vnu): the two files as shipped (index.html and en/index.html), the six legal
+// pages, which have no script that changes them, and the DOM the scripts build, in both languages.
 // usage: node tools/validate-html.mjs                      (needs Java 17+ on the PATH and the Playwright Chromium browser)
 //        node tools/validate-html.mjs --only-static FILE   (checks one file as it is, with no browser)
 import { spawn } from 'node:child_process';
@@ -8,6 +9,7 @@ import { tmpdir } from 'node:os';
 import { basename, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
+import { LegalPages } from './legal-pages.mjs';
 
 const PROJECT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const VNU_JAR = join(PROJECT, 'node_modules', 'vnu-jar', 'build', 'dist', 'vnu.jar');
@@ -199,6 +201,10 @@ class HtmlValidation {
       const files = [
         { name: 'index.html (as shipped)', path: join(PROJECT, 'source', 'index.html') },
         { name: 'en/index.html (as shipped)', path: join(PROJECT, 'source', 'en', 'index.html') },
+        ...LegalPages.PAGES.map(({ file }) => ({
+          name: file,
+          path: join(PROJECT, 'source', file),
+        })),
       ];
       for (const language of LANGUAGES) {
         const path = join(folder, `rendered-${language.locale}.html`);

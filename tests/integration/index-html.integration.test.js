@@ -141,7 +141,7 @@ describe('index.html', () => {
       expect(references.filter((reference) => !SiteSource.exists(reference))).toStrictEqual([]);
     });
 
-    it('lists the local stylesheets with the layer declaration first, and uses every CSS file in the folder', () => {
+    it('lists the local stylesheets with the layer declaration first, and uses every CSS file in the folder but the one of the legal pages', () => {
       const local = all('link[rel=stylesheet-not-loaded]')
         .map((link) => link.getAttribute('href'))
         .filter((href) => !href.startsWith('http'));
@@ -151,7 +151,9 @@ describe('index.html', () => {
           .split('\n')
           .find((line) => line.startsWith('@layer')),
       ).toBe('@layer reset, base, layout, components, effects;');
-      expect([...local].sort()).toStrictEqual(SiteSource.files('css'));
+      expect([...local].sort()).toStrictEqual(
+        SiteSource.files('css').filter((file) => file !== 'css/legal.css'),
+      );
     });
 
     it('preloads exactly the modules main.js reaches, except main.js itself, sorted', () => {

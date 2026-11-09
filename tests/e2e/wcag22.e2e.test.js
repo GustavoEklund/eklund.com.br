@@ -47,6 +47,9 @@ const SECTIONS_TAB_ORDER = [
   ...JOB_HEADERS,
   ...SOCIAL_LINKS,
   'a:source-link',
+  'a:privacy-link',
+  'a:cookies-link',
+  'a:terms-link',
 ];
 const HEADER_TAB_ORDER = [
   'a:pt-BR',

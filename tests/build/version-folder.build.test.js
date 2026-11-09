@@ -1,11 +1,13 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { LegalPages } from '../../tools/legal-pages.mjs';
 import { BuiltSite } from '../support/built-site.js';
 import { RepositoryFiles } from '../support/repository-files.js';
 
 const { version } = JSON.parse(RepositoryFiles.read('package.json'));
 const FOLDER = `/${version}/`;
-const PAGES = ['index.html', 'en/index.html'];
+const HOME_PAGES = ['index.html', 'en/index.html'];
+const PAGES = [...HOME_PAGES, ...LegalPages.PAGES.map(({ file }) => file)];
 
 const parse = (html) =>
   new DOMParser().parseFromString(
@@ -62,15 +64,15 @@ describe('the copy of the version for its own folder, which pnpm run build write
     },
   );
 
-  it.each(PAGES)('links %s to the page of each language in the folder', (path) => {
+  it.each(HOME_PAGES)('links %s to the page of each language in the folder', (path) => {
     const links = [...parse(copy.read(path)).querySelectorAll('.locale-switcher a')].map((link) =>
       link.getAttribute('href'),
     );
     expect(links).toStrictEqual([FOLDER, `${FOLDER}en/`]);
   });
 
-  it('names the fonts in the stylesheet and the load test worker in the script from inside the folder', () => {
-    const css = copy.read(asset(/^main-.*\.css$/));
+  it('names the fonts in the stylesheets and the load test worker in the script from inside the folder', () => {
+    const css = copy.read(asset(/^main-.*\.css$/)) + copy.read(asset(/^legal-.*\.css$/));
     const js = copy.read(asset(/^main-.*\.js$/));
     const worker = [...js.matchAll(/new Worker\(new URL\(`?"?([^`"',]+)/g)].map(
       ([, address]) => address,
