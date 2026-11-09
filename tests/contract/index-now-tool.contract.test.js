@@ -6,7 +6,8 @@ import { IndexNow } from '../../tools/index-now.mjs';
 import { SiteBuild } from '../../tools/site-build.mjs';
 import { SiteSource } from '../support/site-source.js';
 
-const KEY = '0123456789abcdef0123456789abcdef';
+/** The site's own key, read from the file at the root of source/: the tests never write a key out. */
+const KEY = IndexNow.key();
 
 describe('tools/index-now.mjs', () => {
   let folder;
