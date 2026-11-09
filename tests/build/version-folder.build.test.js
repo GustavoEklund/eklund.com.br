@@ -43,7 +43,9 @@ describe('the copy of the version for its own folder, which pnpm run build write
   });
 
   it('is made of the same files as the build for the root of the site', () => {
-    expect(copy.files().map(unhashed)).toStrictEqual(root.files().map(unhashed));
+    // Sorted after the hashes go: the two builds hash differently, and a hash must not decide the order.
+    const names = (build) => build.files().map(unhashed).sort();
+    expect(names(copy)).toStrictEqual(names(root));
   });
 
   it.each(PAGES)(

@@ -187,7 +187,7 @@ pnpm exec wrangler dev --config edge/wrangler.jsonc --var LAB_TOKEN:local   # th
 
 CI runs Lighthouse on the production build, mobile profile, five times on `/` and five times on `/en/`. [`tools/production-server.mjs`](../tools/production-server.mjs) serves the build the way the hosting does: HTTP/2 over TLS, brotli, and the headers and cache rules of the `.htaccess` files. Every assertion reads the median run, the one whose performance metrics sit in the middle, and not the best of the five.
 
-Chrome runs in Portuguese (`--accept-lang=pt-BR`). In English, the head script sends a visitor of `/` to `/en/`, and Lighthouse measured both pages in one run: the fonts, the script and the stylesheet were downloaded twice, 557 kB instead of 286 kB. That is also what an English browser pays the first time it opens `/`.
+Chrome runs in Portuguese (`--accept-lang=pt-BR`), the language of the page at `/`, so Lighthouse measures what a reader of Portuguese gets, without the offer of the English page. Before [0012](decisions/0012-no-redirect-by-browser-language.md), the head script sent an English browser from `/` to `/en/`, and Lighthouse measured both pages in one run: the fonts, the script and the stylesheet were downloaded twice, 557 kB instead of 286 kB.
 
 A pull request fails when:
 

@@ -28,6 +28,26 @@ test.describe('layout stability', () => {
     expect(await LayoutShiftMeter.shifts(page)).toStrictEqual([]);
   });
 
+  test.describe('the offer of the English page', () => {
+    test.use({ locale: 'en-GB' });
+
+    test('appears, and goes away when declined, without moving anything', async ({
+      site,
+      page,
+    }) => {
+      await LayoutShiftMeter.install(page);
+      await site.open('/');
+      await page.waitForLoadState('networkidle');
+      await expect(site.languageOffer).toBeVisible();
+      await site.languageOffer.getByRole('button').click();
+      await expect(site.languageOffer).toBeHidden();
+      await page.evaluate(
+        () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+      );
+      expect(await LayoutShiftMeter.shifts(page)).toStrictEqual([]);
+    });
+  });
+
   test('the scroll cue appears in English once the fonts settle', async ({
     site,
     page,

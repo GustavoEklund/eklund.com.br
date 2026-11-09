@@ -11,6 +11,10 @@ All notable changes to this project are written here. The format follows [Keep a
 - A lab job that measures the site every night: PageSpeed Insights five times on each page, on mobile and on desktop, the field data of Chrome users from CrUX, the clicks and searches of Google Search Console and Bing Webmaster Tools, and when the certificates expire. It all goes to the collector, with the full report of the run in the middle kept in R2.
 - Each release now tells Bing and the other engines that take IndexNow that its pages changed, once it is online.
 
+### Fixed
+
+- A browser in English that opens `eklund.com.br` for the first time stays on the Portuguese page, which offers the English one in a small note under the header, instead of being sent to `/en/`. The redirect made it download the fonts, the stylesheet and the script twice, about 180 kB more ([#19](https://github.com/GustavoEklund/eklund.com.br/issues/19)). A visitor who chose English is still sent to `/en/`.
+
 ## [1.1.0] - 2026-10-27
 
 ### Added

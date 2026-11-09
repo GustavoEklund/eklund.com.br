@@ -7,18 +7,20 @@ const GOOGLEBOT =
   'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; +http://www.google.com/bot.html) Chrome/130 Safari/537.36';
 
 describe('the inline script in the head of index.html', () => {
-  describe('on the Portuguese page, where English readers are sent to /en/', () => {
+  describe('on the Portuguese page, where only a choice of English sends a visitor to /en/ (0012)', () => {
     it.each([
       ['a browser in Portuguese', { languages: ['pt-BR'] }, null],
-      ['a browser in English', { languages: ['en-US'] }, '/en/'],
-      ['a browser in British English', { languages: ['en-GB'] }, '/en/'],
-      ['a browser that lists English first', { languages: ['en-GB', 'pt-BR'] }, '/en/'],
-      ['a browser that lists Portuguese first', { languages: ['pt-PT', 'en-US'] }, null],
-      ['a browser in a language the site is not translated into', { languages: ['fr-FR'] }, null],
+      ['a browser in English, which gets the offer instead', { languages: ['en-US'] }, null],
+      ['a browser that lists English first', { languages: ['en-GB', 'pt-BR'] }, null],
       ['a browser that lists no language', { languages: [] }, null],
       [
         'English chosen on an earlier visit, in a browser in Portuguese',
         { saved: { lang: 'en-US' }, languages: ['pt-BR'] },
+        '/en/',
+      ],
+      [
+        'English chosen on an earlier visit, saved as a bare tag',
+        { saved: { lang: 'en' }, languages: ['pt-BR'] },
         '/en/',
       ],
       [
@@ -29,40 +31,29 @@ describe('the inline script in the head of index.html', () => {
       [
         'a saved choice the site does not know, in a browser in English',
         { saved: { lang: 'klingon' }, languages: ['en-US'] },
-        '/en/',
-      ],
-      [
-        'a saved choice the site does not know, in a browser in Portuguese',
-        { saved: { lang: 'klingon' }, languages: ['pt-BR'] },
         null,
       ],
       [
-        'a browser that lists a language the site does not translate before English',
-        { languages: ['de', 'en-AU'] },
-        '/en/',
-      ],
-      [
-        '?lang=fr, which the site does not translate: the browser decides',
+        '?lang=fr, which the site does not translate, in a browser in English',
         { search: '?lang=fr', languages: ['en-GB'] },
-        '/en/',
+        null,
       ],
       [
-        '?lang=fr in a browser in Portuguese, whatever else was chosen',
-        { search: '?lang=fr', saved: { lang: 'pt-BR' }, languages: ['en-GB'] },
-        null,
+        '?lang=fr over a saved English choice: the choice decides',
+        { search: '?lang=fr', saved: { lang: 'en-US' } },
+        '/en/',
       ],
       [
         '?lang=en, whatever was chosen before',
         { search: '?lang=en', saved: { lang: 'pt-BR' }, languages: ['pt-BR'] },
         '/en/',
       ],
-      ['?lang=pt in a browser in English', { search: '?lang=pt', languages: ['en-US'] }, null],
       [
         '?lang=pt over a saved English choice',
         { search: '?lang=pt', saved: { lang: 'en-US' } },
         null,
       ],
-      ['the same address as /', { pathname: '/index.html', languages: ['en-US'] }, '/en/'],
+      ['the same address as /', { pathname: '/index.html', saved: { lang: 'en-US' } }, '/en/'],
     ])('%s', (_description, visitor, expected) => {
       expect(redirect(visitor)).toBe(expected);
     });
@@ -73,7 +64,7 @@ describe('the inline script in the head of index.html', () => {
       ['/?utm=x&lang=en&y=2#carga', '/en/?utm=x&y=2#carga'],
     ])('keeps what the address carries, except lang: %s goes to %s', (address, expected) => {
       const { pathname, search, hash } = new URL(address, 'https://eklund.com.br');
-      expect(redirect({ pathname, search, hash, languages: ['en-US'] })).toBe(expected);
+      expect(redirect({ pathname, search, hash, saved: { lang: 'en-US' } })).toBe(expected);
     });
 
     it('leaves a crawler where it is, so the Portuguese page is the one that gets indexed at /', () => {
@@ -86,14 +77,14 @@ describe('the inline script in the head of index.html', () => {
       );
     });
 
-    it('goes by the browser language when localStorage is blocked', () => {
+    it('sends no one when localStorage is blocked, except by the address', () => {
       expect([
         redirect({ storageBlocked: true, languages: ['en-US'] }),
-        redirect({ storageBlocked: true, languages: ['pt-BR'] }),
-      ]).toStrictEqual(['/en/', null]);
+        redirect({ storageBlocked: true, search: '?lang=en' }),
+      ]).toStrictEqual([null, '/en/']);
     });
 
-    it('agrees with Locale.normalize about which tags are English', () => {
+    it('agrees with Locale.normalize about which saved tags are English', () => {
       const tags = [
         'en',
         'en-US',
@@ -110,9 +101,14 @@ describe('the inline script in the head of index.html', () => {
         'ptx',
         '',
       ];
-      expect(tags.map((tag) => redirect({ languages: [tag] }) === '/en/')).toStrictEqual(
+      expect(tags.map((tag) => redirect({ saved: { lang: tag } }) === '/en/')).toStrictEqual(
         tags.map((tag) => Locale.normalize(tag) === 'en-US'),
       );
+    });
+
+    it('never reads the browser languages', () => {
+      const tags = ['en-US', 'en-GB', 'pt-BR', 'fr', 'de'];
+      expect(tags.map((tag) => redirect({ languages: [tag] }))).toStrictEqual(tags.map(() => null));
     });
   });
 

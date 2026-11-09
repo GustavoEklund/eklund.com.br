@@ -35,6 +35,9 @@ export class SitePage {
   localeLink(tag) {
     return this.#page.locator(`.locale-switcher a[data-locale="${tag}"]`);
   }
+  get languageOffer() {
+    return this.#page.locator('.language-offer');
+  }
   get themeToggle() {
     return this.#page.locator('#theme-toggle');
   }

@@ -6,8 +6,9 @@ const STORAGE_KEY = 'lang';
  * The language tags the site is translated into. Each language has its own page, and the address says which one this is: the
  * folder the site lives in is Portuguese, and its en/ folder is English. That folder is / on eklund.com.br and /1.1.0/ in
  * the copy of version 1.1.0. Which page a visitor lands on is decided before the first paint by the inline script in the
- * head of index.html: the language they chose on an earlier visit (localStorage `lang`, written by `remember`), else the
- * language of their browser, else Portuguese.
+ * head of index.html: /en/ for ?lang=en or the English they chose on an earlier visit (localStorage `lang`, written by
+ * `remember`), else the page they opened. The browser language sends no one; it only decides whether the Portuguese page
+ * offers the English one (LanguageOffer).
  */
 export class Locale {
   static DEFAULT = 'pt-BR';
@@ -26,6 +27,20 @@ export class Locale {
     if (language === 'en') return 'en-US';
     if (language === 'pt') return 'pt-BR';
     return null;
+  }
+
+  /** The first language of a browser's list that the site is translated into; null when there is none. */
+  static preferred(tags) {
+    for (const tag of tags) {
+      const locale = Locale.normalize(tag);
+      if (locale) return locale;
+    }
+    return null;
+  }
+
+  /** The language the visitor chose on an earlier visit; null when they chose none the site knows. */
+  static chosen() {
+    return Locale.normalize(Preferences.read(STORAGE_KEY));
   }
 
   static remember(locale) {

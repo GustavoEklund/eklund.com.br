@@ -20,6 +20,37 @@ test.describe('accessibility (axe-core)', () => {
     }
   }
 
+  test.describe('the offer of the English page, which only a browser in English sees', () => {
+    test.use({ locale: 'en-GB' });
+
+    for (const theme of ['dark', 'light']) {
+      test(`${theme} theme: no axe violation with the offer on screen`, async ({ site, page }) => {
+        await AxeAudit.useTheme(page, theme);
+        await site.open('/');
+        await expect(site.languageOffer).toBeVisible();
+        expect(await AxeAudit.run(page)).toStrictEqual([]);
+      });
+    }
+
+    test('names itself, and its two controls are at least 24 px tall and reached with the keyboard', async ({
+      site,
+      page,
+    }) => {
+      await site.open('/');
+      await expect(site.languageOffer).toHaveAttribute('aria-label', PT_BR.languageOffer.label);
+      const controls = site.languageOffer.locator('a, button');
+      const heights = await controls.evaluateAll((elements) =>
+        elements.map((element) => element.getBoundingClientRect().height >= 24),
+      );
+      await controls.first().focus();
+      await page.keyboard.press('Tab');
+      expect([
+        heights,
+        await controls.nth(1).evaluate((button) => button === document.activeElement),
+      ]).toStrictEqual([[true, true], true]);
+    });
+  });
+
   test('aria-label sits on an element that allows it', async ({ site, page }) => {
     await site.open('/');
     expect(await AxeAudit.run(page, { onlyRules: ['aria-prohibited-attr'] })).toStrictEqual([]);

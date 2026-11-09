@@ -221,31 +221,63 @@ test.describe('switching with the command palette', () => {
   });
 });
 
-test.describe('where the browser language sends a visitor who opens the root address', () => {
+test.describe('what the browser language does to a visitor who opens the root address', () => {
   test.describe('English (United Kingdom) browser', () => {
     test.use({ locale: 'en-GB' });
 
-    test('goes to /en/, in English, and saves nothing', async ({ site }) => {
+    test('stays at the root, in Portuguese, saves nothing, and is offered the English page', async ({
+      site,
+    }) => {
       await site.open('/');
-      await expect(site.page).toHaveURL(`${ORIGIN}/en/`);
-      await expect(site.html).toHaveAttribute('lang', 'en-US');
-      await expect(site.page).toHaveTitle(EN_US.meta.title);
+      await expect(site.page).toHaveURL(`${ORIGIN}/`);
+      await expect(site.html).toHaveAttribute('lang', 'pt-BR');
+      await expect(site.languageOffer).toBeVisible();
+      await expect(site.languageOffer).toHaveAttribute('lang', 'en');
+      await expect(site.languageOffer).toHaveText(
+        PT_BR.languageOffer.text + PT_BR.languageOffer.accept + PT_BR.languageOffer.decline,
+      );
       expect(await site.storedValue('lang')).toBeNull();
     });
 
-    test('keeps the section in the hash and what else the address carries', async ({ site }) => {
-      await site.open('/?utm=x#carga');
-      await expect(site.page).toHaveURL(`${ORIGIN}/en/?utm=x#carga`);
+    test('taking the offer switches to English in place and remembers it, as the header link does', async ({
+      site,
+      page,
+    }) => {
+      await site.open('/#carga');
+      await site.languageOffer.getByRole('link').click();
+      await expect(site.html).toHaveAttribute('lang', 'en-US');
+      await expect(page).toHaveURL(`${ORIGIN}/en/#carga`);
+      await expect(site.languageOffer).toBeHidden();
+      expect(await site.storedValue('lang')).toBe('en-US');
+    });
+
+    test('declining the offer keeps Portuguese, saves it, and the offer does not come back', async ({
+      site,
+    }) => {
+      await site.open('/');
+      await site.languageOffer.getByRole('button').click();
+      await expect(site.languageOffer).toBeHidden();
+      await expect(site.page.locator('#main')).toBeFocused();
+      expect(await site.storedValue('lang')).toBe('pt-BR');
+      await site.open('/');
+      await expect(site.html).toHaveAttribute('lang', 'pt-BR');
+      await expect(site.languageOffer).toBeHidden();
+    });
+
+    test('is not offered anything on the English page', async ({ site }) => {
+      await site.open('/en/');
+      await expect(site.languageOffer).toBeHidden();
     });
   });
 
   test.describe('Portuguese (Portugal) browser', () => {
     test.use({ locale: 'pt-PT' });
 
-    test('stays at the root, in Brazilian Portuguese', async ({ site }) => {
+    test('stays at the root, in Brazilian Portuguese, with nothing offered', async ({ site }) => {
       await site.open('/');
       await expect(site.page).toHaveURL(`${ORIGIN}/`);
       await expect(site.html).toHaveAttribute('lang', 'pt-BR');
+      await expect(site.languageOffer).toBeHidden();
     });
   });
 
@@ -263,13 +295,16 @@ test.describe('where the browser language sends a visitor who opens the root add
   test.describe('English browser with a saved Portuguese choice', () => {
     test.use({ locale: 'en-US' });
 
-    test('the saved choice wins over the browser language', async ({ site }) => {
+    test('the saved choice wins over the browser language, and nothing is offered', async ({
+      site,
+    }) => {
       await site.open('/en/');
       await expect(site.html).toHaveAttribute('lang', 'en-US');
       await site.storeValue('lang', 'pt-BR');
       await site.open('/');
       await expect(site.page).toHaveURL(`${ORIGIN}/`);
       await expect(site.html).toHaveAttribute('lang', 'pt-BR');
+      await expect(site.languageOffer).toBeHidden();
     });
   });
 
@@ -282,6 +317,7 @@ test.describe('where the browser language sends a visitor who opens the root add
       await site.open('/');
       await expect(site.page).toHaveURL(`${ORIGIN}/`);
       await expect(site.html).toHaveAttribute('lang', 'pt-BR');
+      await expect(site.languageOffer).toBeHidden();
     });
 
     test('still follows an explicit /?lang=en link to the English page', async ({ site }) => {

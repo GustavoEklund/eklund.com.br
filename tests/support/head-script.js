@@ -2,8 +2,8 @@ import { SiteSource } from './site-source.js';
 
 /**
  * The inline script in the head of a page, run against a stand-in browser: what it settles before the first paint.
- * It sets the theme, the hue and the motion setting on the root element and, on the Portuguese page, sends English readers
- * to /en/. The script is the real one from the file; only the browser around it is made up.
+ * It sets the theme, the hue and the motion setting on the root element and, on the Portuguese page, sends to /en/ the
+ * visitors who chose English, by ?lang=en or on an earlier visit. The script is the real one from the file; only the browser around it is made up.
  */
 export class HeadScript {
   /** The code of the one inline classic script of a page. */

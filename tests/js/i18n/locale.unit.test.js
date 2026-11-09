@@ -85,6 +85,35 @@ describe('Locale.detect', () => {
   });
 });
 
+describe('Locale.preferred', () => {
+  it.each([
+    [['en-US'], 'en-US'],
+    [['en-GB', 'pt-BR'], 'en-US'],
+    [['pt-PT', 'en-US'], 'pt-BR'],
+    [['de', 'en-AU'], 'en-US'],
+    [['fr-FR', 'de-DE'], null],
+    [[], null],
+  ])('reads %j as %s: the first language of the list that the site translates', (tags, expected) =>
+    expect(Locale.preferred(tags)).toBe(expected),
+  );
+});
+
+describe('Locale.chosen', () => {
+  afterEach(() => localStorage.clear());
+
+  it.each([
+    ['en-US', 'en-US'],
+    ['pt-BR', 'pt-BR'],
+    ['en', 'en-US'],
+    ['klingon', null],
+  ])('reads a saved %s as %s', (saved, expected) => {
+    localStorage.setItem('lang', saved);
+    expect(Locale.chosen()).toBe(expected);
+  });
+
+  it('is null when nothing was saved', () => expect(Locale.chosen()).toBeNull());
+});
+
 describe('Locale.remember', () => {
   afterEach(() => {
     vi.restoreAllMocks();
