@@ -23,7 +23,7 @@
   "r2_buckets": [{ "binding": "REPORTS", "bucket_name": "eklund", "jurisdiction": "eu" }],
   // The clients, grants and tokens of the OAuth provider that guards /mcp and /api/v1. Created with
   // `wrangler kv namespace create OAUTH_KV`; KV has no jurisdiction, and nothing in it is about a visitor.
-  "kv_namespaces": [{ "binding": "OAUTH_KV", "id": "00000000000000000000000000000000" }],
+  "kv_namespaces": [{ "binding": "OAUTH_KV", "id": "78f36fc5c15745ca9371fa8636790116" }],
   // The uptime monitor every five minutes; the daily totals and the retention at a quiet hour for Brazil.
   "triggers": { "crons": ["*/5 * * * *", "17 6 * * *"] },
   "vars": {
