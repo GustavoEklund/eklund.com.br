@@ -37,9 +37,11 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup
+      # A refused sign-in turns Search Console off for this run, and the other sources still run; the last step fails the job.
       - name: Sign in to Google as the lab's service account
         id: google
         if: vars.GOOGLE_WORKLOAD_IDENTITY_PROVIDER != '' && vars.GOOGLE_SERVICE_ACCOUNT_EMAIL != ''
+        continue-on-error: true
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
         with:
           workload_identity_provider: ${{ vars.GOOGLE_WORKLOAD_IDENTITY_PROVIDER }}
@@ -54,3 +56,8 @@ jobs:
           BING_API_KEY: ${{ secrets.BING_API_KEY }}
           LAB_TOKEN: ${{ secrets.LAB_TOKEN }}
         run: node tools/lab-run.mjs
+      - name: Fail when Google refused the sign-in
+        if: steps.google.outcome == 'failure'
+        run: |
+          echo "::error::Google refused the lab's sign-in, so Search Console was not read. See the step above."
+          exit 1
