@@ -342,21 +342,35 @@ describe('BingWebmaster', () => {
 describe('Certificates', () => {
   let server;
   let port;
+  let ca;
 
   beforeAll(async () => {
-    server = createServer(Certificate.create(), (socket) => socket.end());
+    const certificate = Certificate.create();
+    ca = certificate.cert;
+    server = createServer(certificate, (socket) => socket.end());
     await new Promise((done) => server.listen(0, '127.0.0.1', done));
     port = server.address().port;
   }, 30_000);
   afterAll(() => new Promise((done) => server.close(done)));
 
-  it('reads when the certificate of a host expires, and who issued it, even when no authority signed it (its name stands for the missing organization)', async () => {
-    const { validTo, issuer } = await new Certificates({ port }).read('127.0.0.1');
+  it('reads when a valid certificate expires and who issued it (its name, when it names no organization)', async () => {
+    const { validTo, issuer, problem } = await new Certificates({ port, ca }).read('127.0.0.1');
     const day = 86_400_000;
-    expect([validTo > Date.now(), validTo < Date.now() + 2 * day, issuer]).toStrictEqual([
+    expect([validTo > Date.now(), validTo < Date.now() + 2 * day, issuer, problem]).toStrictEqual([
       true,
       true,
       '127.0.0.1',
+      null,
+    ]);
+  });
+
+  it('answers the problem of a certificate the connection refuses, without its dates', async () => {
+    expect([
+      await new Certificates({ port }).read('127.0.0.1'),
+      await new Certificates({ port, ca }).read('localhost'),
+    ]).toStrictEqual([
+      { validTo: null, issuer: '', problem: 'DEPTH_ZERO_SELF_SIGNED_CERT' },
+      { validTo: null, issuer: '', problem: 'ERR_TLS_CERT_ALTNAME_INVALID' },
     ]);
   });
 
@@ -439,7 +453,12 @@ describe('LabRun', () => {
         ],
       },
       bing: { rows: async () => [] },
-      certificates: { read: async () => ({ validTo: 1_799_000_000_000, issuer: "Let's Encrypt" }) },
+      certificates: {
+        read: async (host) =>
+          host === 'eklund.com.br'
+            ? { validTo: 1_799_000_000_000, issuer: "Let's Encrypt", problem: null }
+            : { validTo: null, issuer: '', problem: 'CERT_HAS_EXPIRED' },
+      },
       ...overrides,
     };
   };
@@ -584,6 +603,36 @@ describe('LabRun', () => {
         ),
         'PageSpeed Insights: no run of desktop /en/ worked',
         'PageSpeed Insights: 14 rows',
+      ],
+    ]);
+  });
+
+  it('keeps the certificate of one host when the other does not answer, and fails the source', async () => {
+    const { sent, sender } = recorder();
+    const log = [];
+    const failed = await new LabRun({
+      sources: sources({
+        certificates: {
+          read: async (host) => {
+            if (host === 'gustavo.eklund.com.br') throw new Error('connect ECONNREFUSED');
+            return { validTo: 1_799_000_000_000, issuer: "Let's Encrypt", problem: null };
+          },
+        },
+      }),
+      sender,
+      clock,
+      log: (line) => log.push(line),
+    }).run();
+    expect([
+      failed,
+      sent.batches[0].certificates.map(({ host, problem }) => [host, problem]),
+      log.slice(-2),
+    ]).toStrictEqual([
+      ['Certificates'],
+      [['eklund.com.br', null]],
+      [
+        'Certificates: gustavo.eklund.com.br did not answer, connect ECONNREFUSED',
+        'Certificates: 1 rows',
       ],
     ]);
   });

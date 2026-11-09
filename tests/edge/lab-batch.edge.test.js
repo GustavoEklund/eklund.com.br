@@ -147,4 +147,18 @@ describe('LabBatch.parse', () => {
       'certificates[0].issuer does not have the expected form',
     ]);
   });
+
+  it('takes a certificate with an expiry or with the problem that refused it, never both or neither', () => {
+    expect([
+      reasonFor((batch) => (batch.certificates[0].problem = 'CERT_HAS_EXPIRED')),
+      reasonFor((batch) => (batch.certificates[1].problem = null)),
+      reasonFor((batch) => (batch.certificates[1].problem = 'certificate has expired')),
+      reasonFor((batch) => delete batch.certificates[1].problem),
+    ]).toStrictEqual([
+      'certificates[0] has an expiry or a problem, never both and never neither',
+      'certificates[1] has an expiry or a problem, never both and never neither',
+      'certificates[1].problem does not have the expected form',
+      'certificates[1] has no problem',
+    ]);
+  });
 });

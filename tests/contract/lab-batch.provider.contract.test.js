@@ -77,12 +77,24 @@ const BATCHES = fc.record({
     { maxLength: 20 },
   ),
   certificates: fc.array(
-    fc.record({
-      day: DAYS,
-      host: fc.constantFrom(...WORDS.HOSTS),
-      validTo: fc.nat(LIMITS.validTo),
-      issuer: fc.string({ maxLength: 40 }).filter((text) => !/\p{Cc}/u.test(text)),
-    }),
+    fc
+      .record({
+        day: DAYS,
+        host: fc.constantFrom(...WORDS.HOSTS),
+        validTo: fc.nat(LIMITS.validTo),
+        issuer: fc.string({ maxLength: 40 }).filter((text) => !/\p{Cc}/u.test(text)),
+        problem: fc.option(
+          fc.constantFrom(
+            'CERT_HAS_EXPIRED',
+            'DEPTH_ZERO_SELF_SIGNED_CERT',
+            'ERR_TLS_CERT_ALTNAME_INVALID',
+          ),
+          { nil: null },
+        ),
+      })
+      .map((certificate) =>
+        certificate.problem ? { ...certificate, validTo: null, issuer: '' } : certificate,
+      ),
     { maxLength: 2 },
   ),
 });
@@ -134,6 +146,10 @@ describe('the lab batch contract, against the collector that reads it', () => {
       (batch) => (batch.search[0].country = 'BRA'),
       (batch) => (batch.search[0].ip = '203.0.113.7'),
       (batch) => (batch.certificates[0].host = 'example.com'),
+      (batch) => (batch.certificates[0].problem = 'CERT_HAS_EXPIRED'),
+      (batch) => (batch.certificates[1].validTo = 1_799_000_000_000),
+      (batch) => (batch.certificates[1].problem = null),
+      (batch) => (batch.certificates[1].problem = 'expired!'),
       (batch) => (batch.certificates = Array(11).fill(batch.certificates[0])),
     ].map((change) => verdicts(LabBatches.with(change)));
     expect(outside).toStrictEqual(outside.map(() => [false, false]));

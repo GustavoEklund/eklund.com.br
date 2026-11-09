@@ -3,7 +3,10 @@ export class LabBatches {
   static DAY = '2026-11-09';
   static TOKEN = 'a-lab-token-for-the-tests';
 
-  /** One night with a row of every kind: a median and a plain run, a CrUX reading, a row of each engine, a certificate. */
+  /**
+   * One night with a row of every kind: a median and a plain run, a CrUX reading, a row of each engine, and a certificate
+   * the lab read and one its connection refused.
+   */
   static complete() {
     return {
       v: 1,
@@ -81,6 +84,14 @@ export class LabBatches {
           host: 'eklund.com.br',
           validTo: 1_799_000_000_000,
           issuer: "Let's Encrypt",
+          problem: null,
+        },
+        {
+          day: LabBatches.DAY,
+          host: 'gustavo.eklund.com.br',
+          validTo: null,
+          issuer: '',
+          problem: 'CERT_HAS_EXPIRED',
         },
       ],
     };

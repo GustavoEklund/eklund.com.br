@@ -14,7 +14,7 @@ describe('LabStore.save, against D1 in workerd', () => {
     await worker.rows('SELECT * FROM lab_run ORDER BY page, form_factor, run'),
     await worker.rows('SELECT * FROM crux_reading'),
     await worker.rows('SELECT * FROM search_row ORDER BY engine'),
-    await worker.rows('SELECT * FROM certificate'),
+    await worker.rows('SELECT * FROM certificate ORDER BY host'),
   ];
 
   beforeAll(() => worker.start(), EdgeWorker.START_TIMEOUT_MS);
@@ -101,6 +101,14 @@ describe('LabStore.save, against D1 in workerd', () => {
           host: 'eklund.com.br',
           valid_to: 1_799_000_000_000,
           issuer: "Let's Encrypt",
+          problem: null,
+        },
+        {
+          day: '2026-11-09',
+          host: 'gustavo.eklund.com.br',
+          valid_to: null,
+          issuer: '',
+          problem: 'CERT_HAS_EXPIRED',
         },
       ],
     ]);

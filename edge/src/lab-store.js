@@ -44,10 +44,11 @@ export class LabStore {
       ],
       [
         certificates,
-        `INSERT INTO certificate (day, host, valid_to, issuer)
-         SELECT value->>'day', value->>'host', value->>'validTo', value->>'issuer'
+        `INSERT INTO certificate (day, host, valid_to, issuer, problem)
+         SELECT value->>'day', value->>'host', value->>'validTo', value->>'issuer', value->>'problem'
          FROM json_each(?1) WHERE true
-         ON CONFLICT (day, host) DO UPDATE SET valid_to = excluded.valid_to, issuer = excluded.issuer`,
+         ON CONFLICT (day, host) DO UPDATE SET
+           valid_to = excluded.valid_to, issuer = excluded.issuer, problem = excluded.problem`,
       ],
     ]
       .filter(([rows]) => rows.length > 0)

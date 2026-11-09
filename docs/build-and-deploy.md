@@ -107,7 +107,7 @@ Every night at 04:23 in Brazil, the [`Lab`](../.github/workflows/lab.yml) workfl
 - CrUX, the 75th percentile and the shares of good, needs-improvement and poor loads of the last 28 days, for the origin and each page, on phones and on desktops. A page with too few visits has no reading, and that is not an error.
 - Google Search Console, the clicks, impressions and position of each page, query, country and device on the day three days back, the first one whose numbers have settled.
 - Bing Webmaster Tools, the clicks and impressions of each day and of each query.
-- The certificate of `eklund.com.br` and of `gustavo.eklund.com.br`: when it expires and who issued it.
+- The certificate of `eklund.com.br` and of `gustavo.eklund.com.br`, over a connection that validates it as a browser does: when it expires and who issued it, or, when the connection refuses it (expired, not yet valid, for another name, from an unknown authority), the code Node gives the problem, such as `CERT_HAS_EXPIRED`. A refused certificate is a row like any other, so it shows up in the data; a host that does not answer fails the job.
 
 The rows go to `POST /v1/lab` and the reports to `PUT /v1/lab/report/<key>`, both with the token `LAB_TOKEN`. What a batch may hold is [`tests/contract/schemas/lab-batch.schema.json`](../tests/contract/schemas/lab-batch.schema.json), checked by the tool's tests and by the collector. A source whose key is missing is left out with a note in the log, and a source that fails makes the job fail after the others are sent. Running the workflow again on the same day writes the same rows over the old ones.
 

@@ -262,7 +262,7 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["day", "host", "validTo", "issuer"],
+        "required": ["day", "host", "validTo", "issuer", "problem"],
         "properties": {
           "day": {
             "type": "string",
@@ -272,14 +272,40 @@
             "enum": ["eklund.com.br", "gustavo.eklund.com.br"]
           },
           "validTo": {
-            "type": "integer",
+            "type": ["integer", "null"],
             "minimum": 0,
             "maximum": 4102444800000,
-            "description": "When the certificate expires, in milliseconds since 1970."
+            "description": "When the certificate expires, in milliseconds since 1970; null when the lab's connection refused it."
           },
           "issuer": {
             "type": "string",
             "pattern": "^[^\\p{Cc}]{0,200}$"
+          },
+          "problem": {
+            "type": ["string", "null"],
+            "pattern": "^[A-Z][A-Z0-9_]{2,63}$",
+            "description": "Why the lab's connection refused the certificate, as Node names it (CERT_HAS_EXPIRED, ERR_TLS_CERT_ALTNAME_INVALID); null for a valid one."
+          }
+        },
+        "if": {
+          "properties": {
+            "problem": {
+              "type": "null"
+            }
+          }
+        },
+        "then": {
+          "properties": {
+            "validTo": {
+              "type": "integer"
+            }
+          }
+        },
+        "else": {
+          "properties": {
+            "validTo": {
+              "type": "null"
+            }
           }
         }
       }

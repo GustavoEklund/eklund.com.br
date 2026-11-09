@@ -49,10 +49,13 @@ CREATE TABLE search_row (
   PRIMARY KEY (engine, day, page, query, country, device)
 ) STRICT;
 
+-- The certificate each host presented, or, when the lab's connection refused it, why (the code Node gives, such as
+-- CERT_HAS_EXPIRED): then it has no expiry.
 CREATE TABLE certificate (
   day TEXT NOT NULL,
   host TEXT NOT NULL,
-  valid_to INTEGER NOT NULL,
+  valid_to INTEGER,
   issuer TEXT NOT NULL,
+  problem TEXT,
   PRIMARY KEY (day, host)
 ) STRICT;

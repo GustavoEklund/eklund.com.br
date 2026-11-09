@@ -31,6 +31,8 @@ const URL_OF_PAGE = /^(?:|https:\/\/(?:gustavo\.)?eklund\.com\.br\/[!-~]{0,250})
 /** What someone typed into a search engine, or a certificate's issuer: any script, no control characters. */
 const TEXT = /^[^\p{Cc}]{0,200}$/u;
 const COUNTRY = /^(?:|[a-z]{3})$/;
+/** Why the lab's connection refused a certificate, as Node names it: CERT_HAS_EXPIRED, ERR_TLS_CERT_ALTNAME_INVALID. */
+const PROBLEM = /^[A-Z][A-Z0-9_]{2,63}$/;
 const BATCH_FIELDS = ['v', 'runs', 'field', 'search', 'certificates'];
 const RUN_FIELDS = [
   'day',
@@ -68,7 +70,7 @@ const SEARCH_FIELDS = [
   'impressions',
   'position',
 ];
-const CERTIFICATE_FIELDS = ['day', 'host', 'validTo', 'issuer'];
+const CERTIFICATE_FIELDS = ['day', 'host', 'validTo', 'issuer', 'problem'];
 
 class Refusal extends Error {}
 
@@ -177,13 +179,20 @@ export class LabBatch {
     };
   }
 
+  /** A certificate the lab could read, with its expiry, or one its connection refused, with the problem instead. */
   static #certificate(certificate, where) {
     LabBatch.#fields(certificate, where, CERTIFICATE_FIELDS);
+    const refused = certificate.problem !== null;
+    if (refused !== (certificate.validTo === null))
+      throw new Refusal(`${where} has an expiry or a problem, never both and never neither`);
     return {
       day: LabBatch.#pattern(certificate.day, DAY, `${where}.day`),
       host: LabBatch.#choice(certificate.host, WORDS.HOSTS, `${where}.host`),
-      validTo: LabBatch.#integer(certificate.validTo, LIMITS.validTo, `${where}.validTo`),
+      validTo: refused
+        ? null
+        : LabBatch.#integer(certificate.validTo, LIMITS.validTo, `${where}.validTo`),
       issuer: LabBatch.#pattern(certificate.issuer, TEXT, `${where}.issuer`),
+      problem: refused ? LabBatch.#pattern(certificate.problem, PROBLEM, `${where}.problem`) : null,
     };
   }
 

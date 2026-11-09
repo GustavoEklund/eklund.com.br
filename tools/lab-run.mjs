@@ -269,12 +269,22 @@ export class BingWebmaster {
   }
 }
 
-/** The certificate a host presents: when it expires and who issued it. Read whether or not it is still valid. */
+/**
+ * The certificate a host presents: when it expires and who issued it, read over a connection that validates it as a browser
+ * would. A certificate the connection refuses (expired, not yet valid, for another name, from an unknown authority) is not
+ * an error of the job: its row names the problem, with the code Node gives it, so a broken certificate is stored and seen.
+ */
 export class Certificates {
-  #port;
+  /** The codes OpenSSL and Node give a certificate the connection refused, as opposed to a host that did not answer. */
+  static PROBLEM = /^(?:CERT_|ERR_TLS_CERT_|UNABLE_TO_|DEPTH_ZERO_|SELF_SIGNED_|HOSTNAME_MISMATCH)/;
 
-  constructor({ port = 443 } = {}) {
+  #port;
+  #ca;
+
+  /** `ca` replaces the authorities Node trusts, for a test that runs its own server. */
+  constructor({ port = 443, ca } = {}) {
     this.#port = port;
+    this.#ca = ca;
   }
 
   read(host) {
@@ -283,16 +293,24 @@ export class Certificates {
         host,
         port: this.#port,
         servername: /^[\d.]+$/.test(host) ? undefined : host,
-        rejectUnauthorized: false,
+        ...(this.#ca ? { ca: this.#ca } : {}),
         timeout: 15_000,
       });
       socket.once('secureConnect', () => {
         const { valid_to: validTo, issuer } = socket.getPeerCertificate();
         socket.end();
-        done({ validTo: Date.parse(validTo), issuer: SearchText.of(issuer?.O ?? issuer?.CN) });
+        done({
+          validTo: Date.parse(validTo),
+          issuer: SearchText.of(issuer?.O ?? issuer?.CN),
+          problem: null,
+        });
       });
       socket.once('timeout', () => socket.destroy(new Error(`${host} did not answer in 15 s`)));
-      socket.once('error', fail);
+      socket.once('error', (error) =>
+        Certificates.PROBLEM.test(error.code ?? '')
+          ? done({ validTo: null, issuer: '', problem: error.code })
+          : fail(error),
+      );
     });
   }
 }
@@ -415,9 +433,16 @@ export class LabRun {
       source.rows(Day.before(now, 3)),
     );
     await read('Bing Webmaster Tools', 'BING_API_KEY', bing, 'search', (source) => source.rows());
-    await read('Certificates', 'nothing', certificates, 'certificates', (source) =>
-      Promise.all(HOSTS.map(async (host) => ({ day, host, ...(await source.read(host)) }))),
-    );
+    await read('Certificates', 'nothing', certificates, 'certificates', async (source, fail) => {
+      const rows = [];
+      for (const host of HOSTS)
+        try {
+          rows.push({ day, host, ...(await source.read(host)) });
+        } catch (error) {
+          fail(`${host} did not answer, ${error.message}`);
+        }
+      return rows;
+    });
     for (const batch of LabRun.batches(found)) await this.#sender.send(batch);
     return failed;
   }
