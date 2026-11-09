@@ -19,7 +19,7 @@ const LABEL = /^[ -~]{0,200}$/;
 /** An error message, in whatever language the browser wrote it, without control characters. */
 const MESSAGE = /^[^\p{Cc}]{0,200}$/u;
 /** A path of this site without its query or fragment, `other` for a file from another origin, or nothing. */
-const PATH = /^(?:|other|\/[!-"$->@-~]{0,199})$/;
+const PATH = /^(?:|other|\/(?:(?![#?])[!-~]){0,199})$/;
 const REPORT_FIELDS = [
   'v',
   'view',
