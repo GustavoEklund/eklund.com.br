@@ -81,7 +81,8 @@ source/                    everything that is deployed
   privacidade/ cookies/ termos/   the legal pages in Portuguese, and en/privacy/, en/cookies/, en/terms/ in English: static HTML with
                            one stylesheet, css/legal.css, and the head script of index.html (docs/decisions/0014)
 edge/                      the collector of real visits, a Cloudflare Worker on workers.dev (docs/decisions/0009); no site code
-  src/                     Router, Collector, PageReport and ReportVocabulary (the contract it reads), VisitorAgent, ReportStore (D1),
+  src/                     Router, Collector, PageReport and ReportVocabulary (the contract it reads), VisitorAgent, SendLimit and
+                           DailyCeiling (how much one client may send in a minute, and how many rows a day), ReportStore (D1),
                            Retention (daily totals and deletions), UptimeMonitor and IncidentIssues (the site checked every five
                            minutes, an issue when a page is down), LabInbox, LabBatch and LabStore (what the nightly lab job sends,
                            behind LAB_TOKEN: rows into D1, full reports into R2), Replies, Calendar; the readings (docs/decisions/0013):
