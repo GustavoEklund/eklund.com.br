@@ -1,6 +1,6 @@
 # Keep every tool on the Vite and Vitest copies that Vite+ ships (see https://viteplus.dev/guide/local-cli).
 overrides:
-  vite@*: npm:@voidzero-dev/vite-plus-core@1.3.0
+  vite@*: npm:@voidzero-dev/vite-plus-core@1.4.0
   vitest@*: 5.0.5
   # Stryker's HTTP client asks for a qs that has denial-of-service advisories (GHSA-q8mj-m7cp-5q26, GHSA-x5fp-wj9c-mxmx,
   # GHSA-4mjr-xmp4-gh2g); the fixed line is a drop-in.
