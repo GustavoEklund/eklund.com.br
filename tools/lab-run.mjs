@@ -5,11 +5,10 @@
 // the job fails at the end when a source it could read did not answer, after sending what the others gave.
 // usage: node tools/lab-run.mjs
 //   GOOGLE_API_KEY          PageSpeed Insights and CrUX
-//   GOOGLE_SERVICE_ACCOUNT  the JSON key of a service account that is a user of the Search Console property
+//   GOOGLE_ACCESS_TOKEN     an access token of the service account that is a user of the Search Console property
 //   BING_API_KEY            Bing Webmaster Tools
 //   LAB_TOKEN               the collector's token for the lab routes (required)
 //   LAB_ENDPOINT            the collector, https://eklund.eklund.workers.dev unless set
-import { createSign } from 'node:crypto';
 import { connect } from 'node:tls';
 import { pathToFileURL } from 'node:url';
 
@@ -165,43 +164,29 @@ export class ChromeUxReport {
   }
 }
 
-/** Google Search Console, read as a service account that is a user of the property. */
+/**
+ * Google Search Console, read with an access token of the lab's service account. The workflow gets that token through
+ * Workload Identity Federation (google-github-actions/auth): the account has no key, and the token lasts an hour.
+ */
 export class SearchConsole {
   static PROPERTY = 'sc-domain:eklund.com.br';
-  static SCOPE = 'https://www.googleapis.com/auth/webmasters.readonly';
 
-  #account;
+  #token;
   #fetch;
-  #clock;
 
-  /** `account` is the JSON key of the service account, as Google Cloud downloads it. */
-  constructor({ account, fetch, clock = Date }) {
-    this.#account = account;
+  constructor({ token, fetch }) {
+    this.#token = token;
     this.#fetch = fetch;
-    this.#clock = clock;
   }
 
   /** The rows of one day, by page, query, country and device, in the form the collector takes. */
   async rows(day) {
-    const { access_token: token } = await JsonRequest.send(
-      this.#fetch,
-      'https://oauth2.googleapis.com/token',
-      {
-        method: 'POST',
-        headers: { 'content-type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-          assertion: this.#assertion(),
-        }).toString(),
-      },
-      'Google OAuth',
-    );
     const { rows = [] } = await JsonRequest.send(
       this.#fetch,
       `https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(SearchConsole.PROPERTY)}/searchAnalytics/query`,
       {
         method: 'POST',
-        headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+        headers: { authorization: `Bearer ${this.#token}`, 'content-type': 'application/json' },
         body: JSON.stringify({
           startDate: day,
           endDate: day,
@@ -227,23 +212,6 @@ export class SearchConsole {
         impressions,
         position,
       }));
-  }
-
-  /** A JSON Web Token signed with the account's key (RS256), which Google trades for an access token. */
-  #assertion() {
-    const now = Math.floor(this.#clock.now() / 1_000);
-    const encode = (value) => Buffer.from(JSON.stringify(value)).toString('base64url');
-    const unsigned = `${encode({ alg: 'RS256', typ: 'JWT' })}.${encode({
-      iss: this.#account.client_email,
-      scope: SearchConsole.SCOPE,
-      aud: 'https://oauth2.googleapis.com/token',
-      iat: now,
-      exp: now + 3_600,
-    })}`;
-    const signature = createSign('RSA-SHA256')
-      .update(unsigned)
-      .sign(this.#account.private_key, 'base64url');
-    return `${unsigned}.${signature}`;
   }
 }
 
@@ -392,8 +360,8 @@ export class LabRun {
       sources: {
         pageSpeed: google ? new PageSpeed({ key: google, fetch }) : null,
         crux: google ? new ChromeUxReport({ key: google, fetch }) : null,
-        searchConsole: env.GOOGLE_SERVICE_ACCOUNT
-          ? new SearchConsole({ account: JSON.parse(env.GOOGLE_SERVICE_ACCOUNT), fetch })
+        searchConsole: env.GOOGLE_ACCESS_TOKEN
+          ? new SearchConsole({ token: env.GOOGLE_ACCESS_TOKEN, fetch })
           : null,
         bing: env.BING_API_KEY ? new BingWebmaster({ key: env.BING_API_KEY, fetch }) : null,
         certificates: new Certificates(),
@@ -443,7 +411,7 @@ export class LabRun {
       ).flat(),
     );
     // Search Console needs about two days to settle a day's numbers.
-    await read('Search Console', 'GOOGLE_SERVICE_ACCOUNT', searchConsole, 'search', (source) =>
+    await read('Search Console', 'GOOGLE_ACCESS_TOKEN', searchConsole, 'search', (source) =>
       source.rows(Day.before(now, 3)),
     );
     await read('Bing Webmaster Tools', 'BING_API_KEY', bing, 'search', (source) => source.rows());

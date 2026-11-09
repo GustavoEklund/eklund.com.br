@@ -30,6 +30,7 @@ carga
 catálogo
 ccaa
 certpia
+chromeuxreport
 claude
 cldr
 cloudflare
@@ -84,6 +85,7 @@ hostinger
 hreflang
 hrefs
 hstgr
+iamcredentials
 icom
 ietf
 ihdr
@@ -132,6 +134,7 @@ opsz
 ossf
 pageerror
 pagespeed
+pagespeedonline
 parsererror
 participação
 peucker
@@ -163,6 +166,7 @@ sarif
 sbom
 schemaorg
 scrollers
+searchconsole
 seguir
 segurança
 serviços

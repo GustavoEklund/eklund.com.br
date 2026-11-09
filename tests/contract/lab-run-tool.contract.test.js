@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { createVerify, generateKeyPairSync } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { createServer } from 'node:tls';
 import Ajv from 'ajv';
@@ -200,78 +199,46 @@ describe('ChromeUxReport', () => {
 });
 
 describe('SearchConsole', () => {
-  const { publicKey, privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
-  const account = {
-    client_email: 'lab@eklund-lab.iam.gserviceaccount.com',
-    private_key: privateKey.export({ type: 'pkcs8', format: 'pem' }),
-  };
-
-  it('trades a signed token for access, then reads the day by page, query, country and device', async () => {
+  it('reads the day by page, query, country and device with the access token of the workflow', async () => {
     const asked = [];
     const rows = await new SearchConsole({
-      account,
-      clock,
+      token: 'an-access-token',
       fetch: async (url, init) => {
         asked.push([url, init.method, init.headers, init.body]);
-        return url.startsWith('https://oauth2')
-          ? json({ access_token: 'an-access-token' })
-          : json({
-              rows: [
-                {
-                  keys: ['https://eklund.com.br/', 'gustavo eklund', 'bra', 'MOBILE'],
-                  clicks: 3,
-                  impressions: 12,
-                  ctr: 0.25,
-                  position: 1.5,
-                },
-                {
-                  keys: [
-                    'https://eklund.com.br/en/',
-                    `x\u0007${'y'.repeat(300)}`,
-                    'zzz',
-                    'DESKTOP',
-                  ],
-                  clicks: 0,
-                  impressions: 1,
-                  ctr: 0,
-                  position: 8,
-                },
-                {
-                  keys: ['http://eklund.com.br/', 'old address', 'bra', 'MOBILE'],
-                  clicks: 1,
-                  impressions: 1,
-                  ctr: 1,
-                  position: 1,
-                },
-              ],
-            });
+        return json({
+          rows: [
+            {
+              keys: ['https://eklund.com.br/', 'gustavo eklund', 'bra', 'MOBILE'],
+              clicks: 3,
+              impressions: 12,
+              ctr: 0.25,
+              position: 1.5,
+            },
+            {
+              keys: ['https://eklund.com.br/en/', `x\u0007${'y'.repeat(300)}`, 'zzz', 'DESKTOP'],
+              clicks: 0,
+              impressions: 1,
+              ctr: 0,
+              position: 8,
+            },
+            {
+              keys: ['http://eklund.com.br/', 'old address', 'bra', 'MOBILE'],
+              clicks: 1,
+              impressions: 1,
+              ctr: 1,
+              position: 1,
+            },
+          ],
+        });
       },
     }).rows('2026-11-06');
-    const assertion = new URLSearchParams(asked[0][3]).get('assertion');
-    const [header, claims, signature] = assertion.split('.');
-    const decoded = (part) => JSON.parse(Buffer.from(part, 'base64url').toString('utf8'));
     expect([
-      decoded(header),
-      decoded(claims),
-      createVerify('RSA-SHA256')
-        .update(`${header}.${claims}`)
-        .verify(publicKey, signature, 'base64url'),
       asked.map(([url, method]) => [url, method]),
-      asked[1][2],
-      JSON.parse(asked[1][3]),
+      asked[0][2],
+      JSON.parse(asked[0][3]),
       rows,
     ]).toStrictEqual([
-      { alg: 'RS256', typ: 'JWT' },
-      {
-        iss: 'lab@eklund-lab.iam.gserviceaccount.com',
-        scope: 'https://www.googleapis.com/auth/webmasters.readonly',
-        aud: 'https://oauth2.googleapis.com/token',
-        iat: NOW / 1_000,
-        exp: NOW / 1_000 + 3_600,
-      },
-      true,
       [
-        ['https://oauth2.googleapis.com/token', 'POST'],
         [
           'https://searchconsole.googleapis.com/webmasters/v3/sites/sc-domain%3Aeklund.com.br/searchAnalytics/query',
           'POST',
@@ -314,8 +281,8 @@ describe('SearchConsole', () => {
 
   it('fails when Google refuses the token', async () => {
     await expect(
-      new SearchConsole({ account, clock, fetch: async () => json({}, 400) }).rows('2026-11-06'),
-    ).rejects.toThrow('Google OAuth answered 400');
+      new SearchConsole({ token: 'expired', fetch: async () => json({}, 401) }).rows('2026-11-06'),
+    ).rejects.toThrow('Search Console answered 401');
   });
 });
 
@@ -640,7 +607,7 @@ describe('LabRun', () => {
 
   it('builds a source only for the keys the environment has, and refuses to start without the token', () => {
     const { sources: built } = LabRun.fromEnvironment(
-      { LAB_TOKEN: 't', GOOGLE_API_KEY: 'g' },
+      { LAB_TOKEN: 't', GOOGLE_ACCESS_TOKEN: 'a' },
       fetch,
     );
     expect([
@@ -648,9 +615,9 @@ describe('LabRun', () => {
       LabRun.batches({ runs: [], field: [], search: [], certificates: [] }).length,
     ]).toStrictEqual([
       [
-        ['pageSpeed', 'PageSpeed'],
-        ['crux', 'ChromeUxReport'],
-        ['searchConsole', null],
+        ['pageSpeed', null],
+        ['crux', null],
+        ['searchConsole', 'SearchConsole'],
         ['bing', null],
         ['certificates', 'Certificates'],
       ],

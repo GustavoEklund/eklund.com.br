@@ -126,10 +126,26 @@ The rows go to `POST /v1/lab` and the reports to `PUT /v1/lab/report/<key>`, bot
    pnpm exec wrangler secret put LAB_TOKEN --config edge/wrangler.jsonc
    ```
 
-3. A Google Cloud project with the PageSpeed Insights API, the Chrome UX Report API and the Google Search Console API turned on, an API key limited to the first two, and a service account with a JSON key. The service account needs no role in the project.
-4. The domain property `eklund.com.br` in Search Console, verified with a TXT record in the DNS, with the service account's address added as a user with restricted access.
+3. A Google Cloud project with an API key limited to the PageSpeed Insights API and the Chrome UX Report API, and a service account for Search Console. The organization forbids service account keys, so the workflow signs in as that account through Workload Identity Federation: Google trusts the tokens GitHub gives a job of this repository's `lab` environment, and nothing else. With `PROJECT_ID` and `PROJECT_NUMBER` of the project:
+
+   ```sh
+   gcloud services enable pagespeedonline.googleapis.com chromeuxreport.googleapis.com searchconsole.googleapis.com \
+     iamcredentials.googleapis.com sts.googleapis.com --project PROJECT_ID
+   gcloud iam service-accounts create eklund-lab --display-name "eklund.com.br lab" --project PROJECT_ID
+   gcloud iam workload-identity-pools create github --location global --display-name GitHub --project PROJECT_ID
+   gcloud iam workload-identity-pools providers create-oidc eklund-com-br --location global --workload-identity-pool github \
+     --issuer-uri https://token.actions.githubusercontent.com --attribute-mapping google.subject=assertion.sub \
+     --attribute-condition "assertion.sub == 'repo:GustavoEklund/eklund.com.br:environment:lab'" --project PROJECT_ID
+   gcloud iam service-accounts add-iam-policy-binding eklund-lab@PROJECT_ID.iam.gserviceaccount.com \
+     --role roles/iam.workloadIdentityUser --project PROJECT_ID \
+     --member "principal://iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/github/subject/repo:GustavoEklund/eklund.com.br:environment:lab"
+   ```
+
+   The service account needs no role in the project, and has no key. The provider is `projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/github/providers/eklund-com-br`.
+
+4. The domain property `eklund.com.br` in Search Console, verified with a TXT record in the DNS, with the service account's address (`eklund-lab@PROJECT_ID.iam.gserviceaccount.com`) added as a user with restricted access.
 5. The site in Bing Webmaster Tools (it can be imported from Search Console) and its API key, under Settings, API access.
-6. The `lab` environment of the repository with the four secrets ([`repository-settings.md`](repository-settings.md#the-lab)).
+6. The `lab` environment of the repository, with three secrets and the two variables that name the provider and the service account ([`repository-settings.md`](repository-settings.md#the-lab)).
 
 ### Run the lab by hand
 

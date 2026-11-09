@@ -101,7 +101,7 @@ The token is the one [`build-and-deploy.md`](build-and-deploy.md#set-the-collect
 
 ### The lab
 
-The [`Lab`](../.github/workflows/lab.yml) workflow reads its keys from the secrets of the `lab` environment, which only `main` can use:
+The [`Lab`](../.github/workflows/lab.yml) workflow reads its keys from the secrets of the `lab` environment, which only `main` can use, and signs in to Google for Search Console with the two variables of that environment:
 
 ```sh
 gh api --method PUT repos/GustavoEklund/eklund.com.br/environments/lab \
@@ -110,12 +110,17 @@ gh api --method POST repos/GustavoEklund/eklund.com.br/environments/lab/deployme
 
 # Each command asks for the value; run them in a terminal, where gh can ask
 gh secret set GOOGLE_API_KEY --env lab --repo GustavoEklund/eklund.com.br
-gh secret set GOOGLE_SERVICE_ACCOUNT --env lab --repo GustavoEklund/eklund.com.br < service-account.json
 gh secret set BING_API_KEY --env lab --repo GustavoEklund/eklund.com.br
 gh secret set LAB_TOKEN --env lab --repo GustavoEklund/eklund.com.br
+
+# Not secrets: Google accepts a token only from a job of this repository's lab environment
+gh variable set GOOGLE_WORKLOAD_IDENTITY_PROVIDER --env lab --repo GustavoEklund/eklund.com.br \
+  --body projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/github/providers/eklund-com-br
+gh variable set GOOGLE_SERVICE_ACCOUNT_EMAIL --env lab --repo GustavoEklund/eklund.com.br \
+  --body eklund-lab@PROJECT_ID.iam.gserviceaccount.com
 ```
 
-`GOOGLE_SERVICE_ACCOUNT` is the whole JSON key that Google Cloud downloads for the service account, read from its file; delete the file afterwards. `LAB_TOKEN` is the same value the Worker has ([`build-and-deploy.md`](build-and-deploy.md#set-the-lab-up-once)). A secret left out turns its source off, and the job says so in its log.
+`LAB_TOKEN` is the same value the Worker has. The pool, the provider and the service account are set up once in Google Cloud ([`build-and-deploy.md`](build-and-deploy.md#set-the-lab-up-once)); the job gets an access token to Search Console that lasts an hour, and no key of the account exists. A secret left out turns its source off, and so do the variables, and the job says so in its log.
 
 ## Labels
 
