@@ -5,6 +5,7 @@ import {
   authorizationErrorRedirect,
 } from '@cloudflare/workers-oauth-provider';
 import { Collector } from './collector.js';
+import { DailyCeiling } from './daily-ceiling.js';
 import { GithubSignIn } from './github-sign-in.js';
 import { IncidentIssues } from './incident-issues.js';
 import { LabInbox } from './lab-inbox.js';
@@ -14,6 +15,7 @@ import { ReadingQueries } from './reading-queries.js';
 import { ReportStore } from './report-store.js';
 import { Retention } from './retention.js';
 import { Router } from './router.js';
+import { SendLimit } from './send-limit.js';
 import { UptimeMonitor } from './uptime-monitor.js';
 
 /** The Cron Trigger of the uptime monitor. The other one, once a day, runs the retention. */
@@ -32,7 +34,12 @@ export default {
   fetch(request, env, context) {
     const origins = env.ORIGINS.split(' ');
     if (PUBLIC.test(new URL(request.url).pathname)) {
-      const collector = new Collector({ origins, store: new ReportStore(env.DB) });
+      const collector = new Collector({
+        origins,
+        store: new ReportStore(env.DB),
+        limit: new SendLimit(env.SEND_LIMIT),
+        ceiling: new DailyCeiling(env.DB),
+      });
       const lab = env.LAB_TOKEN
         ? new LabInbox({ token: env.LAB_TOKEN, store: new LabStore(env.DB), reports: env.REPORTS })
         : null;

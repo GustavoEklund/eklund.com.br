@@ -1,6 +1,6 @@
+# A misspelling does not belong here: fix it instead.
 # Words the project uses that no dictionary knows: Banco Central and Pix terms, the names of people and places in the copy,
 # tool and API names, and the unaccented Portuguese words of section anchors and identifiers. One word per line, any case.
-# A misspelling does not belong here: fix it instead.
 acao
 acsp
 actionlint
@@ -156,6 +156,7 @@ prerendering
 privacidade
 ramer
 rasterizes
+ratelimits
 rdfs
 repositorio
 requestable

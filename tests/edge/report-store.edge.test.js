@@ -137,6 +137,31 @@ describe('ReportStore.save, against D1 in workerd', () => {
     ]);
   });
 
+  it('adds the rows of each report to the count of its day, in the same batch', async () => {
+    await store.save(readOf(PageReports.complete()), CONTEXT);
+    await store.save(readOf(PageReports.with((report) => (report.seq = 2))), CONTEXT);
+    await store.save(readOf(PageReports.complete()), { ...CONTEXT, day: '2026-10-30' });
+    expect(await worker.rows('SELECT day, rows FROM daily_writes ORDER BY day')).toStrictEqual([
+      { day: '2026-10-29', rows: 20 },
+      { day: '2026-10-30', rows: 10 },
+    ]);
+  });
+
+  it('counts the visit, its index entry, the count of the day and each vital, event and error of a report', () => {
+    expect([
+      ReportStore.rowsOf(readOf(PageReports.complete())),
+      ReportStore.rowsOf(
+        readOf(
+          PageReports.with((report) => {
+            report.vitals = [];
+            report.events = [];
+            report.errors = [];
+          }),
+        ),
+      ),
+    ]).toStrictEqual([10, 3]);
+  });
+
   it('keeps the longest visibility when an older report arrives last', async () => {
     await store.save(readOf(PageReports.with((report) => (report.visible = 9_000))), CONTEXT);
     await store.save(readOf(PageReports.with((report) => (report.visible = 5_000))), CONTEXT);

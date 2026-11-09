@@ -38,6 +38,21 @@ describe('Replies', () => {
     });
   });
 
+  it('tells a sender that is past a limit how many seconds to wait', async () => {
+    expect(await described(Replies.tooMany(ORIGIN, 60))).toStrictEqual({
+      status: 429,
+      headers: {
+        'access-control-allow-origin': ORIGIN,
+        'cache-control': 'no-store',
+        'content-type': 'text/plain; charset=utf-8',
+        'retry-after': '60',
+        vary: 'Origin',
+        'x-content-type-options': 'nosniff',
+      },
+      body: 'too many reports, try again later\n',
+    });
+  });
+
   it('gives an origin it does not know no CORS header at all', async () => {
     expect(await described(Replies.forbidden())).toStrictEqual({
       status: 403,
