@@ -10,12 +10,13 @@ export class EdgeWorker {
   #server;
   #worker;
 
-  constructor() {
+  /** `vars` override the variables of edge/wrangler.jsonc, such as the pages the uptime monitor checks. */
+  constructor(vars = {}) {
     this.#server = createTestHarness({
       workers: [
         {
           configPath: new URL('../../edge/wrangler.jsonc', import.meta.url),
-          vars: { ORIGINS: `${EdgeWorker.ORIGIN} ${EdgeWorker.MIRROR}` },
+          vars: { ORIGINS: `${EdgeWorker.ORIGIN} ${EdgeWorker.MIRROR}`, ...vars },
         },
       ],
     });
@@ -56,8 +57,9 @@ export class EdgeWorker {
     });
   }
 
-  scheduled(scheduledTime) {
-    return this.#worker.scheduled({ cron: '17 6 * * *', scheduledTime });
+  /** Runs a Cron Trigger: the daily retention unless `cron` names another one. */
+  scheduled(scheduledTime, cron = '17 6 * * *') {
+    return this.#worker.scheduled({ cron, scheduledTime });
   }
 
   async database() {

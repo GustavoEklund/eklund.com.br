@@ -2,11 +2,13 @@ import { Calendar } from './calendar.js';
 
 /**
  * Once a day: the daily totals of the last three days, which late reports can still change, then the deletion of every row
- * past its retention (docs/decisions/0010-privacy-by-the-anpd-guidance.md).
+ * past its retention (docs/decisions/0010-privacy-by-the-anpd-guidance.md). The checks of the uptime monitor follow the
+ * retention of errors.
  */
 export class Retention {
   static RECENT_DAYS = 3;
   static ROW_MONTHS = 13;
+  /** Errors and the checks of the uptime monitor. */
   static ERROR_DAYS = 90;
   static TOTAL_MONTHS = 25;
 
@@ -62,6 +64,17 @@ export class Retention {
        FROM event e JOIN page_view p ON p.id = e.view_id
        WHERE p.day = ?1
        GROUP BY p.day, p.page, p.version, e.name, e.detail`,
+      `INSERT OR REPLACE INTO daily_uptime (day, target, checks, failures, p50_ms, p95_ms)
+       SELECT day, target, count(*), sum(problem IS NOT NULL),
+         min(CASE WHEN rank >= 0.50 * total THEN duration_ms END),
+         min(CASE WHEN rank >= 0.95 * total THEN duration_ms END)
+       FROM (
+         SELECT day, target, problem, duration_ms,
+           row_number() OVER (PARTITION BY day, target ORDER BY duration_ms) AS rank,
+           count(*) OVER (PARTITION BY day, target) AS total
+         FROM uptime_check WHERE day = ?1
+       )
+       GROUP BY day, target`,
       `INSERT OR REPLACE INTO daily_error (day, version, kind, source, message, total)
        SELECT p.day, p.version, e.kind, e.source, e.message, count(*)
        FROM error e JOIN page_view p ON p.id = e.view_id
@@ -78,7 +91,8 @@ export class Retention {
       this.#db.prepare(older('vital')).bind(rows),
       this.#db.prepare(older('event')).bind(rows),
       this.#db.prepare('DELETE FROM page_view WHERE day < ?1').bind(rows),
-      ...['daily_view', 'daily_vital', 'daily_event', 'daily_error'].map((table) =>
+      this.#db.prepare('DELETE FROM uptime_check WHERE day < ?1').bind(errors),
+      ...['daily_view', 'daily_vital', 'daily_event', 'daily_error', 'daily_uptime'].map((table) =>
         this.#db.prepare(`DELETE FROM ${table} WHERE day < ?1`).bind(totals),
       ),
     ];

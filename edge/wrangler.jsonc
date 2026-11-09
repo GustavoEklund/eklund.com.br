@@ -18,8 +18,14 @@
       "migrations_dir": "migrations",
     },
   ],
-  // The daily totals and the retention, at a quiet hour for Brazil.
-  "triggers": { "crons": ["17 6 * * *"] },
-  // The origins whose pages may send reports, separated by spaces. Tests and local runs add their own.
-  "vars": { "ORIGINS": "https://eklund.com.br https://gustavo.eklund.com.br" },
+  // The uptime monitor every five minutes; the daily totals and the retention at a quiet hour for Brazil.
+  "triggers": { "crons": ["*/5 * * * *", "17 6 * * *"] },
+  "vars": {
+    // The origins whose pages may send reports, separated by spaces. Tests and local runs add their own.
+    "ORIGINS": "https://eklund.com.br https://gustavo.eklund.com.br",
+    // The pages the uptime monitor checks. The first one also names the folder of its release.
+    "UPTIME_TARGETS": "https://eklund.com.br/ https://eklund.com.br/en/ https://gustavo.eklund.com.br/",
+    // Where the issues of an outage go. The token, OPERATIONS_TOKEN, is a secret of the Worker that can only write issues there.
+    "OPERATIONS_REPOSITORY": "GustavoEklund/eklund.com.br-operations",
+  },
 }
