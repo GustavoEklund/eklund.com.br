@@ -1,6 +1,6 @@
 # Privacy
 
-What the site processes, on which legal basis, the balancing test for its legitimate interest, and the record of processing that Art. 37 of the LGPD asks for. The decisions behind it are [0009](decisions/0009-measurement-on-a-cloudflare-worker.md), [0010](decisions/0010-privacy-by-the-anpd-guidance.md) and [0011](decisions/0011-two-libraries-to-measure.md), and visitors read the privacy policy at `/privacidade/` and `/en/privacy/`. This record changes in the same pull request as the code it describes.
+What the site processes, on which legal basis, the balancing test for its legitimate interest, and the record of processing that Art. 37 of the LGPD asks for. The decisions behind it are [0009](decisions/0009-measurement-on-a-cloudflare-worker.md), [0010](decisions/0010-privacy-by-the-anpd-guidance.md) and [0011](decisions/0011-two-libraries-to-measure.md), and visitors read the privacy policy at `/privacidade/` and `/en/privacy/` and the cookie policy at `/cookies/` and `/en/cookies/` ([0014](decisions/0014-legal-pages-written-in-html.md)). This record and those pages change in the same pull request as the code they describe.
 
 ## Who is responsible
 

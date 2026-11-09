@@ -53,8 +53,8 @@ The suffix of a test file is its Vitest project ([`vite.config.js`](vite.config.
 
 `/` is the Portuguese page and `/en/` the English one, and the language also switches in place without a reload ([`docs/internationalization.md`](docs/internationalization.md)).
 
-- Text a visitor reads lives only in `source/js/i18n/locales/pt-br.js` and `en-us.js`, which have the same keys. Markup takes it through `data-i18n`, `data-i18n-html` and `data-i18n-attr`, and code through `translator.t()`, `translator.plural()` and `translator.bind()`. No sentence in either language goes in any other `.js` file.
-- `source/en/index.html` and the default text inside `source/index.html` are generated. After editing a dictionary or `index.html`, run `node tools/i18n-check.mjs --fix-html`, and never edit `en/index.html` by hand.
+- Text a visitor reads lives only in `source/js/i18n/locales/pt-br.js` and `en-us.js`, which have the same keys, except the legal pages (`privacidade/`, `cookies/`, `termos/` and their English pages under `en/`), each written in HTML in its own language ([0014](docs/decisions/0014-legal-pages-written-in-html.md)). Markup takes it through `data-i18n`, `data-i18n-html` and `data-i18n-attr`, and code through `translator.t()`, `translator.plural()` and `translator.bind()`. No sentence in either language goes in any other `.js` file.
+- `source/en/index.html` and the default text inside `source/index.html` are generated. After editing a dictionary or `index.html`, run `node tools/i18n-check.mjs --fix-html`, and never edit `en/index.html` by hand. The same command copies the head script of `index.html` into the legal pages.
 - Numbers and dates go through `Formatter` (`shared/format.js`). An architecture test allows `Intl` only there and in `i18n/`, and locale tags only in `i18n/`.
 - When copy, fonts or layout change the height of a section, run `node tools/measure-sections.mjs --write` (it takes several minutes). It regenerates the `contain-intrinsic-size` block in `css/foundation/layout.css`, and the layout-stability E2E test fails until that block is current.
 
