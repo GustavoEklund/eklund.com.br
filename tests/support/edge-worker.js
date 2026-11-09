@@ -4,6 +4,8 @@ import { createTestHarness } from 'wrangler';
 export class EdgeWorker {
   static ORIGIN = 'https://eklund.com.br';
   static MIRROR = 'https://gustavo.eklund.com.br';
+  /** Where the tests reach the Worker, and so the resource its tokens are bound to. */
+  static WORKER = 'https://eklund.example.workers.dev';
   /** The time it takes workerd to start on a slow CI machine. */
   static START_TIMEOUT_MS = 60_000;
 
@@ -16,7 +18,11 @@ export class EdgeWorker {
       workers: [
         {
           configPath: new URL('../../edge/wrangler.jsonc', import.meta.url),
-          vars: { ORIGINS: `${EdgeWorker.ORIGIN} ${EdgeWorker.MIRROR}`, ...vars },
+          vars: {
+            ORIGINS: `${EdgeWorker.ORIGIN} ${EdgeWorker.MIRROR}`,
+            READING_RESOURCE: `${EdgeWorker.WORKER}/`,
+            ...vars,
+          },
         },
       ],
     });
@@ -38,7 +44,7 @@ export class EdgeWorker {
   }
 
   fetch(path, init = {}) {
-    return this.#worker.fetch(`https://eklund.example.workers.dev${path}`, init);
+    return this.#worker.fetch(`${EdgeWorker.WORKER}${path}`, init);
   }
 
   /** A report as a page would send it: a plain-text POST from the site's origin, by a phone in Brazil. */

@@ -1,6 +1,6 @@
 # 0011. Two libraries run in the browser, both to measure the site
 
-Status: accepted, 2026-10-28. It amends [0001](0001-no-framework-everything-is-a-class.md) and [0007](0007-supply-chain-policy.md).
+Status: accepted, 2026-10-28. It amends [0001](0001-no-framework-everything-is-a-class.md) and [0007](0007-supply-chain-policy.md). Amended by [0013](0013-reading-the-data-without-the-agents-sdk.md): the Worker reads its data without the Agents SDK.
 
 ## Context
 

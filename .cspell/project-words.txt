@@ -22,6 +22,7 @@ axxb
 badware
 bing
 bingbot
+biserial
 bitangent
 branas
 brulee
@@ -31,6 +32,7 @@ catálogo
 ccaa
 certpia
 chromeuxreport
+cimd
 claude
 cldr
 cloudflare
@@ -55,6 +57,7 @@ easylist
 easyprivacy
 eklund
 embedly
+erfc
 esatto
 esbuild
 etdjw
@@ -103,6 +106,7 @@ klingon
 kubernetes
 labelledby
 laravel
+lentz
 lerp
 lgpd
 lhci
@@ -113,12 +117,14 @@ linkedin
 longtask
 lowp
 lycheeverse
+mann
 mbit
 mediump
 mensageria
 microsservicos
 milhões
 mobi
+modelcontextprotocol
 monday
 networkidle
 noext
@@ -126,6 +132,7 @@ noopener
 nosniff
 numeros
 nums
+octocat
 oklab
 oklch
 okto
@@ -139,6 +146,7 @@ parsererror
 participação
 peucker
 pibr
+pkce
 playhead
 portugues
 português
@@ -201,6 +209,7 @@ wdth
 webgl
 webp
 whatsapp
+whitney
 workerd
 xmld
 zizmor

@@ -7,6 +7,7 @@ What the site processes, on which legal basis, the balancing test for its legiti
 - **Controller.** Gustavo Eklund, Taubaté-SP, Brazil. A small processing agent under the ANPD's Resolution 2/2022, which needs no data protection officer, only a channel.
 - **Channel.** gustavo+privacidade@eklund.com.br, answered within 15 days (Art. 19, II).
 - **Operator.** Cloudflare runs the collector and keeps its data in the EU jurisdiction, which Brazil has recognized as adequate since 26 January 2026.
+- **Who reads it.** Only the controller, through the Worker's read-only MCP server and JSON API after a GitHub sign-in that admits one account ([0013](decisions/0013-reading-the-data-without-the-agents-sdk.md)). The readings return totals, percentiles and tests, never the row of a single visit. What an AI agent reads there, such as Claude Code, goes to its provider as part of the conversation. Cloudflare KV keeps only what that sign-in needs: the clients that registered, the grants with the controller's GitHub login, and the tokens.
 - **Host.** Hostinger serves the pages. Like any host, its servers and its CDN see the address of each request, and the site does not read those logs.
 
 ## What is processed

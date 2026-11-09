@@ -21,6 +21,9 @@
   // The full Lighthouse report of each median run of the lab job, under lab/<day>/. Created in the EU jurisdiction:
   // `wrangler r2 bucket create eklund --jurisdiction eu`.
   "r2_buckets": [{ "binding": "REPORTS", "bucket_name": "eklund", "jurisdiction": "eu" }],
+  // The clients, grants and tokens of the OAuth provider that guards /mcp and /api/v1. Created with
+  // `wrangler kv namespace create OAUTH_KV`; KV has no jurisdiction, and nothing in it is about a visitor.
+  "kv_namespaces": [{ "binding": "OAUTH_KV", "id": "78f36fc5c15745ca9371fa8636790116" }],
   // The uptime monitor every five minutes; the daily totals and the retention at a quiet hour for Brazil.
   "triggers": { "crons": ["*/5 * * * *", "17 6 * * *"] },
   "vars": {
@@ -31,5 +34,10 @@
     // Where the issues of an outage go. The token, OPERATIONS_TOKEN, is a secret of the Worker that can only write issues there.
     "OPERATIONS_REPOSITORY": "GustavoEklund/eklund.com.br-operations",
     // LAB_TOKEN, a secret of the Worker, opens /v1/lab to the nightly lab job. Without it, the lab routes answer 404.
+    // What the tokens of the readings are bound to: the Worker's own origin, so one token reads /mcp and /api/v1.
+    "READING_RESOURCE": "https://eklund.eklund.workers.dev/",
+    // The GitHub accounts that may read the measurements, separated by spaces. The OAuth App's GITHUB_CLIENT_ID and
+    // GITHUB_CLIENT_SECRET are secrets of the Worker; without them, signing in answers 503.
+    "ALLOWED_GITHUB_LOGINS": "GustavoEklund",
   },
 }

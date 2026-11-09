@@ -82,10 +82,14 @@ edge/                      the collector of real visits, a Cloudflare Worker on 
   src/                     Router, Collector, PageReport and ReportVocabulary (the contract it reads), VisitorAgent, ReportStore (D1),
                            Retention (daily totals and deletions), UptimeMonitor and IncidentIssues (the site checked every five
                            minutes, an issue when a page is down), LabInbox, LabBatch and LabStore (what the nightly lab job sends,
-                           behind LAB_TOKEN: rows into D1, full reports into R2), Replies, Calendar; index.js wires them to the requests
-                           and the Cron Triggers
+                           behind LAB_TOKEN: rows into D1, full reports into R2), Replies, Calendar; the readings (docs/decisions/0013):
+                           GithubSignIn (the OAuth sign-in through GitHub), ReadingHandler (/mcp and /api/v1 for an allowed login),
+                           ReadingServer (the MCP tools), ReadingApi (the same as JSON), ReadingInputs (their closed inputs),
+                           ReadingQueries (read-only D1), MannWhitney, ChangePoints and Sample; index.js wires them to the requests
+                           and the Cron Triggers, with the OAuth provider in front of everything but the public routes
   migrations/              the D1 schema, applied by wrangler before each deploy
-  wrangler.jsonc           the Worker: D1 and R2 in the EU jurisdiction, the Cron Triggers, the origins that may send, no request logs
+  wrangler.jsonc           the Worker: D1 and R2 in the EU jurisdiction, KV for the OAuth provider, the Cron Triggers, the origins
+                           that may send, the GitHub logins that may read, no request logs
 tests/
   js/<feature>/<module>.<kind>.test.js   unit, property and component tests, beside the module they test
   edge/<module>.edge.test.js             the collector's tests, beside its modules; the Worker runs in workerd through wrangler

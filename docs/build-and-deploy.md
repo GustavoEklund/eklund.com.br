@@ -183,6 +183,38 @@ pnpm run test:edge       # its tests, with the Worker in workerd
 pnpm exec wrangler dev --config edge/wrangler.jsonc --var LAB_TOKEN:local   # the same, with the lab routes open to the token local
 ```
 
+## The readings
+
+The Worker serves what it has stored to an AI agent, and to me, at two addresses ([0013](decisions/0013-reading-the-data-without-the-agents-sdk.md)):
+
+- `https://eklund.eklund.workers.dev/mcp`, a read-only MCP server with twelve tools: `overview`, `vitals`, `compare_vitals`, `events`, `errors`, `uptime`, `lab`, `compare_lab`, `lab_change_points`, `crux`, `search` and `certificates`.
+- `https://eklund.eklund.workers.dev/api/v1/<tool>?…`, the same readings as JSON, with the tool's inputs as query parameters. `GET /api/v1` lists them.
+
+Both need a token of the OAuth provider in front of the Worker, and it only issues one after a GitHub sign-in by a login of `ALLOWED_GITHUB_LOGINS` in [`edge/wrangler.jsonc`](../edge/wrangler.jsonc). An MCP client registers itself, opens a page that names it and asks for consent, and goes through GitHub. The token lasts an hour, and the client renews it for 30 days. Every input is a closed list, a day or a version, and every answer says how large its sample is and whether that reaches the minimum of `Sample`: 20 values in each group of a comparison, 14 nights in a series.
+
+### Set the readings up once
+
+1. The KV namespace where the OAuth provider keeps clients, grants and tokens, whose id then goes into `edge/wrangler.jsonc` in place of the zeros. KV has no jurisdiction, and nothing in it is about a visitor.
+
+   ```sh
+   pnpm exec wrangler kv namespace create OAUTH_KV
+   ```
+
+2. A GitHub OAuth App, under Settings, Developer settings, OAuth Apps: homepage `https://eklund.eklund.workers.dev/`, callback URL `https://eklund.eklund.workers.dev/callback`. It asks for no scope, so it reads only the public profile. Its client id and a new client secret go to the Worker; without them, signing in answers 503.
+
+   ```sh
+   pnpm exec wrangler secret put GITHUB_CLIENT_ID --config edge/wrangler.jsonc
+   pnpm exec wrangler secret put GITHUB_CLIENT_SECRET --config edge/wrangler.jsonc
+   ```
+
+### Read with Claude Code
+
+```sh
+claude mcp add --transport http eklund https://eklund.eklund.workers.dev/mcp
+```
+
+The first use opens the consent page in the browser. The JSON API takes the same tokens, as `Authorization: Bearer <token>`, from any OAuth client that registers itself and signs in the same way. Removing a login from `ALLOWED_GITHUB_LOGINS` and deploying shuts its tokens out at once, because each request checks the login again.
+
 ## Lighthouse
 
 CI runs Lighthouse on the production build, mobile profile, five times on `/` and five times on `/en/`. [`tools/production-server.mjs`](../tools/production-server.mjs) serves the build the way the hosting does: HTTP/2 over TLS, brotli, and the headers and cache rules of the `.htaccess` files. Every assertion reads the median run, the one whose performance metrics sit in the middle, and not the best of the five.

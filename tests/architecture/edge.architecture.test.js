@@ -50,14 +50,19 @@ describe('the collector of edge/', () => {
     expect(loose).toStrictEqual([]);
   });
 
-  it('imports only its own modules: nothing from the site, the tools or a package', () => {
+  it('imports only its own modules and the three packages of the readings: nothing from the site or the tools', () => {
     expect(
       MODULES.flatMap((path) =>
         EdgeSource.importsOf(path)
           .filter((specifier) => !/^\.\/[a-z0-9-]+\.js$/.test(specifier))
           .map((specifier) => [path, specifier]),
       ),
-    ).toStrictEqual([]);
+    ).toStrictEqual([
+      ['src/index.js', '@cloudflare/workers-oauth-provider'],
+      ['src/reading-handler.js', '@modelcontextprotocol/server'],
+      ['src/reading-inputs.js', 'zod'],
+      ['src/reading-server.js', '@modelcontextprotocol/server'],
+    ]);
   });
 
   it('keeps a test for each module, beside the others in tests/edge, except the entry that the Worker tests cover', () => {
