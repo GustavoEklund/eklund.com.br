@@ -21,7 +21,7 @@ class Site {
   /** The app sets window.eklund when everything is mounted; until then the page is not usable. */
   static async open(page, path) {
     await page.goto(path, { waitUntil: 'domcontentloaded' }).catch((error) => {
-      // The root address sends a reader of English to /en/ from the head of the page, which interrupts this navigation with that one.
+      // The root address sends a visitor who chose English to /en/ from the head of the page, which interrupts this navigation with that one.
       if (!/interrupted by another navigation/.test(error.message)) throw error;
     });
     await page.waitForFunction(() => window.eklund !== undefined, null, { timeout: 30_000 });
@@ -56,6 +56,10 @@ When('o visitante recarrega a página', async function () {
 
 When('o visitante clica em {string} no seletor de idioma', async function (label) {
   await Site.languageLink(this.page, label).click();
+});
+
+When('o visitante aceita a oferta da página em inglês', async function () {
+  await this.page.locator('.language-offer a').click();
 });
 
 When('o visitante clica no botão de tema', async function () {
@@ -97,6 +101,14 @@ Then('a página está em {string}', async function (locale) {
 
 Then('o link {string} do seletor de idioma está marcado como atual', async function (label) {
   await expect(Site.languageLink(this.page, label)).toHaveAttribute('aria-current', 'true');
+});
+
+Then('a oferta da página em inglês está visível', async function () {
+  await expect(this.page.locator('.language-offer')).toBeVisible();
+});
+
+Then('a oferta da página em inglês está escondida', async function () {
+  await expect(this.page.locator('.language-offer')).toBeHidden();
 });
 
 Then('o endereço é {string}', async function (path) {

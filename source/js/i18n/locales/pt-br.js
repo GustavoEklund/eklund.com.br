@@ -29,6 +29,14 @@ export const PT_BR = {
     language: 'Idioma',
   },
 
+  // The offer of the English page on the Portuguese one (0012): English in both dictionaries, for a reader of English.
+  languageOffer: {
+    label: 'English version',
+    text: 'I also wrote this page in English.',
+    accept: 'Read it in English',
+    decline: 'Stay in Portuguese',
+  },
+
   scrollbar: {
     hero: 'início',
     status: 'status',

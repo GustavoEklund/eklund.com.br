@@ -98,6 +98,11 @@ try {
       () =>
         document.documentElement.classList.contains('fonts-ready') && window.eklund !== undefined,
     );
+    // The offer of the English page shows only to a browser in English (0012); it is shown here so its colors are measured too.
+    await page.evaluate(() => {
+      const offer = document.querySelector('.language-offer');
+      if (offer) offer.hidden = false;
+    });
     const sweep = new ContrastSweep(page);
     await sweep.prepare();
     const all = {};

@@ -4,6 +4,7 @@ import { SiteSource } from '../../support/site-source.js';
 import { HeadScript } from '../../../support/head-script.js';
 
 const { Locale } = await SiteSource.load('js/i18n/locale.js');
+const { LanguageOffer } = await SiteSource.load('js/i18n/language-offer.js');
 const GOOGLEBOT = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)';
 
 const visitorAt = (address, saved, languages, userAgent) => {
@@ -35,6 +36,22 @@ Given(
 
 Given('um robô de busca em {string} com o navegador com {string}', function (address, languages) {
   this.visitor = visitorAt(address, '', languages, GOOGLEBOT);
+});
+
+Given(
+  'um visitante da página {string}, com a escolha salva {string} e o navegador com {string}',
+  function (page, saved, languages) {
+    this.offerVisitor = {
+      page,
+      chosen: Locale.normalize(saved),
+      languages: languages === '' ? [] : languages.split(','),
+      userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/130 Safari/537.36',
+    };
+  },
+);
+
+When('a página termina de abrir', function () {
+  this.offered = LanguageOffer.wanted(this.offerVisitor);
 });
 
 When('o site detecta o idioma', function () {
@@ -76,6 +93,22 @@ Then(
     assert.strictEqual(HeadScript.run(this.visitor).redirectedTo, destination);
   },
 );
+
+Then('a oferta da página em inglês aparece', function () {
+  assert.strictEqual(this.offered, true);
+});
+
+Then('a oferta da página em inglês não aparece', function () {
+  assert.strictEqual(this.offered, false);
+});
+
+Then('a oferta da página em inglês não aparece para ele', function () {
+  const { userAgent, languages } = this.visitor;
+  assert.strictEqual(
+    LanguageOffer.wanted({ page: Locale.detect(this.visitor), chosen: null, languages, userAgent }),
+    false,
+  );
+});
 
 Then('o link é {string}', function (link) {
   assert.strictEqual(this.link, link);

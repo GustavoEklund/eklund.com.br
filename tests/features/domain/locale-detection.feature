@@ -1,7 +1,7 @@
 # language: pt
 @locale
 Funcionalidade: Escolha do idioma do site
-  Cada idioma tem a sua página: "/" em português e "/en/" em inglês. Quem abre a página em português e prefere inglês é levado à página em inglês antes de ver qualquer coisa. O endereço manda; depois vem a escolha salva do visitante e, por último, o idioma do navegador.
+  Cada idioma tem a sua página: "/" em português e "/en/" em inglês. Quem abre a página em português só é levado à página em inglês quando escolheu inglês: pelo endereço ou numa visita anterior. O idioma do navegador sozinho não leva ninguém; ele só decide se a página em português oferece a página em inglês.
 
   Esquema do Cenário: O idioma da página de cada endereço
     Dado a página no endereço "<endereço>"
@@ -34,23 +34,11 @@ Funcionalidade: Escolha do idioma do site
       | /?lang=en               | pt-BR | pt-BR     | /en/               |
       | /?x=1&lang=en&y=2#carga |       | pt-BR     | /en/?x=1&y=2#carga |
 
-    Exemplos: a escolha salva vence o navegador
-      | endereço | salva | navegador | destino |
-      | /        | en-US | pt-BR     | /en/    |
-
-    Exemplos: uma escolha salva que o site não conhece é ignorada
-      | endereço | salva   | navegador | destino |
-      | /        | klingon | en-GB     | /en/    |
-
-    Exemplos: um endereço com um idioma que o site não traduz é ignorado
-      | endereço  | salva | navegador | destino |
-      | /?lang=fr |       | en-GB     | /en/    |
-
-    Exemplos: o navegador decide, pelo primeiro idioma da lista que o site traduz
-      | endereço | salva | navegador   | destino    |
-      | /        |       | en-US       | /en/       |
-      | /        |       | en-GB,pt-BR | /en/       |
-      | /#carga  |       | de,en-AU    | /en/#carga |
+    Exemplos: a escolha salva leva, qualquer que seja o navegador
+      | endereço  | salva | navegador | destino    |
+      | /         | en-US | pt-BR     | /en/       |
+      | /#carga   | en-US | en-US     | /en/#carga |
+      | /?lang=fr | en-US | pt-BR     | /en/       |
 
   Esquema do Cenário: Quem fica na página em português
     Dado um visitante em "<endereço>", com a escolha salva "<salva>" e o navegador com "<navegador>"
@@ -65,14 +53,12 @@ Funcionalidade: Escolha do idioma do site
       | endereço | salva | navegador |
       | /        | pt-BR | en-US     |
 
-    Exemplos: uma escolha salva que o site não conhece não vale
-      | endereço | salva   | navegador |
-      | /        | klingon | pt-BR     |
-
-    Exemplos: o navegador decide, pelo primeiro idioma da lista que o site traduz
-      | endereço | salva | navegador   |
-      | /        |       | pt-PT,en-US |
-      | /        |       | fr-FR,pt-PT |
+    Exemplos: o navegador em inglês não leva ninguém
+      | endereço  | salva   | navegador   |
+      | /         |         | en-US       |
+      | /         |         | en-GB,pt-BR |
+      | /         | klingon | en-GB       |
+      | /?lang=fr |         | en-GB       |
 
     Exemplos: sem nada que o site traduza, o padrão
       | endereço | salva | navegador   |
@@ -84,10 +70,30 @@ Funcionalidade: Escolha do idioma do site
       | /en/     | pt-BR | pt-BR     |
       | /en/     | en-US | en-US     |
 
-  Esquema do Cenário: Um robô de busca fica onde está, para a página em português ser a indexada em "/"
+  Esquema do Cenário: Quem vê a oferta da página em inglês
+    Dado um visitante da página "<página>", com a escolha salva "<salva>" e o navegador com "<navegador>"
+    Quando a página termina de abrir
+    Então a oferta da página em inglês <aparece>
+
+    Exemplos: um navegador que prefere inglês, sem escolha feita
+      | página | salva | navegador   | aparece     |
+      | pt-BR  |       | en-US       | aparece     |
+      | pt-BR  |       | en-GB,pt-BR | aparece     |
+      | pt-BR  |       | de,en-AU    | aparece     |
+
+    Exemplos: quem já escolheu, ou prefere outro idioma, não vê
+      | página | salva | navegador   | aparece     |
+      | pt-BR  | pt-BR | en-US       | não aparece |
+      | pt-BR  | en-US | en-US       | não aparece |
+      | pt-BR  |       | pt-PT,en-US | não aparece |
+      | pt-BR  |       | fr-FR       | não aparece |
+      | en-US  |       | en-US       | não aparece |
+
+  Esquema do Cenário: Um robô de busca fica onde está e não vê a oferta, para a página em português ser a indexada em "/"
     Dado um robô de busca em "<endereço>" com o navegador com "en-US"
     Quando a página começa a abrir
     Então o visitante fica onde está
+    E a oferta da página em inglês não aparece para ele
 
     Exemplos:
       | endereço |

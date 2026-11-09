@@ -31,7 +31,7 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
 
-<!-- Theme, hue and motion before first paint, so nothing flashes. The script has no whitespace before or after it, which the markup minifier of the build would otherwise change, and with it the hash the Content-Security-Policy allows it by. On the Portuguese page it also sends English readers to /en/: those who chose English, or who have not chosen and whose browser prefers it. Crawlers stay. -->
+<!-- Theme, hue and motion before first paint, so nothing flashes. The script has no whitespace before or after it, which the markup minifier of the build would otherwise change, and with it the hash the Content-Security-Policy allows it by. On the Portuguese page it also sends to /en/ the readers who chose English, by ?lang=en or on an earlier visit. The browser language alone sends no one (0012): a browser that prefers English sees an offer of the English page instead. -->
 <script>document.documentElement.classList.add('js');
 let motion, language;
 try {
@@ -45,16 +45,11 @@ try {
 document.documentElement.dataset.motion = motion === 'paused' || motion === 'full' ? motion : matchMedia('(prefers-reduced-motion: reduce)').matches ? 'paused' : 'full';
 if (location.pathname === '/' || location.pathname === '/index.html') {
   const query = new URLSearchParams(location.search);
-  const crawler = /bot|crawl|spider|slurp|facebookexternalhit|preview/i.test(navigator.userAgent);
-  const translated = (tags) => {
-    for (const tag of tags) {
-      const language = String(tag || '').toLowerCase().split(/[-_]/)[0];
-      if (language === 'en' || language === 'pt') return language;
-    }
-    return '';
+  const translated = (tag) => {
+    const language = String(tag || '').toLowerCase().split(/[-_]/)[0];
+    return language === 'en' || language === 'pt' ? language : '';
   };
-  const wants = translated([query.get('lang')]) || translated([language]) || (crawler ? '' : translated(navigator.languages || [navigator.language]));
-  if (wants === 'en') {
+  if ((translated(query.get('lang')) || translated(language)) === 'en') {
     query.delete('lang');
     location.replace('/en/' + (query.toString() ? '?' + query : '') + location.hash);
   }
@@ -69,6 +64,7 @@ if (location.pathname === '/' || location.pathname === '/index.html') {
 <link rel="stylesheet" href="/css/foundation/fonts.css">
 <link rel="stylesheet" href="/css/foundation/layout.css">
 <link rel="stylesheet" href="/css/locale-switcher.css">
+<link rel="stylesheet" href="/css/language-offer.css">
 <link rel="stylesheet" href="/css/foundation/shared-components.css">
 <link rel="stylesheet" href="/css/scrollbar.css">
 <link rel="stylesheet" href="/css/cursor.css">
@@ -116,6 +112,7 @@ if (location.pathname === '/' || location.pathname === '/index.html') {
 <link rel="modulepreload" href="/js/history/history-accordion.js">
 <link rel="modulepreload" href="/js/i18n/dictionaries.js">
 <link rel="modulepreload" href="/js/i18n/document-metadata.js">
+<link rel="modulepreload" href="/js/i18n/language-offer.js">
 <link rel="modulepreload" href="/js/i18n/locale-switcher.js">
 <link rel="modulepreload" href="/js/i18n/locale.js">
 <link rel="modulepreload" href="/js/i18n/locales/en-us.js">
@@ -248,6 +245,9 @@ if (location.pathname === '/' || location.pathname === '/index.html') {
     <button class="icon-button motion-toggle" id="motion-toggle" type="button" aria-pressed="false" data-i18n-attr="aria-label:nav.motionLabel;title:nav.motionTitle" aria-label="Pause animations" title="Pause animations and live updates"><svg class="icon-pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg><svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M8 5.5v13l10-6.5z"/></svg></button>
   </nav>
 </header>
+
+<!-- The offer of the English page, to a browser that prefers English on a first visit (0012). In English on both pages; the script shows it. -->
+<aside class="language-offer" lang="en" hidden data-i18n-attr="aria-label:languageOffer.label" aria-label="English version"><p data-i18n="languageOffer.text">I also wrote this page in English.</p><a href="/en/" data-locale="en-US" hreflang="en" data-i18n="languageOffer.accept">Read it in English</a><button type="button" data-i18n="languageOffer.decline">Stay in Portuguese</button></aside>
 
 <main id="main" tabindex="-1">
   <!-- Hero -->

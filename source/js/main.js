@@ -31,6 +31,7 @@ import { AnchorLinks } from './navigation/anchor-links.js';
 import { Locale } from './i18n/locale.js';
 import { Translator } from './i18n/translator.js';
 import { LocaleSwitcher } from './i18n/locale-switcher.js';
+import { LanguageOffer } from './i18n/language-offer.js';
 import { Dictionaries } from './i18n/dictionaries.js';
 
 const FRAME_RATE_CHIP_INTERVAL_MS = 500;
@@ -90,7 +91,7 @@ class App {
     this.#exposeDebugHandle();
   }
 
-  /** Picks the language, translates the markup, and mounts the switcher. Runs first: every feature renders text. */
+  /** Picks the language, translates the markup, and mounts the switcher and the offer of the English page. Runs first: every feature renders text. */
   #mountLocale() {
     const locale = Locale.detect();
     Formatter.use(locale);
@@ -100,6 +101,19 @@ class App {
       root: Dom.require('.locale-switcher'),
       translator: this.#translator,
       onSelect: (next) => this.setLocale(next),
+    }).install();
+    new LanguageOffer({
+      root: Dom.require('.language-offer'),
+      translator: this.#translator,
+      visitor: {
+        page: locale,
+        chosen: Locale.chosen(),
+        languages: navigator.languages ?? [navigator.language],
+        userAgent: navigator.userAgent,
+      },
+      onAccept: (next) => this.setLocale(next),
+      onDecline: (stay) => Locale.remember(stay),
+      focusAfter: Dom.require('#main'),
     }).install();
   }
 

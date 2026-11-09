@@ -17,6 +17,11 @@ const DICTIONARIES = { 'pt-BR': PT_BR, 'en-US': EN_US };
  */
 const SAME_IN_BOTH_LANGUAGES = [
   'nav.status',
+  // The offer of the English page is for a reader of English on either page (0012).
+  'languageOffer.label',
+  'languageOffer.text',
+  'languageOffer.accept',
+  'languageOffer.decline',
   'scrollbar.status',
   'status.checks.layoutShift.name',
   'trace.meta.spans',
@@ -163,7 +168,7 @@ describe('internationalization', () => {
   });
 
   describe('language of parts', () => {
-    it('marks the elements whose language differs from the rest: the language links and the English metric name, nothing else', () => {
+    it('marks the elements whose language differs from the rest: the language links, the offer of the English page and the English metric name, nothing else', () => {
       expect(
         all('[lang]').map((element) => [
           element.tagName.toLowerCase(),
@@ -173,6 +178,7 @@ describe('internationalization', () => {
         ['html', 'pt-BR'],
         ['a', 'pt-BR'],
         ['a', 'en-US'],
+        ['aside', 'en'],
         ['small', 'en'],
       ]);
       expect(

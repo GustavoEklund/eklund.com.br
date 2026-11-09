@@ -1,14 +1,19 @@
 # language: pt
 @ui
 Funcionalidade: Idioma do site
-  Cada idioma tem a sua página: "/" em português e "/en/" em inglês. O site leva o visitante à página no idioma do navegador, deixa o visitante trocar e lembra da escolha na próxima visita.
+  Cada idioma tem a sua página: "/" em português e "/en/" em inglês. O site abre a página do endereço, oferece a página em inglês a quem tem o navegador em inglês, deixa o visitante trocar e lembra da escolha na próxima visita.
 
-  Cenário: Quem tem o navegador em inglês é levado à página em inglês
+  Cenário: Quem tem o navegador em inglês fica na página em português e recebe a oferta da página em inglês
     Dado que o navegador do visitante está em inglês
     Quando o visitante abre o site
-    Então o endereço é "/en/"
-    E a página está em "en-US"
+    Então o endereço é "/"
+    E a página está em "pt-BR"
+    E a oferta da página em inglês está visível
+    Quando o visitante aceita a oferta da página em inglês
+    Então a página está em "en-US"
+    E o endereço é "/en/"
     E o link "EN" do seletor de idioma está marcado como atual
+    E a oferta da página em inglês está escondida
 
   Cenário: O visitante troca para inglês e a escolha fica salva
     Dado que o navegador do visitante está em português
