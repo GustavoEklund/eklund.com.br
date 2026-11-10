@@ -1,6 +1,6 @@
 # Security policy
 
-This is a static personal website. It has no server code, no accounts, no forms and no cookies, and the page asks no other host for anything. The attack surface is small, and I want to hear about anything that makes it bigger.
+This is a static personal website. It has no accounts, no forms and no cookies, and its host runs no code of mine. The one other host a page talks to is the collector in [`edge/`](edge/), a Cloudflare Worker of mine that receives anonymous measurements of the site ([0009](docs/decisions/0009-measurement-on-a-cloudflare-worker.md)). The attack surface is small, and I want to hear about anything that makes it bigger.
 
 ## Supported versions
 
@@ -34,6 +34,7 @@ In scope:
 - A dependency, a workflow or a build step that lets someone change what is published (see the supply chain notes below).
 - A secret committed to the repository.
 - A flaw in the load test worker that reaches outside the page.
+- A way to make the collector in [`edge/`](edge/) store something outside the contract of what a page sends, or to read its data without the owner's GitHub account.
 
 Out of scope:
 
@@ -52,6 +53,6 @@ If you follow this policy and act in good faith (you do not read or change data 
 
 - A [Content-Security-Policy](docs/web-standards.md#security-headers) that allows only this origin. The one inline script is allowed by its hash, and a test fails when the hash and the script disagree.
 - `Strict-Transport-Security`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` and `Cross-Origin-Opener-Policy`, set from one file and checked by a contract test.
-- No third-party requests, no cookies, no analytics. Fonts, icons and scripts come from the same origin.
+- No cookies and no third-party scripts. Fonts, icons and scripts come from the same origin, and so does the one library the page runs, web-vitals, a copy of its npm file that a test compares byte for byte with the pinned version ([0011](docs/decisions/0011-two-libraries-to-measure.md)). The only request to another host is the report sent to the collector, the one origin `connect-src` adds.
 - Every GitHub Action is pinned to a commit, workflows run with the least permission they need, and CodeQL, dependency review, secret scanning and OpenSSF Scorecard run on the repository ([how](docs/continuous-integration.md#security)).
 - Dependencies are updated by Dependabot after a cool-down, and `pnpm` refuses a version that is less than two days old, one that lost its provenance, and an install script that nobody approved.

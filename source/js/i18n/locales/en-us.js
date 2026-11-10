@@ -166,8 +166,7 @@ export const EN_US = {
       layoutShift: { name: 'Layout shift', detail: 'CLS {value} · worst 5 s window' },
       dependencies: {
         name: 'Dependencies',
-        detail:
-          '0 packages · 0 frameworks · {images} images (logos, lazy) · 0 cookies · 0 trackers',
+        detail: '1 library · 0 frameworks · {images} images (logos, lazy) · 0 cookies · 0 trackers',
       },
       platform: { name: 'Platform' },
       contrast: {
@@ -675,7 +674,8 @@ export const EN_US = {
   },
 
   footer: {
-    stack: 'Built with just HTML, CSS and JavaScript, no frameworks and no libraries ·',
+    stack:
+      'Built with just HTML, CSS and JavaScript, no frameworks. One library, to measure the site: web-vitals ·',
     uncompressed: 'of code, uncompressed ·',
     source: 'Source code on GitHub',
     // The legal pages (0014) are one page per language, so each link names the page of the language on screen.

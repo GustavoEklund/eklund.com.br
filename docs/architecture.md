@@ -1,6 +1,6 @@
 # Architecture
 
-The site is plain HTML, CSS and JavaScript with no framework and no runtime dependency. This page explains how the code is organized and why. For the decisions behind it, see [`decisions/`](decisions/).
+The site is plain HTML, CSS and JavaScript with no framework. The one library it runs is web-vitals, to measure it ([0011](decisions/0011-two-libraries-to-measure.md)). This page explains how the code is organized and why. For the decisions behind it, see [`decisions/`](decisions/).
 
 ## How the pieces fit
 
@@ -21,18 +21,22 @@ flowchart LR
       load["load-test"]
       palette["command-palette"]
       privacy["privacy"]
+      report["field-report"]
       more["history, contact, theme,<br/>cursor, marquee, scrollbar, navigation"]
     end
+    vendor["vendor<br/>web-vitals, as npm ships it"]
     shared["shared<br/>Dom, Formatter, Environment, Preferences,<br/>ThemeColors, RenderLoop, PageReadings"]
     i18n["i18n<br/>Locale, Translator, dictionaries"]
   end
   main --> features
   features --> shared
   features --> i18n
+  report --> vendor
   load -. "messages" .-> worker["pix-engine.worker.js<br/>Web Workers"]
+  main -. "import() when allowed" .-> report
 ```
 
-The arrows are rules, and `tests/architecture` fails when code breaks them: a feature imports only `shared/` and `i18n/`, `shared/` imports nothing of the site, and only `main.js` composes features.
+The arrows are rules, and `tests/architecture` fails when code breaks them: a feature imports only `shared/`, `i18n/` and the libraries of `vendor/`, `shared/` imports nothing of the site, and only `main.js` composes features.
 
 ## The privacy choice
 
@@ -42,7 +46,17 @@ The arrows are rules, and `tests/architecture` fails when code breaks them: a fe
 - The inline script in the head of `index.html` makes the same decision before the first paint and sets `data-privacy="ask"` on the root element, which is what shows the notice, so the notice never moves the layout. `tests/contract/head-script.contract.test.js` checks that the script and `PrivacyChoice` agree in every case.
 - `PrivacyNotice` is the card fixed at the bottom: three buttons of the same size and style and no close button. While it shows, it writes its height to `--privacy-notice-height`, which `privacy.css` turns into `scroll-padding-bottom` on the root and room under the footer, so the focused control and the last link stay above it.
 - `PrivacyDialog` is the second layer, a modal `<dialog>`. The footer link "Privacy preferences" and the command palette open it, and so does the address `/?preferencias` or `/en/?preferences`, which the legal pages link to; the app opens it and takes the query out of the address. Without scripts, the footer link leads to the part of the privacy policy about the choice, and nothing measures.
-- What measures or records later asks `PrivacyChoice` first (`measurementAllowed`, `recordingAllowed`) and follows `onChange`. "Delete my recordings" calls the `recordings` that `App` gives the dialog, `{ held(), deleteAll() }`; until recordings exist, `PrivacyDialog.NO_RECORDINGS` holds none, and the button stays disabled.
+- What measures or records asks `PrivacyChoice` first (`measurementAllowed`, `recordingAllowed`) and follows `onChange`: the measurement below does. "Delete my recordings" calls the `recordings` that `App` gives the dialog, `{ held(), deleteAll() }`; until recordings exist, `PrivacyDialog.NO_RECORDINGS` holds none, and the button stays disabled.
+
+## What the page sends about itself
+
+The anonymous measurement of [0009](decisions/0009-measurement-on-a-cloudflare-worker.md) and [0010](decisions/0010-privacy-by-the-anpd-guidance.md) lives in `field-report/`. What a page may send is `tests/contract/schemas/page-report.schema.json`: a contract test on the collector's side (`page-report.provider`) and one on the page's side (`page-report.consumer`) hold both to it.
+
+- `App` loads `field-report/field-report.js`, and with it web-vitals, through a dynamic import, once the page has loaded and the main thread is idle (`requestIdleCallback`, four seconds at most), and only while `PrivacyChoice.measurementAllowed`. A visitor who refused, or whose browser sends Global Privacy Control, downloads none of it. A refusal later stops it at once (`stop()`), and allowing it again starts it again. The production build turns the module and web-vitals into one chunk of its own, which no page preloads.
+- `FieldReport` puts the parts together: web-vitals' `onLCP`, `onINP`, `onCLS`, `onFCP` and `onTTFB` with attribution, reduced by `VitalSummary` to the fields the contract allows; `PageErrors` for uncaught errors in the site's own files, unhandled rejections, Content-Security-Policy violations, deprecations and interventions; `PageActivity` for the sections reached, the links that leave the site, the first touch of the globe, the map, the trace and the history, and rage clicks; and `record(name, detail, value)`, which `App` calls for what the features do (the palette, its commands, the theme, the color, the language, the pause button, copying the address, the load test). `DeviceRanges` turns the device into ranges, and `ReportText` puts every text and number in the form the collector accepts.
+- `LoadReport` is one page load: a random UUID made in memory (`crypto.randomUUID()`), never stored, and the report that grows as the load goes on, with `seq` counting up. It goes out with `fetch`, as `text/plain` with `keepalive`, no credentials and no referrer, each time the page hides (`visibilitychange`, then `pagehide`), and only when there is something new. Events and errors go once; each metric goes with its latest value. A load restored from the back/forward cache is a new load.
+- `ReportEndpoint` says where: from eklund.com.br and gustavo.eklund.com.br, the collector on workers.dev; from a development server on this machine (plain HTTP on 127.0.0.1), the one `pnpm run edge:dev` runs; from anywhere else, such as the build Lighthouse loads over HTTPS, nowhere, though everything else runs. `tools/site-headers.mjs` reads the same origins for `connect-src`. The end-to-end and BDD suites answer for the local collector and cut off the one online.
+- `SiteVersion` is the release the reports name; `pnpm run changelog release` writes it with `package.json`, and a contract test keeps them equal.
 
 ## What the page measures about itself
 
@@ -87,6 +101,10 @@ source/                    everything that is deployed
                            LoadTestCharts, TerminalLog, WorkerPool, LoadTest
     i18n/                  Locale, Translator, LocaleSwitcher, Dictionaries, locales/pt-br.js, locales/en-us.js
     privacy/               PrivacyChoice, PrivacyNotice, PrivacyDialog (see The privacy choice)
+    field-report/          FieldReport, LoadReport, VitalSummary, PageErrors, PageActivity, DeviceRanges, ReportText,
+                           ReportEndpoint, SiteVersion (see What the page sends about itself)
+    vendor/                web-vitals.attribution.js and its map and license, npm's files as they are, outside the class
+                           rule, the formatter and the rule of a test per module (docs/decisions/0011)
     history/ contact/ command-palette/ theme/ cursor/ hero/ marquee/ scrollbar/ navigation/
   .htaccess                security headers, cache and compression rules for Hostinger
   robots.txt sitemap.xml site.webmanifest icon.svg favicon.ico apple-touch-icon.png .well-known/security.txt .well-known/gpc.json
@@ -136,7 +154,7 @@ playwright.config.js  cucumber.mjs  stryker.config.mjs  .dependency-cruiser.cjs
 ## Conventions
 
 - Code, comments and identifiers in English. Comments only where they add intent.
-- Classes everywhere: dependencies in the constructor, side effects in `mount()` / `install()` / `start()`.
+- Classes everywhere: dependencies in the constructor, side effects in `mount()` / `install()` / `start()`. The one exception is `vendor/`, which holds npm's files as they are.
 - CSS classes are descriptive (`.job-card`, `.status-badge`), state is `is-*`, tokens live in `css/foundation/tokens.css` (`--hue` recolors the whole site).
 - Performance rules: no `backdrop-filter` on fixed elements, no full-screen `mix-blend-mode` overlays, canvas strokes batched, `will-change` on marquee tracks, DOM written only on change, every loop pauses off-screen (`RenderLoop`).
 - Layout-stability rules (CLS is measured live on the status page and stays at 0.000 on a normal load in both languages): no `scroll-behavior: smooth` on the root (it animates the initial fragment jump; `AnchorLinks` does smooth scrolling on clicks instead); every box the JS fills has its final size in the markup or CSS (`viewBox` on the SVG map, `aspect-ratio`/`height` on chart plots, `min-height` on the status components, incident log and trace rows, static summary tiles); the load-test terminal uses `contain: size` so logging never changes the row height; text that depends on the display fonts (hero, marquee, nav) stays hidden until `fonts-ready`; the `contain-intrinsic-size` placeholders of the off-screen sections are content-box heights (Chrome adds the section padding and border on top), follow the width of the window as `calc(A + B vw)` lines between the layout switches, and have English variants under `:lang(en)`; they are generated by `tools/measure-sections.mjs`. Known limit: a deep link such as `/#carga` can still shift, because Chrome scrolls to the fragment while the first layout is unsettled and the display font swaps in.

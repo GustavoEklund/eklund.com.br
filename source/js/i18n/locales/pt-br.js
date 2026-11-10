@@ -170,7 +170,7 @@ export const PT_BR = {
       dependencies: {
         name: 'Dependências',
         detail:
-          '0 pacotes · 0 frameworks · {images} imagens (logos, lazy) · 0 cookies · 0 rastreadores',
+          '1 biblioteca · 0 frameworks · {images} imagens (logos, lazy) · 0 cookies · 0 rastreadores',
       },
       platform: { name: 'Plataforma' },
       contrast: {
@@ -678,7 +678,8 @@ export const PT_BR = {
   },
 
   footer: {
-    stack: 'Feito só com HTML, CSS e JavaScript, sem frameworks e sem bibliotecas ·',
+    stack:
+      'Feito só com HTML, CSS e JavaScript, sem frameworks. Uma biblioteca, para medir o site: web-vitals ·',
     uncompressed: 'de código, sem comprimir ·',
     source: 'Código-fonte no GitHub',
     // The legal pages (0014) are one page per language, so each link names the page of the language on screen.
