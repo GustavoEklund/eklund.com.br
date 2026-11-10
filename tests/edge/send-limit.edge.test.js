@@ -6,6 +6,13 @@ import { PageReports } from '../support/page-reports.js';
 
 /** The SHA-256 of 203.0.113.7, an address kept for documentation, cut to its first 32 hexadecimal digits, made by Node. */
 const ADDRESS_HASH = createHash('sha256').update('203.0.113.7').digest('hex').slice(0, 32);
+/** The binding's window follows the wall clock, so a run too close to the next minute is split in two. */
+const MINUTE_MS = 60_000;
+const MARGIN_MS = 15_000;
+const withinOneWindow = async () => {
+  const left = MINUTE_MS - (Date.now() % MINUTE_MS);
+  if (left < MARGIN_MS) await new Promise((resolve) => setTimeout(resolve, left + 100));
+};
 const requestFrom = (address) =>
   new Request('https://eklund.example.workers.dev/v1/page', {
     method: 'POST',
@@ -54,17 +61,24 @@ describe('the limit of a client, through the whole Worker in workerd', () => {
   afterAll(() => worker.stop());
   beforeEach(() => worker.reset());
 
-  it('takes 60 reports a minute from one address, refuses the next with 429, and still takes another address', async () => {
-    const statuses = [];
-    for (let sent = 0; sent < 61; sent += 1)
-      statuses.push(
-        (await worker.send(PageReports.complete(), { 'cf-connecting-ip': '203.0.113.7' })).status,
-      );
-    const other = await worker.send(PageReports.complete(), { 'cf-connecting-ip': '203.0.113.8' });
-    expect([
-      statuses.filter((status) => status === 204).length,
-      statuses.at(-1),
-      other.status,
-    ]).toStrictEqual([60, 429, 204]);
-  });
+  it(
+    'takes 60 reports a minute from one address, refuses the next with 429, and still takes another address',
+    async () => {
+      await withinOneWindow();
+      const statuses = [];
+      for (let sent = 0; sent < 61; sent += 1)
+        statuses.push(
+          (await worker.send(PageReports.complete(), { 'cf-connecting-ip': '203.0.113.7' })).status,
+        );
+      const other = await worker.send(PageReports.complete(), {
+        'cf-connecting-ip': '203.0.113.8',
+      });
+      expect([
+        statuses.filter((status) => status === 204).length,
+        statuses.at(-1),
+        other.status,
+      ]).toStrictEqual([60, 429, 204]);
+    },
+    MARGIN_MS + 30_000,
+  );
 });
