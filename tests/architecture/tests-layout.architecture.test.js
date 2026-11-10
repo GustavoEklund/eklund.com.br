@@ -123,14 +123,12 @@ describe('where the tests live', () => {
     ]);
   });
 
-  it('mirrors edge/src: every test of tests/edge sits beside a module of the collector with the same name', () => {
+  it('mirrors edge/: every test of tests/edge sits beside a module of the collector or the panel with the same name', () => {
     expect(
       ALL_TESTS.filter((path) => path.startsWith('edge/')).filter(
         (path) =>
           !path.endsWith('.edge.test.js') ||
-          !existsSync(
-            join(EdgeSource.root, 'src', path.slice(5).replace(/\.edge\.test\.js$/, '.js')),
-          ),
+          !EdgeSource.has(path.slice(5).replace(/\.edge\.test\.js$/, '.js')),
       ),
     ).toStrictEqual([]);
   });

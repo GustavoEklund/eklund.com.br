@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { SiteSource } from '../support/site-source.js';
 
@@ -75,5 +75,39 @@ describe('the libraries in source/js/vendor', () => {
       ],
       22,
     ]);
+  });
+});
+
+/**
+ * edge/panel/vendor/ holds rrweb's replayer, which only the owner's panel serves, after its check of the Access token
+ * (docs/decisions/0015-the-panel-behind-cloudflare-access.md); the site never loads it. The Worker imports it as text, so it
+ * is a copy of npm's file, pinned like the site's. After an update: cp node_modules/@rrweb/replay/dist/replay.js
+ * edge/panel/vendor/rrweb-replay.js and cp node_modules/@rrweb/replay/dist/style.css edge/panel/vendor/rrweb-replay.css
+ */
+const PANEL = join(PROJECT, 'edge', 'panel', 'vendor');
+const PANEL_COPIES = [
+  ['rrweb-replay.js', '@rrweb/replay/dist/replay.js'],
+  ['rrweb-replay.css', '@rrweb/replay/dist/style.css'],
+];
+
+describe("rrweb's replayer in edge/panel/vendor", () => {
+  it('is the only thing there, with the license text of rrweb beside it, the same as the copy beside the recorder', () => {
+    expect([
+      readdirSync(PANEL).sort(),
+      readFileSync(join(PANEL, 'rrweb-LICENSE.txt')).equals(SiteSource.bytes(RRWEB_LICENSE)),
+    ]).toStrictEqual([['rrweb-LICENSE.txt', 'rrweb-replay.css', 'rrweb-replay.js'], true]);
+  });
+
+  it('is byte for byte the files of the version that package.json pins, the same version as the recorder', () => {
+    const { version } = JSON.parse(installed('@rrweb/replay/package.json').toString('utf8'));
+    expect([
+      PANEL_COPIES.map(([copy, original]) => [
+        copy,
+        readFileSync(join(PANEL, copy)).equals(installed(original)),
+      ]),
+      MANIFEST.dependencies['@rrweb/replay'] === version,
+      /^\d+\.\d+\.\d+$/.test(version),
+      version === MANIFEST.dependencies['@rrweb/record'],
+    ]).toStrictEqual([PANEL_COPIES.map(([copy]) => [copy, true]), true, true, true]);
   });
 });

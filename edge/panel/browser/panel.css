@@ -1,0 +1,423 @@
+/* The panel's one stylesheet: the site's colors at its default hue, system fonts, and light or dark as the system asks. */
+@layer base, components;
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+    --hue: 128;
+    --bg: light-dark(oklch(97% 0.025 var(--hue)), oklch(13.5% 0.012 265deg));
+    --bg-2: light-dark(oklch(93.5% 0.045 var(--hue)), oklch(17.5% 0.015 265deg));
+    --fg: light-dark(oklch(20% 0.02 265deg), oklch(96% 0.008 100deg));
+    --fg-2: light-dark(oklch(41% 0.02 265deg), oklch(72% 0.014 265deg));
+    --line: light-dark(oklch(85% 0.02 265deg), oklch(30% 0.015 265deg));
+    --accent: light-dark(oklch(55% 0.19 var(--hue)), oklch(88% 0.23 var(--hue)));
+    --accent-2: light-dark(
+      oklch(52% 0.2 calc(var(--hue) + 250)),
+      oklch(76% 0.19 calc(var(--hue) + 250))
+    );
+    --good: light-dark(oklch(55% 0.15 150deg), oklch(75% 0.17 150deg));
+    --middle: light-dark(oklch(65% 0.15 75deg), oklch(82% 0.15 80deg));
+    --poor: light-dark(oklch(55% 0.2 25deg), oklch(70% 0.19 25deg));
+    --series-0: var(--accent);
+    --series-1: var(--accent-2);
+    --series-2: light-dark(oklch(58% 0.17 40deg), oklch(78% 0.15 50deg));
+    --series-3: light-dark(oklch(50% 0.12 300deg), oklch(75% 0.13 310deg));
+    --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font: 15px/1.5 var(--sans);
+  }
+
+  a {
+    color: var(--fg);
+    text-decoration-color: var(--accent);
+    text-underline-offset: 0.2em;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.9em;
+    overflow-wrap: anywhere;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+    margin: 0 0 1rem;
+  }
+
+  h2 {
+    font-size: 1.15rem;
+    margin: 2rem 0 0.75rem;
+  }
+
+  h3 {
+    font-size: 1rem;
+    margin: 1.25rem 0 0.5rem;
+  }
+}
+
+@layer components {
+  .top {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-2);
+  }
+
+  .brand {
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .brand span {
+    color: var(--fg-2);
+    font-weight: 400;
+  }
+
+  .top ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .top a[aria-current='page'] {
+    font-weight: 700;
+    text-decoration-thickness: 2px;
+  }
+
+  .who {
+    margin: 0 0 0 auto;
+    color: var(--fg-2);
+    font-size: 0.85rem;
+  }
+
+  main {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 4rem;
+  }
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: end;
+    margin: 0 0 1rem;
+  }
+
+  .filters label {
+    display: grid;
+    gap: 0.2rem;
+    color: var(--fg-2);
+    font-size: 0.85rem;
+  }
+
+  input,
+  select,
+  button {
+    min-height: 2rem;
+    padding: 0.2rem 0.5rem;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--fg);
+    font: inherit;
+  }
+
+  button {
+    background: var(--accent);
+    color: oklch(20% 0.02 265deg);
+    border-color: transparent;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  button:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    gap: 0.75rem;
+  }
+
+  .tile {
+    display: grid;
+    margin: 0;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--bg-2);
+  }
+
+  .tile span {
+    color: var(--fg-2);
+    font-size: 0.85rem;
+  }
+
+  .tile strong {
+    font-size: 1.5rem;
+  }
+
+  .columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+    gap: 0 1.5rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+  }
+
+  th,
+  td {
+    padding: 0.35rem 0.5rem;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  thead th {
+    color: var(--fg-2);
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  tbody th {
+    font-weight: 600;
+  }
+
+  small,
+  .note,
+  .sample,
+  .empty {
+    color: var(--fg-2);
+  }
+
+  .note,
+  .sample {
+    font-size: 0.85rem;
+  }
+
+  .is-small {
+    color: var(--poor);
+    font-weight: 600;
+  }
+
+  .verdict {
+    font-weight: 600;
+  }
+
+  .chart {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .chart .mark,
+  .meter .mark {
+    fill: var(--accent);
+  }
+
+  .axis line {
+    stroke: var(--line);
+  }
+
+  .axis text,
+  .grid text {
+    fill: var(--fg-2);
+    font-size: 11px;
+  }
+
+  .series polyline {
+    stroke-width: 2;
+  }
+
+  .series-0 polyline,
+  .series-0 circle {
+    stroke: var(--series-0);
+    fill: var(--series-0);
+  }
+
+  .series-1 polyline,
+  .series-1 circle {
+    stroke: var(--series-1);
+    fill: var(--series-1);
+  }
+
+  .series-2 polyline,
+  .series-2 circle {
+    stroke: var(--series-2);
+    fill: var(--series-2);
+  }
+
+  .series-3 polyline,
+  .series-3 circle {
+    stroke: var(--series-3);
+    fill: var(--series-3);
+  }
+
+  .series polyline {
+    fill: none;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.85rem;
+  }
+
+  .legend li::before {
+    content: '';
+    display: inline-block;
+    width: 0.8em;
+    height: 0.8em;
+    margin-right: 0.35em;
+    border-radius: 50%;
+    background: var(--series-0);
+  }
+
+  .legend .series-1::before {
+    background: var(--series-1);
+  }
+
+  .legend .series-2::before {
+    background: var(--series-2);
+  }
+
+  .legend .series-3::before {
+    background: var(--series-3);
+  }
+
+  figure {
+    margin: 1rem 0;
+  }
+
+  .charts figure {
+    max-width: 48rem;
+  }
+
+  figcaption {
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+  }
+
+  .ratings,
+  .meter {
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  .ratings .rating-good {
+    fill: var(--good);
+  }
+
+  .ratings .rating-middle {
+    fill: var(--middle);
+  }
+
+  .ratings .rating-poor {
+    fill: var(--poor);
+  }
+
+  .segment {
+    display: inline-block;
+    margin-right: 0.75rem;
+  }
+
+  .heat {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    gap: 1rem 1.5rem;
+  }
+
+  .grid {
+    width: 100%;
+    max-width: 18rem;
+    height: auto;
+    border: 1px solid var(--line);
+  }
+
+  .grid .cell {
+    fill: var(--poor);
+  }
+
+  .grid .cell-empty {
+    fill: none;
+    stroke: var(--line);
+    stroke-width: 0.5;
+  }
+
+  .grid text {
+    text-anchor: middle;
+    fill: var(--fg);
+    font-size: 9px;
+  }
+
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 2rem;
+    margin: 0 0 1rem;
+  }
+
+  .facts dt {
+    color: var(--fg-2);
+    font-size: 0.8rem;
+  }
+
+  .facts dd {
+    margin: 0;
+  }
+
+  .controls {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .controls .seek {
+    flex: 1;
+  }
+
+  .stage {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: #fff;
+  }
+
+  .stage iframe {
+    border: 0;
+  }
+}

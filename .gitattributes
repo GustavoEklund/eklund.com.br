@@ -15,3 +15,4 @@ source/en/index.html linguist-generated=true
 source/js/globe/land-bitset.js linguist-generated=true
 tools/land.json linguist-generated=true
 source/js/vendor/** linguist-vendored=true
+edge/panel/vendor/** linguist-vendored=true

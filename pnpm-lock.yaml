@@ -180,6 +180,9 @@ importers:
       '@rrweb/record':
         specifier: 2.2.1
         version: 2.2.1
+      '@rrweb/replay':
+        specifier: 2.2.1
+        version: 2.2.1
       web-vitals:
         specifier: 6.2.3
         version: 6.2.3
@@ -1834,6 +1837,9 @@ packages:
 
   '@rrweb/record@2.2.1':
     resolution: {integrity: sha512-1O99qqIujofUh4ajQ1vwaitKIgZ+71sXHn7IeDdNJXBc//EWIyOYkKynonS8f/1JKHkH3gdSIZnX4PCclMVTxA==}
+
+  '@rrweb/replay@2.2.1':
+    resolution: {integrity: sha512-iQVqwp+PMGDU7+7v8Uijw3O7rI0X3FoVztjpre5N5GPQXI3WgPYA/C80qSTLYy1OWzpk4I/sy/jRBr2NdKSEPA==}
 
   '@rrweb/types@2.2.1':
     resolution: {integrity: sha512-GGUGQXekOJ35Ab644SO6iWU7vWpXiGPz1B5egTsPEwNTHv+syXWOoe2rXwB1NQOs64XirHzHqYX6SSYaJme3Cg==}
@@ -5381,6 +5387,11 @@ snapshots:
     dependencies:
       '@rrweb/types': 2.2.1
       '@rrweb/utils': 2.2.1
+      rrweb: 2.2.1
+
+  '@rrweb/replay@2.2.1':
+    dependencies:
+      '@rrweb/types': 2.2.1
       rrweb: 2.2.1
 
   '@rrweb/types@2.2.1': {}
