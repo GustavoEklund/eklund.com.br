@@ -22,16 +22,17 @@ test.describe('the production build', () => {
       health,
     }) => {
       await site.open(path);
+      // The HTML as served: once the page is idle, the measurement's dynamic import adds module preloads to the live DOM.
       const hrefs = (selector, attribute) =>
-        page
-          .locator(selector)
-          .evaluateAll(
-            (elements, name) =>
-              elements.map(
-                (element) => new URL(element.getAttribute(name), location.href).pathname,
-              ),
-            attribute,
-          );
+        page.evaluate(
+          async ([query, name]) => {
+            const html = await (await fetch(location.href)).text();
+            return [
+              ...new DOMParser().parseFromString(html, 'text/html').querySelectorAll(query),
+            ].map((element) => new URL(element.getAttribute(name), location.href).pathname);
+          },
+          [selector, attribute],
+        );
       const hashed = /^\/assets\/main-[\w-]{8}\.(css|js)$/;
       const [stylesheets, scripts, modulePreloads, preloads] = await Promise.all([
         hrefs('link[rel=stylesheet]', 'href'),
