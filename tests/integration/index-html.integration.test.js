@@ -162,13 +162,19 @@ describe('index.html', () => {
       expect(preloaded).toStrictEqual([...preloaded].sort());
     });
 
-    it('leaves out only the worker and its engine, which the page never imports', () => {
+    it('leaves out only the worker and its engine, which the page never imports, and the measurement, which loads later', () => {
       const unreachable = SiteSource.files('js').filter(
         (file) => !SiteSource.reachableFrom('js/main.js').includes(file),
       );
       expect(unreachable).toStrictEqual([
+        ...SiteSource.reachableFrom('js/field-report/field-report.js')
+          .filter((file) => file.startsWith('js/field-report/'))
+          .sort(),
         'js/load-test/pix-engine.js',
         'js/load-test/pix-engine.worker.js',
+        'js/vendor/web-vitals-LICENSE.txt',
+        'js/vendor/web-vitals.attribution.js',
+        'js/vendor/web-vitals.attribution.js.map',
       ]);
     });
   });

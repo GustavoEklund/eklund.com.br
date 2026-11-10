@@ -26,6 +26,7 @@ ignorePaths:
   - pnpm-lock.yaml
   - tools/land.json
   - source/js/globe/land-bitset.js
+  - source/js/vendor/**
   - source/fonts/**
   - source/assets/**/*.svg
   - tests/contract/fixtures/**

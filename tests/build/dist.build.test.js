@@ -14,6 +14,7 @@ import { SiteSource } from '../support/site-source.js';
 /** What the files of one page may weigh once compressed, with a margin over what they weigh today so that growth is a decision. */
 const BUDGET_GZIP_BYTES = {
   'main js': 70_000,
+  'measurement js': 10_500,
   'main css': 18_500,
   'index.html': 14_500,
   'en/index.html': 14_500,
@@ -25,6 +26,7 @@ const HASHED_ASSETS = [
   'esatto-logo-200-x-200-HASH.jpg',
   'fatec-taubate-logo-200-x-200-HASH.jpg',
   'favicon-HASH.ico',
+  'field-report-HASH.js',
   'g8-finance-logo-200-x-200-HASH.jpg',
   'icon-HASH.svg',
   'icons-HASH.svg',
@@ -371,6 +373,22 @@ describe('the production build', () => {
     });
   });
 
+  describe('the measurement', () => {
+    it('is a chunk of its own, with web-vitals inside, that the script imports by its built address and no page preloads', () => {
+      const name = site.hashedAssets().find((entry) => /^field-report-.*\.js$/.test(entry));
+      const main = site.read(
+        `assets/${site.hashedAssets().find((entry) => /^main-.*\.js$/.test(entry))}`,
+      );
+      const pages = ['index.html', 'en/index.html'].map((page) => site.read(page));
+      expect([
+        new RegExp(`import\\([\`"']\\./${name.replace('.', '\\.')}[\`"']\\)`).test(main),
+        site.read(`assets/${name}`).includes('largestShiftTarget'),
+        main.includes('largestShiftTarget'),
+        pages.map((page) => page.includes(name)),
+      ]).toStrictEqual([true, true, false, [false, false]]);
+    });
+  });
+
   describe('the web manifest', () => {
     it('is the manifest as it is written, as data, with each icon named from the root by the address it has in the build, and every icon exists', () => {
       const name = site.hashedAssets().find((entry) => /^site-.*\.webmanifest$/.test(entry));
@@ -402,6 +420,9 @@ describe('the production build', () => {
         `assets/${site.hashedAssets().find((entry) => new RegExp(`^main-.*\\.${extension}$`).test(entry))}`;
       const weights = {
         'main js': site.gzipBytes(main('js')),
+        'measurement js': site.gzipBytes(
+          `assets/${site.hashedAssets().find((entry) => /^field-report-.*\.js$/.test(entry))}`,
+        ),
         'main css': site.gzipBytes(main('css')),
         'index.html': site.gzipBytes('index.html'),
         'en/index.html': site.gzipBytes('en/index.html'),

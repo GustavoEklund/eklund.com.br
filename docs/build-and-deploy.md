@@ -13,7 +13,7 @@ pnpm run screenshots        # redraws the pictures of the README into docs/image
 
 What the build does:
 
-- One JavaScript bundle (Rolldown and the Oxc minifier, for Chrome 123, Edge 123, Firefox 129 and Safari 17.5) with the load test worker next to it, and one stylesheet (Lightning CSS), both named by content hash under `assets/`.
+- One JavaScript bundle (Rolldown and the Oxc minifier, for Chrome 123, Edge 123, Firefox 129 and Safari 17.5) with the load test worker next to it, and one stylesheet (Lightning CSS), both named by content hash under `assets/`. The measurement and web-vitals become one more chunk, which the bundle imports only once the page is idle and the visitor has not refused it ([architecture](architecture.md#what-the-page-sends-about-itself)), so the cold load below does not count it.
 - Fonts, images and the icon sprite are hashed too and never inlined, because the CSP only allows `data:` for images.
 - The markup, the JSON-LD and the web manifest are minified. The inline script in the head stays byte for byte, since the CSP allows it by its hash; the manifest icons point at the built addresses.
 - The hand-written `modulepreload` list is dropped, one bundle needs none.
@@ -227,7 +227,7 @@ A pull request fails when:
 
 - accessibility or SEO drops from 100, or best practices under 90;
 - layout shift goes above 0.02, or the console shows an error;
-- the page weighs more than 360 kB, its scripts more than 70 kB or its fonts more than 200 kB, or it makes more than 12 requests;
+- the page weighs more than 360 kB, its scripts more than 80 kB or its fonts more than 200 kB, or it makes more than 12 requests. The scripts were held to 70 kB until the measurement came: its chunk, web-vitals included, adds about 9 kB once the page is idle, and Lighthouse counts it, since the build it loads over HTTPS measures as a visit does and only sends nowhere;
 - the page cannot be restored from the back/forward cache.
 
 Performance warns below 75, LCP above 2.5 s and TBT above 200 ms. The limits are in [`lighthouserc.json`](../lighthouserc.json). Measured in CI on 2026-10-28, median run of `/`: accessibility 100, SEO 100, best practices 96, performance 80, LCP 2.6 s, TBT 663 ms, layout shift 0, 286 kB in 9 requests (58 kB of script, 185 kB of fonts). On a laptop the same median gives performance 93 and TBT 232 ms: the CI machine is slower, and the blocking time is what moves. The 4 points of best practices are the audit "legible font sizes" (about half of the text is under 12 px, which is a design choice), and the missing performance points are the blocking time described above.

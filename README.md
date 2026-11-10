@@ -37,7 +37,7 @@
 
 This is the code of [eklund.com.br](https://eklund.com.br). I develop payment systems, mostly with Pix, and I wanted the site to show how I work. So the page measures itself, runs a small Pix engine in your browser and explains the architecture of a direct Pix participant, and the code behind it is tested, accessible, secured and public.
 
-It has no framework and no runtime dependency. Every one of its 66 JavaScript modules is a class, the layout of the folders says what the site does, and the standards it claims to meet are checked by tests that fail when they stop being true.
+It has no framework, and one library: web-vitals, which measures how the page loads for real visitors and downloads only for those who did not refuse the measurement. Every one of its 75 JavaScript modules is a class, the layout of the folders says what the site does, and the standards it claims to meet are checked by tests that fail when they stop being true.
 
 ## A tour of the page
 
@@ -72,7 +72,7 @@ Each number can be checked with the command beside it.
 
 | What                        | Value                                                                                                                                                                  | Check it                                                       |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| Runtime dependencies        | **0**: no framework, no library, no cookies, no request to another host                                                                                                | `pnpm run build` and open `dist/`                              |
+| Runtime dependencies        | **1**: web-vitals, to measure the site; no framework, no cookies, and one other host, the collector of the measurement                                                 | `pnpm run build` and open `dist/`                              |
 | Cold load, production build | **7** requests, **282 kB** over the wire (brotli), 185 kB of it fonts                                                                                                  | `pnpm run measure:build`                                       |
 | Layout shift                | **0**, in both languages and on a phone                                                                                                                                | `pnpm run test:e2e`                                            |
 | Lighthouse, mobile profile  | **100** accessibility, **100** SEO, **96** best practices, **80** performance, median of five                                                                          | the `Lighthouse` job of CI                                     |

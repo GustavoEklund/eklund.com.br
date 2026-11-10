@@ -51,8 +51,10 @@ const prepare = ({ hardwareConcurrency = 3, reduced = false, stages = null } = {
     results.push(result);
     finish(result);
   };
-  const loadTest = new LoadTest({ root: fixture.root, onFinished, translator });
-  return { fixture, translator, script, loadTest, results, finished };
+  const starts = [];
+  const onStart = () => starts.push(results.length);
+  const loadTest = new LoadTest({ root: fixture.root, onStart, onFinished, translator });
+  return { fixture, translator, script, loadTest, results, starts, finished };
 };
 const release = () => {
   delete document.documentElement.dataset.motion;
@@ -94,6 +96,10 @@ describe('LoadTest, a complete 20-second run', () => {
     await context.loadTest.run();
   });
   afterAll(release);
+
+  it('says it started once, before it finished', () => {
+    expect([context.starts, context.results.length]).toStrictEqual([[0], 1]);
+  });
 
   it('writes the whole k6-style log, in order, in the language of the page: header, warm-up, a progress line every other second, the five checks and the metrics', () => {
     expect(context.fixture.lines()).toStrictEqual([

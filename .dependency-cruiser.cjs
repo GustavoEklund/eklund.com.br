@@ -1,6 +1,6 @@
 /** Architecture rules for source/js: Screaming Architecture with features that only know shared/ and i18n/. */
 const FEATURES =
-  'architecture-map|command-palette|contact|cursor|dashboard|globe|hero|history|load-test|marquee|navigation|privacy|scrollbar|status-page|theme|trace-viewer';
+  'architecture-map|command-palette|contact|cursor|dashboard|field-report|globe|hero|history|load-test|marquee|navigation|privacy|scrollbar|status-page|theme|trace-viewer';
 
 module.exports = {
   forbidden: [
@@ -70,7 +70,8 @@ module.exports = {
   ],
   options: {
     doNotFollow: { path: 'node_modules' },
-    exclude: { path: '^source/js/globe/land-bitset\\.js$' },
+    // The generated land data, and the libraries of vendor/, which are npm's files as they are (0011).
+    exclude: { path: ['^source/js/globe/land-bitset\\.js$', '^source/js/vendor/'] },
     tsPreCompilationDeps: false,
     combinedDependencies: false,
   },

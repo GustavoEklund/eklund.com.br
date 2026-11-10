@@ -177,6 +177,9 @@ importers:
       '@modelcontextprotocol/server':
         specifier: 2.4.0
         version: 2.4.0
+      web-vitals:
+        specifier: 6.2.3
+        version: 6.2.3
       zod:
         specifier: 4.6.7
         version: 4.6.7
@@ -3886,6 +3889,9 @@ packages:
   weapon-regex@2.0.6:
     resolution: {integrity: sha512-iJC2vqYp+bh3r4X6zjuP0h65XqXjgUX3nJgmhj0PQMrdhAbUwCfN76CSTEEQqV3G7468kjOJ69PmytTG8l/8Gg==}
 
+  web-vitals@6.2.3:
+    resolution: {integrity: sha512-Dmy+vdO1UPMqXiAtZSNayhl4f794Bxfd94W4HIj2HlYtczEQfEOon969memlcpcHrTuOKLa5baFjX7WbgmOq+A==}
+
   whatwg-mimetype@3.0.0:
     resolution: {integrity: sha512-nt+N2dzIutVRxARx1nghPKGv1xHikU7HKdfafKkLNLindmPU/ch3U31NOCGGA/dmPcmb1VlofO0vnKAcsm0o/Q==}
     engines: {node: '>=12'}
@@ -7424,6 +7430,8 @@ snapshots:
   watskeburt@6.0.0: {}
 
   weapon-regex@2.0.6: {}
+
+  web-vitals@6.2.3: {}
 
   whatwg-mimetype@3.0.0: {}
 

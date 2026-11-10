@@ -40,6 +40,8 @@ import { PrivacyDialog } from './privacy/privacy-dialog.js';
 const FRAME_RATE_CHIP_INTERVAL_MS = 500;
 const TRACE_RENDER_DEBOUNCE_MS = 150;
 const LOCALE_FADE_MS = 240;
+/** How long the measurement waits for an idle moment after the load before it starts anyway. */
+const MEASUREMENT_IDLE_TIMEOUT_MS = 4_000;
 const SECTIONS = [
   { labelKey: 'scrollbar.hero', selector: '#hero' },
   { labelKey: 'scrollbar.status', selector: '#status' },
@@ -53,6 +55,21 @@ const LINKS = {
   github: 'https://github.com/GustavoEklund',
   repository: 'https://github.com/GustavoEklund/eklund.com.br',
   linkedin: 'https://www.linkedin.com/in/gustavo-eklund',
+};
+/** What the measurement reads from the page: the sections, the links that leave it, and the parts that respond to the pointer. */
+const MEASURED = {
+  sections: SECTIONS.map(({ selector }) => selector.slice(1)).filter((id) => id !== 'hero'),
+  links: [
+    ['source', LINKS.repository],
+    ['github', LINKS.github],
+    ['linkedin', LINKS.linkedin],
+  ],
+  regions: [
+    ['globe', '#globe'],
+    ['architecture-map', '#architecture'],
+    ['trace-viewer', '#trace-viewer'],
+    ['history', '#history'],
+  ],
 };
 
 /** Composition root: builds every feature, wires them together, exposes a debug handle. */
@@ -78,6 +95,8 @@ class App {
   #history;
   #privacy;
   #privacyDialog;
+  #measurement = null;
+  #measurementLoading = false;
   #traceRenderTimer = 0;
 
   start() {
@@ -93,6 +112,7 @@ class App {
     this.#mountNavigation();
     this.#mountChips();
     this.#motion.onChange(() => this.#syncMotion());
+    this.#mountMeasurement();
     performance.mark('app:ready');
     this.#exposeDebugHandle();
   }
@@ -103,6 +123,7 @@ class App {
     Formatter.use(locale);
     this.#translator = new Translator({ dictionaries: Dictionaries.BY_LOCALE, locale }).mount();
     this.#translator.onChange((next) => this.#onLocaleChange(next));
+    this.#translator.onChange((next) => this.#record('language', next));
     new LocaleSwitcher({
       root: Dom.require('.locale-switcher'),
       translator: this.#translator,
@@ -159,6 +180,7 @@ class App {
   #mountMotion() {
     this.#announcer = new LiveAnnouncer(Dom.require('#announcer'));
     this.#motion = new MotionToggle({ button: Dom.require('#motion-toggle') }).mount();
+    this.#motion.onChange((paused) => this.#record('motion', paused ? 'paused' : 'full'));
   }
 
   /**
@@ -189,6 +211,53 @@ class App {
     }
   }
 
+  /**
+   * The anonymous measurement (0009, 0010, 0011): its code and web-vitals are downloaded only while PrivacyChoice allows it,
+   * once the page has loaded and the main thread is idle, so it costs the first screen nothing. A refusal stops it at once,
+   * and allowing it again starts it again.
+   */
+  #mountMeasurement() {
+    const start = () => this.#startMeasurement();
+    const whenIdle = () =>
+      'requestIdleCallback' in window
+        ? requestIdleCallback(start, { timeout: MEASUREMENT_IDLE_TIMEOUT_MS })
+        : setTimeout(start, 0);
+    if (document.readyState === 'complete') whenIdle();
+    else addEventListener('load', whenIdle, { once: true });
+    this.#privacy.onChange(({ measurement }) => {
+      if (measurement) start();
+      else this.#stopMeasurement();
+    });
+  }
+
+  async #startMeasurement() {
+    if (!this.#privacy.measurementAllowed || this.#measurement || this.#measurementLoading) return;
+    this.#measurementLoading = true;
+    try {
+      const { FieldReport } = await import('./field-report/field-report.js');
+      if (this.#privacy.measurementAllowed && !this.#measurement)
+        this.#measurement = new FieldReport({
+          window,
+          language: () => this.#translator.locale,
+          ...MEASURED,
+        }).start();
+    } catch {
+      /* the code did not arrive (offline, or blocked): the page goes on without measuring */
+    } finally {
+      this.#measurementLoading = false;
+    }
+  }
+
+  #stopMeasurement() {
+    this.#measurement?.stop();
+    this.#measurement = null;
+  }
+
+  /** An engagement event for the measurement, when it runs; `name` and `detail` come from the collector's fixed lists. */
+  #record(name, detail, value) {
+    this.#measurement?.record(name, detail, value);
+  }
+
   /** Everything that moves by itself follows the pause button; CSS animations follow it through data-motion. */
   #syncMotion() {
     this.#marquee.sync();
@@ -205,7 +274,16 @@ class App {
       themeToggle.setAttribute('aria-pressed', String(this.#theme.theme === 'dark'));
     this.#theme.apply(this.#theme.theme);
     showTheme();
+    let { theme, hue } = this.#theme;
     this.#theme.onColorsChange(() => {
+      if (this.#theme.theme !== theme) {
+        theme = this.#theme.theme;
+        this.#record('theme', theme);
+      }
+      if (this.#theme.hue !== hue) {
+        hue = this.#theme.hue;
+        this.#record('hue', '');
+      }
       showTheme();
       this.#globe?.recolor();
       this.#field?.recolor();
@@ -298,6 +376,7 @@ class App {
       this.#loadTest = new LoadTest({
         root: Dom.require('#load-test'),
         translator: this.#translator,
+        onStart: () => this.#record('load-test', 'start'),
         onFinished: (result) => this.#onLoadTestFinished(result),
       }).mount();
     this.#history = new HistoryAccordion(Dom.require('#history'));
@@ -307,7 +386,10 @@ class App {
     this.#emailActions = new EmailActions({
       emailLink: Dom.require('#email-link'),
       toast: Dom.require('#copied-toast'),
-      onCopied: () => this.#announcer.announce(this.#translator.t('contact.copiedAnnouncement')),
+      onCopied: () => {
+        this.#record('copy-email');
+        this.#announcer.announce(this.#translator.t('contact.copiedAnnouncement'));
+      },
     });
     this.#emailActions.install();
   }
@@ -326,6 +408,7 @@ class App {
       list: Dom.require('#command-palette-list'),
       emptyMessage: Dom.require('#command-palette-empty'),
       openButton: Dom.require('#command-palette-button'),
+      onOpen: (how) => this.#record('palette-open', how),
       onResults: (count) =>
         this.#announcer.announce(
           count
@@ -352,8 +435,15 @@ class App {
       title: this.#translator.t(`palette.commands.${id}.title`, params),
       keywords: this.#translator.t(`palette.commands.${id}.keywords`),
       tag: this.#translator.t(`palette.tags.${tag}`),
-      run,
+      run: () => {
+        this.#record('palette-command', id);
+        run();
+      },
     });
+    const leave = (detail, address) => () => {
+      this.#record('outbound', detail);
+      open(address, '_blank', 'noopener');
+    };
     const otherLocale = Locale.SUPPORTED.find((locale) => locale !== this.#translator.locale);
     return [
       command('status', 'go', () => goTo('#status')),
@@ -403,21 +493,9 @@ class App {
         'code',
         closeThen(() => this.#shaderDialog.open()),
       ),
-      command(
-        'github',
-        'external',
-        closeThen(() => open(LINKS.github, '_blank', 'noopener')),
-      ),
-      command(
-        'source',
-        'external',
-        closeThen(() => open(LINKS.repository, '_blank', 'noopener')),
-      ),
-      command(
-        'linkedin',
-        'external',
-        closeThen(() => open(LINKS.linkedin, '_blank', 'noopener')),
-      ),
+      command('github', 'external', closeThen(leave('github', LINKS.github))),
+      command('source', 'external', closeThen(leave('source', LINKS.repository))),
+      command('linkedin', 'external', closeThen(leave('linkedin', LINKS.linkedin))),
       {
         ...command(
           'switchLocale',
@@ -491,6 +569,7 @@ class App {
   }
 
   #onLoadTestFinished(result) {
+    this.#record('load-test', 'finish', result.seconds * 1_000);
     this.#statusPage.recordLoadTest(result);
     this.#announcer.announce(
       this.#translator.t('loadTest.announcement', {
@@ -551,6 +630,7 @@ class App {
       theme: this.#theme,
       translator: this.#translator,
       privacy: this.#privacy,
+      measurement: () => this.#measurement,
       setLocale: (tag) => this.setLocale(tag),
     };
   }

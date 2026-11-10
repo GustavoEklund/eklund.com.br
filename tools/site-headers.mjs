@@ -3,6 +3,7 @@
 // (development, Playwright, Cucumber) and tools/production-server.mjs (Lighthouse) set the same ones from this class, and
 // tests/contract/security-headers.contract.test.js fails when they differ.
 import { createHash } from 'node:crypto';
+import { ReportEndpoint } from '../source/js/field-report/report-endpoint.js';
 
 /**
  * The policy, as ordered directives. Everything comes from this origin. The two relaxations are deliberate:
@@ -11,7 +12,9 @@ import { createHash } from 'node:crypto';
  * - style-src-attr allows style="" attributes. Layout widgets carry data-driven values in them (--i, --brand, left
  *   and width of the trace minimap) and the scripts build some of them through innerHTML. Attributes cannot load
  *   anything or run script, and every style element and stylesheet still has to come from this origin.
- * data: images are the noise texture in tokens.css; worker-src is the load test's module workers.
+ * data: images are the noise texture in tokens.css; worker-src is the load test's module workers; connect-src adds the
+ * collector the pages send their reports to (0009), and nothing else. The development servers also allow the collector
+ * that `pnpm run edge:dev` runs on this machine, where their pages send (ReportEndpoint).
  */
 const DIRECTIVES = [
   ['default-src', ["'self'"]],
@@ -20,7 +23,7 @@ const DIRECTIVES = [
   ['style-src-attr', ["'unsafe-inline'"]],
   ['img-src', ["'self'", 'data:']],
   ['font-src', ["'self'"]],
-  ['connect-src', ["'self'"]],
+  ['connect-src', ["'self'", ReportEndpoint.COLLECTOR]],
   ['worker-src', ["'self'"]],
   ['manifest-src', ["'self'"]],
   ['object-src', ["'none'"]],
@@ -98,11 +101,14 @@ export class SiteHeaders {
     );
   }
 
-  /** The Content-Security-Policy value for a page. */
-  static contentSecurityPolicy(html = '') {
-    const inline = SiteHeaders.inlineScriptSources(html);
+  /** The Content-Security-Policy value for a page; `local` adds the local collector, for the development servers. */
+  static contentSecurityPolicy(html = '', { local = false } = {}) {
+    const added = {
+      'script-src': SiteHeaders.inlineScriptSources(html),
+      'connect-src': local ? [ReportEndpoint.LOCAL_COLLECTOR] : [],
+    };
     return DIRECTIVES.map(([name, sources]) =>
-      [name, name === 'script-src' ? [...sources, ...inline] : sources].flat().join(' '),
+      [name, [...sources, ...(added[name] ?? [])]].flat().join(' '),
     ).join('; ');
   }
 
@@ -115,11 +121,14 @@ export class SiteHeaders {
     };
   }
 
-  /** What the development server sends: the production headers without the HTTPS-only ones, plus the language of the document at `pathname`. */
+  /**
+   * What the development server sends: the production headers without the HTTPS-only ones, the local collector in
+   * connect-src, and the language of the document at `pathname`.
+   */
   static development({ html, isDocument, pathname }) {
     return {
       ...SiteHeaders.ALWAYS,
-      'Content-Security-Policy': SiteHeaders.contentSecurityPolicy(html),
+      'Content-Security-Policy': SiteHeaders.contentSecurityPolicy(html, { local: true }),
       ...(isDocument ? { 'Content-Language': SiteHeaders.documentLanguage(pathname) } : {}),
     };
   }

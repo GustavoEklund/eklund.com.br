@@ -22,6 +22,7 @@ export class LoadTest {
   #runButton;
   #pool;
   #resampler = new SeriesResampler(RampScenario.totalSeconds);
+  #onStart;
   #onFinished;
   #translator;
   #result = null;
@@ -36,8 +37,9 @@ export class LoadTest {
   #batchDurations = [];
   #counters = LoadTest.#emptyCounters();
 
-  constructor({ root, onFinished, translator }) {
+  constructor({ root, onStart, onFinished, translator }) {
     this.#root = root;
+    this.#onStart = onStart;
     this.#onFinished = onFinished;
     this.#translator = translator;
     this.#log = new TerminalLog(root.querySelector('#load-test-terminal'));
@@ -143,6 +145,7 @@ export class LoadTest {
   async run() {
     if (this.#running) return;
     this.#running = this.#hasRun = true;
+    this.#onStart?.();
     this.#reset();
     this.#pool.spawn();
     this.#writeHeader();

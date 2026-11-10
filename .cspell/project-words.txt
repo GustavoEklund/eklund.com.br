@@ -24,6 +24,7 @@ bing
 bingbot
 biserial
 bitangent
+blockedbyclient
 branas
 brulee
 brûlée
@@ -101,6 +102,7 @@ jmax
 jmin
 jsonld
 keepachangelog
+keepalive
 keyout
 khtml
 klaro
@@ -144,6 +146,7 @@ oneof
 opsz
 ossf
 pageerror
+pagehide
 pagespeed
 pagespeedonline
 parsererror
@@ -206,6 +209,7 @@ unstub
 urlset
 valuenow
 valuetext
+visibilitychange
 vite
 vitest
 voidzero
