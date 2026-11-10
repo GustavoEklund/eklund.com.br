@@ -112,7 +112,7 @@ export const PT_BR = {
     scrollCue: 'rola',
     chips: {
       network: 'KB na rede',
-      networkNote: '0 dependências',
+      networkNote: 'sem frameworks',
       points: 'pontos',
       pointsNote: 'WebGL2 · desenhado ponto a ponto',
       fpsNote: 'medido agora, no seu navegador',
