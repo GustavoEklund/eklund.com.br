@@ -15,6 +15,8 @@ const LAB_COLUMNS = {
   speed_index: 'speed_index_ms',
   ttfb: 'ttfb_ms',
 };
+/** The field of a vital's attribution that names the element it measured, for the metrics that name one. */
+const TARGETS = { CLS: 'largestShiftTarget', INP: 'interactionTarget', LCP: 'target' };
 /** The columns of daily_view an overview ranks. Empty text is an unknown country, or a visit without a referrer. */
 const DIMENSIONS = [
   'page',
@@ -38,6 +40,8 @@ export class ReadingQueries {
   static SIGNIFICANCE = 0.05;
   static TOP = 10;
   static LONG_TOP = 50;
+  /** The most elements a vital names as its targets. */
+  static TARGETS = 5;
   /**
    * The most values of a release a comparison reads, the latest first: plenty for the test, and a bound on its CPU, which the
    * free plan limits to 10 ms a request (2 × 2,000 values take about 2 ms).
@@ -91,11 +95,36 @@ export class ReadingQueries {
     }
   }
 
+  /**
+   * One recording by its code, with what the panel needs to replay it: the day that names its folder in R2 and the last
+   * sequence number of its chunks. Null when no recording has that code.
+   */
+  async recording(code) {
+    const [found] = await this.#all(
+      `SELECT code, day, page, language, version, started_at, first_event_ms, last_event_ms, chunks, last_seq, bytes, clicks
+       FROM recording WHERE code = ?1`,
+      code,
+    );
+    if (!found) return null;
+    const { started_at: started, first_event_ms: first, last_event_ms: last, ...about } = found;
+    const { chunks, last_seq: lastSeq, bytes, clicks, ...rest } = about;
+    return {
+      ...rest,
+      started: new Date(started).toISOString(),
+      duration_ms: last - first,
+      chunks,
+      last_seq: lastSeq,
+      bytes,
+      clicks,
+    };
+  }
+
   async #overview({ from, to }) {
     const where = `FROM ${this.#days('daily_view')}`;
     const [[totals], ...tops] = await this.#batch(
       [
         `SELECT coalesce(sum(views), 0) AS views, count(DISTINCT day) AS days ${where}`,
+        `SELECT day, sum(views) AS views ${where} GROUP BY day ORDER BY day`,
         ...DIMENSIONS.map(
           (column) =>
             `SELECT ${column} AS value, sum(views) AS views ${where}
@@ -106,29 +135,50 @@ export class ReadingQueries {
       to,
       this.#firstRecentDay(),
     );
+    const [perDay, ...ranked] = tops;
     return {
       from,
       to,
       views: totals.views,
       days_with_views: totals.days,
-      top: Object.fromEntries(DIMENSIONS.map((column, index) => [column, tops[index]])),
+      per_day: perDay,
+      top: Object.fromEntries(DIMENSIONS.map((column, index) => [column, ranked[index]])),
       sample: Sample.of(totals.views),
     };
   }
 
   async #vitals({ from, to, page = null, device = null, version = null }) {
-    const rows = await this.#all(
-      `SELECT name, count(*) AS loads, min(CASE WHEN rank >= 0.75 * total THEN value END) AS p75,
-         sum(rating = 'good') AS good, sum(rating = 'needs-improvement') AS needs_improvement, sum(rating = 'poor') AS poor
-       FROM (
-         SELECT v.name, v.value, v.rating,
-           row_number() OVER (PARTITION BY v.name ORDER BY v.value) AS rank,
-           count(*) OVER (PARTITION BY v.name) AS total
-         FROM vital v JOIN page_view p ON p.id = v.view_id
-         WHERE p.day BETWEEN ?1 AND ?2 AND (?3 IS NULL OR p.page = ?3) AND (?4 IS NULL OR p.device = ?4)
-           AND (?5 IS NULL OR p.version = ?5)
-       )
-       GROUP BY name ORDER BY name`,
+    const filter = `p.day BETWEEN ?1 AND ?2 AND (?3 IS NULL OR p.page = ?3) AND (?4 IS NULL OR p.device = ?4)
+           AND (?5 IS NULL OR p.version = ?5)`;
+    const paths = Object.entries(TARGETS)
+      .map(([metric, field]) => `WHEN '${metric}' THEN '$.${field}'`)
+      .join(' ');
+    const [rows, targets] = await this.#batch(
+      [
+        `SELECT name, count(*) AS loads, min(CASE WHEN rank >= 0.75 * total THEN value END) AS p75,
+           sum(rating = 'good') AS good, sum(rating = 'needs-improvement') AS needs_improvement, sum(rating = 'poor') AS poor
+         FROM (
+           SELECT v.name, v.value, v.rating,
+             row_number() OVER (PARTITION BY v.name ORDER BY v.value) AS rank,
+             count(*) OVER (PARTITION BY v.name) AS total
+           FROM vital v JOIN page_view p ON p.id = v.view_id
+           WHERE ${filter}
+         )
+         GROUP BY name ORDER BY name`,
+        `SELECT name, target, loads, poor FROM (
+           SELECT name, target, loads, poor,
+             row_number() OVER (PARTITION BY name ORDER BY loads DESC, target) AS place
+           FROM (
+             SELECT v.name, json_extract(v.attribution, CASE v.name ${paths} END) AS target,
+               count(*) AS loads, sum(v.rating = 'poor') AS poor
+             FROM vital v JOIN page_view p ON p.id = v.view_id
+             WHERE ${filter}
+             GROUP BY v.name, target
+           )
+           WHERE target IS NOT NULL AND target <> ''
+         )
+         WHERE place <= ${ReadingQueries.TARGETS} ORDER BY name, place`,
+      ],
       from,
       to,
       page,
@@ -147,6 +197,9 @@ export class ReadingQueries {
         good: ReadingQueries.#share(good, loads),
         needs_improvement: ReadingQueries.#share(middle, loads),
         poor: ReadingQueries.#share(poor, loads),
+        targets: targets
+          .filter((target) => target.name === name)
+          .map(({ name: _name, ...target }) => target),
         sample: Sample.of(loads),
       })),
     };

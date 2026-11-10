@@ -64,12 +64,12 @@ export class ReadingInputs {
     const tool = ReadingInputs.#tool;
     return {
       overview: tool(
-        'Page views of a period from the daily totals: how many, and the most common pages, languages, devices, browsers, countries, referrers, releases and hosts.',
+        'Page views of a period from the daily totals: how many, how many each day, and the most common pages, languages, devices, browsers, countries, referrers, releases and hosts.',
         {},
         period,
       ),
       vitals: tool(
-        "Core Web Vitals of real visits in a period: the 75th percentile and the share of good, needs-improvement and poor loads of each metric, from the visits' own rows.",
+        "Core Web Vitals of real visits in a period: the 75th percentile and the share of good, needs-improvement and poor loads of each metric, and the elements LCP, INP and CLS most often name, from the visits' own rows.",
         { page: page.optional(), device: device.optional(), version: release.optional() },
         period,
       ),
