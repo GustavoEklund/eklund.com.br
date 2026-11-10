@@ -10,6 +10,7 @@ import { basename, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
 import { LegalPages } from './legal-pages.mjs';
+import { NotFoundPages } from './not-found-pages.mjs';
 
 const PROJECT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const VNU_JAR = join(PROJECT, 'node_modules', 'vnu-jar', 'build', 'dist', 'vnu.jar');
@@ -201,7 +202,7 @@ class HtmlValidation {
       const files = [
         { name: 'index.html (as shipped)', path: join(PROJECT, 'source', 'index.html') },
         { name: 'en/index.html (as shipped)', path: join(PROJECT, 'source', 'en', 'index.html') },
-        ...LegalPages.PAGES.map(({ file }) => ({
+        ...[...LegalPages.PAGES, ...NotFoundPages.PAGES].map(({ file }) => ({
           name: file,
           path: join(PROJECT, 'source', file),
         })),

@@ -245,6 +245,83 @@ describe('tools/serve.mjs', () => {
   });
 });
 
+describe('tools/serve.mjs with the 404 pages, as the ErrorDocument of each .htaccess names them', () => {
+  let root, server;
+  const PORTUGUESE = '<html lang="pt-BR"><script>a()</script><h1>não existe</h1></html>';
+  const ENGLISH = '<html lang="en-US"><script>a()</script><h1>does not exist</h1></html>';
+
+  beforeAll(async () => {
+    root = mkdtempSync(join(tmpdir(), 'serve-not-found-'));
+    const files = {
+      'index.html': '<h1>home</h1>',
+      '404.html': PORTUGUESE,
+      'en/index.html': '<h1>english</h1>',
+      'en/404.html': ENGLISH,
+      '1.1.0/index.html': '<h1>copy</h1>',
+      '1.1.0/en/index.html': '<h1>copy english</h1>',
+    };
+    for (const [name, content] of Object.entries(files)) {
+      mkdirSync(join(root, name, '..'), { recursive: true });
+      writeFileSync(join(root, name), content);
+    }
+    server = await RunningServer.start(['--root', root]);
+  });
+
+  afterAll(() => {
+    server.stop();
+    rmSync(root, { recursive: true, force: true });
+  });
+
+  it.each([
+    ['/nao-existe', PORTUGUESE],
+    ['/a/b/c.html', PORTUGUESE],
+    ['/assets/missing.js', PORTUGUESE],
+    ['/enigma', PORTUGUESE],
+    ['/x/en/y', PORTUGUESE],
+    ['/en/does-not-exist', ENGLISH],
+    ['/en/a/b/', ENGLISH],
+    ['/1.1.0/nao-existe', PORTUGUESE],
+    ['/1.1.0/en/does-not-exist', ENGLISH],
+  ])(
+    'answers %s with status 404 and the page of its language, never cached',
+    async (path, body) => {
+      expect(await server.get(path)).toStrictEqual({
+        status: 404,
+        type: 'text/html; charset=utf-8',
+        cache: 'no-store',
+        body,
+      });
+    },
+  );
+
+  it('sends the language of the page and the policy that allows its inline script', async () => {
+    const [portuguese, english] = await Promise.all(
+      ['/nao-existe', '/en/nao-existe'].map((path) => server.headers(path)),
+    );
+    expect([
+      portuguese['content-language'],
+      english['content-language'],
+      portuguese['content-security-policy'],
+    ]).toStrictEqual([
+      'pt-BR',
+      'en-US',
+      SiteHeaders.development({ html: PORTUGUESE, isDocument: true })['Content-Security-Policy'],
+    ]);
+  });
+
+  it('still serves the pages that exist, with status 200', async () => {
+    expect(
+      (await Promise.all(['/', '/en/', '/404.html'].map((path) => server.get(path)))).map(
+        ({ status, body }) => [status, body],
+      ),
+    ).toStrictEqual([
+      [200, '<h1>home</h1>'],
+      [200, '<h1>english</h1>'],
+      [200, PORTUGUESE],
+    ]);
+  });
+});
+
 describe('tools/serve.mjs with its defaults', () => {
   it('serves the real site from source/', async () => {
     const server = await RunningServer.start();

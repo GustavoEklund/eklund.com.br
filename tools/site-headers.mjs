@@ -48,8 +48,8 @@ export class SiteHeaders {
 
   /**
    * How long production lets a file be kept, as the root .htaccess writes it: pages for ten minutes, files with a hash in
-   * their name for a year, the few that keep their name for a day. Apache applies every <FilesMatch> that matches, in order,
-   * so the last one wins (favicon.ico is kept a day).
+   * their name for a year, the few that keep their name for a day, and the 404 page ten minutes with no stale copy. Apache
+   * applies every <FilesMatch> that matches, in order, so the last one wins (favicon.ico is kept a day, 404.html ten minutes).
    */
   static CACHE_RULES = [
     [/\.html?$/, 'public, max-age=600, stale-while-revalidate=86400'],
@@ -61,6 +61,8 @@ export class SiteHeaders {
       /^(robots\.txt|sitemap\.xml|favicon\.ico|security\.txt|gpc\.json)$/,
       'public, max-age=86400, stale-while-revalidate=604800',
     ],
+    // The 404 page (0016) answers for any missing address, so it keeps no stale copy.
+    [/^404\.html$/, 'public, max-age=600'],
   ];
 
   /** The .htaccess of assets/brand/ adds a rule after those: the manifest icons and the social card keep their names. */

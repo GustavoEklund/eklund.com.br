@@ -10,6 +10,8 @@ import { SiteHeaders } from '../../tools/site-headers.mjs';
 const PAGE =
   '<!doctype html>\n<html lang="pt-BR"><head><script>document.documentElement.dataset.ready = "1";</script></head><body></body></html>\n';
 const ENGLISH = PAGE.replace('pt-BR', 'en-US');
+const NOT_FOUND = PAGE.replace('<body>', '<body>não existe');
+const ENGLISH_NOT_FOUND = ENGLISH.replace('<body>', '<body>does not exist');
 const SCRIPT = 'export const answer = 42;\n';
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 const TIMEOUT_MS = 30_000;
@@ -49,6 +51,8 @@ describe('tools/production-server.mjs', () => {
     mkdirSync(join(folder, 'assets', 'brand'), { recursive: true });
     writeFileSync(join(folder, 'index.html'), PAGE);
     writeFileSync(join(folder, 'en', 'index.html'), ENGLISH);
+    writeFileSync(join(folder, '404.html'), NOT_FOUND);
+    writeFileSync(join(folder, 'en', '404.html'), ENGLISH_NOT_FOUND);
     writeFileSync(join(folder, 'assets', 'main-AbC123.js'), SCRIPT);
     writeFileSync(join(folder, 'assets', 'brand', 'icon-192.png'), PNG);
     server = new ProductionServer(folder);
@@ -100,6 +104,28 @@ describe('tools/production-server.mjs', () => {
   it('sends the bytes as they are to a client that does not accept brotli', async () => {
     const plain = await get('/', 'identity');
     expect([plain.encoding, plain.body.toString('utf8')]).toStrictEqual([undefined, PAGE]);
+  });
+
+  it('answers a missing address with the 404 page of its language and status 404, as the .htaccess files do', async () => {
+    const answers = await Promise.all(['/nao-existe', '/en/a/b'].map((path) => get(path)));
+    expect(
+      answers.map(({ status, cache, language, policy, body }) => [
+        status,
+        cache,
+        language,
+        policy,
+        body.toString('utf8'),
+      ]),
+    ).toStrictEqual([
+      [404, 'public, max-age=600', 'pt-BR', SiteHeaders.contentSecurityPolicy(PAGE), NOT_FOUND],
+      [
+        404,
+        'public, max-age=600',
+        'en-US',
+        SiteHeaders.contentSecurityPolicy(PAGE),
+        ENGLISH_NOT_FOUND,
+      ],
+    ]);
   });
 
   it('answers 404 to a file it does not have and to a path that climbs out of its folder', async () => {

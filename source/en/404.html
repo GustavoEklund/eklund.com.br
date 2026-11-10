@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en-US" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>This page does not exist | eklund.com.br</title>
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#111318">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+<!-- The page every missing address under /en/ answers with, status 404 (docs/decisions/0016). Every address in it starts at the root, because it is served at any depth. The inline script of the head of index.html, byte for byte, so the Content-Security-Policy allows it by the same hash: here it only applies the theme, hue and motion the visitor chose. tools/i18n-check.mjs copies it, with its fix-html option. -->
+<script>document.documentElement.classList.add('js');
+let motion, language, privacy;
+try {
+  const theme = localStorage.getItem('theme');
+  if (theme) document.documentElement.dataset.theme = theme;
+  const hue = localStorage.getItem('hue');
+  if (hue) document.documentElement.style.setProperty('--hue', hue);
+  motion = localStorage.getItem('motion');
+  language = localStorage.getItem('lang');
+  privacy = JSON.parse(localStorage.getItem('privacy'));
+} catch {}
+document.documentElement.dataset.motion = motion === 'paused' || motion === 'full' ? motion : matchMedia('(prefers-reduced-motion: reduce)').matches ? 'paused' : 'full';
+if (navigator.globalPrivacyControl !== true && !(privacy?.version === 1 && privacy.expires > Date.now())) document.documentElement.dataset.privacy = 'ask';
+if (location.pathname === '/' || location.pathname === '/index.html') {
+  const query = new URLSearchParams(location.search);
+  const translated = (tag) => {
+    const language = String(tag || '').toLowerCase().split(/[-_]/)[0];
+    return language === 'en' || language === 'pt' ? language : '';
+  };
+  if ((translated(query.get('lang')) || translated(language)) === 'en') {
+    query.delete('lang');
+    location.replace('/en/' + (query.toString() ? '?' + query : '') + location.hash);
+  }
+}</script>
+
+<link rel="preload" as="font" type="font/woff2" href="/fonts/bricolage-grotesque-latin.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/fonts/jetbrains-mono-latin.woff2" crossorigin>
+<link rel="stylesheet" href="/css/legal.css">
+</head>
+<body>
+<div class="legal-page">
+<header class="legal-header">
+  <a class="logo" translate="no" href="/en/" aria-label="eklund.com.br, home">eklund<i>.</i></a>
+</header>
+
+<main class="legal-text not-found">
+<p class="status-code">Error 404</p>
+<h1>This page does not exist</h1>
+<p>There is nothing at this address. It may have a typo, or the link that brought you here points to a page that has moved.</p>
+
+<h2>Where to go next</h2>
+<ul>
+<li><a href="/en/">Home page</a>: who I am and what I do</li>
+<li><a href="/en/#status">Status</a>: the monitoring of this visit, measured in your browser</li>
+<li><a href="/en/#perfil">Profile</a>: where I work and with what</li>
+<li><a href="/en/#arquitetura">Architecture</a>: how a Pix payment goes from the app to the Central Bank</li>
+<li><a href="/en/#carga">Load test</a>: a Pix engine tested in your browser</li>
+<li><a href="/en/#historico">History</a>: the companies I worked for</li>
+<li><a href="/en/#contato">Contact</a>: how to reach me</li>
+<li><a href="https://github.com/GustavoEklund/eklund.com.br">Source code on GitHub</a>: the code of this site</li>
+</ul>
+
+<p>If a link on this site brought you here, tell me at <a href="mailto:gustavo@eklund.com.br">gustavo@eklund.com.br</a> and I will fix it.</p>
+<p lang="pt-BR">Procurando a versão em português? Ela começa na <a href="/" hreflang="pt-BR">página inicial em português</a>.</p>
+</main>
+
+<footer class="legal-footer">
+  <p>© 2026 Gustavo Eklund · Taubaté, Brazil</p>
+  <nav aria-label="Legal pages">
+    <ul>
+      <li><a href="/en/privacy/">Privacy Policy</a></li>
+      <li><a href="/en/cookies/">Cookie Policy</a></li>
+      <li><a href="/en/terms/">Terms of Use</a></li>
+      <li><a href="/en/?preferences">Privacy preferences</a></li>
+    </ul>
+  </nav>
+</footer>
+</div>
+</body>
+</html>

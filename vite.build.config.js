@@ -7,6 +7,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { defineConfig } from 'vite-plus';
 import { LegalPages } from './tools/legal-pages.mjs';
+import { NotFoundPages } from './tools/not-found-pages.mjs';
 import { SiteBuild } from './tools/site-build.mjs';
 
 const SOURCE = resolve(import.meta.dirname, 'source');
@@ -44,6 +45,13 @@ export default defineConfig(({ mode }) => {
           ...Object.fromEntries(
             LegalPages.PAGES.map(({ file }) => [
               file.replace(/\/index\.html$/, '').replace('/', '-'),
+              resolve(SOURCE, file),
+            ]),
+          ),
+          // The 404 pages (0016), which the .htaccess files name: like the legal pages, one stylesheet and the inline script.
+          ...Object.fromEntries(
+            NotFoundPages.PAGES.map(({ file }) => [
+              file.replace(/\.html$/, '').replace('/', '-'),
               resolve(SOURCE, file),
             ]),
           ),

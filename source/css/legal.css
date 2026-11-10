@@ -1,7 +1,8 @@
 /*
  * The legal pages (privacy, cookies, terms of use, in both languages): long text to read once, with no script of their own.
- * This is their only stylesheet, so the build gives each of them one file of its own: the tokens and the fonts come in by
- * @import, and the layout of the home page, which they do not use, stays out.
+ * The 404 pages (404.html and en/404.html, 0016) are built the same way and use it too. This is their only stylesheet, so the
+ * build gives them one file of their own: the tokens and the fonts come in by @import, and the layout of the home page, which
+ * they do not use, stays out.
  */
 @import url('foundation/tokens.css');
 @import url('foundation/fonts.css');
@@ -78,6 +79,15 @@
     letter-spacing: 0.04em;
     color: var(--fg-2);
     margin-bottom: 2rem;
+  }
+
+  /* The 404 pages name the status above their heading, where the legal pages put their date. */
+  .not-found .status-code {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    color: var(--accent-text);
+    margin-bottom: 0.75rem;
   }
 
   .legal-text h2 {

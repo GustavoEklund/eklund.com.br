@@ -1,13 +1,17 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { LegalPages } from '../../tools/legal-pages.mjs';
+import { NotFoundPages } from '../../tools/not-found-pages.mjs';
 import { BuiltSite } from '../support/built-site.js';
 import { RepositoryFiles } from '../support/repository-files.js';
 
 const { version } = JSON.parse(RepositoryFiles.read('package.json'));
 const FOLDER = `/${version}/`;
 const HOME_PAGES = ['index.html', 'en/index.html'];
-const PAGES = [...HOME_PAGES, ...LegalPages.PAGES.map(({ file }) => file)];
+const PAGES = [
+  ...HOME_PAGES,
+  ...[...LegalPages.PAGES, ...NotFoundPages.PAGES].map(({ file }) => file),
+];
 
 const parse = (html) =>
   new DOMParser().parseFromString(

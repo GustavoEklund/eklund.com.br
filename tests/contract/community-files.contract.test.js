@@ -140,6 +140,7 @@ describe('the documents', () => {
         'docs/decisions/0013-reading-the-data-without-the-agents-sdk.md',
         'docs/decisions/0014-legal-pages-written-in-html.md',
         'docs/decisions/0015-the-panel-behind-cloudflare-access.md',
+        'docs/decisions/0016-a-404-page-of-our-own.md',
         'docs/decisions/README.md',
         'docs/internationalization.md',
         'docs/privacy.md',

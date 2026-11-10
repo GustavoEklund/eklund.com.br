@@ -1,4 +1,6 @@
 # The English page. The document language of the root .htaccess is Portuguese; this folder says it is English.
+# A missing address under en/ answers with the English 404 page (0016), with the status kept by the local path.
+ErrorDocument 404 /en/404.html
 # tools/site-headers.mjs is the source of truth, and tests/contract/security-headers.contract.test.js compares it with this file.
 <IfModule mod_headers.c>
   <FilesMatch "\.html?$">

@@ -29,9 +29,11 @@ class SiteCopy {
       'html-defaults.mjs',
       'english-page.mjs',
       'legal-pages.mjs',
+      'not-found-pages.mjs',
     ])
       cpSync(join(PROJECT, 'tools', tool), join(this.root, 'tools', tool));
-    cpSync(join(PROJECT, 'source', 'index.html'), join(this.root, 'source', 'index.html'));
+    for (const page of ['index.html', '404.html'])
+      cpSync(join(PROJECT, 'source', page), join(this.root, 'source', page));
     for (const folder of ['en', 'privacidade', 'cookies', 'termos'])
       cpSync(join(PROJECT, 'source', folder), join(this.root, 'source', folder), {
         recursive: true,
@@ -173,7 +175,7 @@ describe('tools/i18n-check.mjs', () => {
           readFileSync(join(copy.root, 'source', 'en', 'index.html'), 'utf8') === original,
         ]).toStrictEqual([
           0,
-          `index.html: 0 default texts rewritten from pt-BR\nen/index.html: written from index.html and en-US\nlegal pages: the head script of index.html copied into 6 pages\n${KEYS} keys · 0 errors · 0 warnings\n`,
+          `index.html: 0 default texts rewritten from pt-BR\nen/index.html: written from index.html and en-US\nlegal and 404 pages: the head script of index.html copied into 8 pages\n${KEYS} keys · 0 errors · 0 warnings\n`,
           true,
         ]);
       } finally {
@@ -192,6 +194,20 @@ describe('tools/i18n-check.mjs', () => {
         stdout: `${KEYS} keys · 1 errors · 0 warnings\n`,
         stderr:
           'error    en/cookies/index.html: its head script is not the one of index.html (run with --fix-html)\n',
+      });
+    });
+
+    it('exits 1 and names the 404 page whose head script is not the one of index.html', () => {
+      const result = inCopy((copy) =>
+        copy.edit('404.html', (code) =>
+          code.replace("localStorage.getItem('hue')", "localStorage.getItem('color')"),
+        ),
+      );
+      expect(result).toStrictEqual({
+        status: 1,
+        stdout: `${KEYS} keys · 1 errors · 0 warnings\n`,
+        stderr:
+          'error    404.html: its head script is not the one of index.html (run with --fix-html)\n',
       });
     });
 
