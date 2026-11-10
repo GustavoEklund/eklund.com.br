@@ -28,7 +28,7 @@ Every pull request that visitors or readers of the repository would notice adds 
    pnpm run changelog release 1.1.0
    ```
 
-   It moves `[Unreleased]` into `## [1.1.0] - <today>`, fixes the comparison links at the bottom and sets `version` in `package.json`. Read the diff and polish the wording. Add a second argument (`2026-12-01`) to choose the date.
+   It moves `[Unreleased]` into `## [1.1.0] - <today>`, fixes the comparison links at the bottom, and sets `version` in `package.json` and the version the pages report in `source/js/field-report/site-version.js`, which a contract test keeps equal. Read the diff and polish the wording. Add a second argument (`2026-12-01`) to choose the date.
 
 4. **Commit and merge** as `chore(release): 1.1.0`, through a pull request.
 5. **Tag the merge commit** and push the tag:

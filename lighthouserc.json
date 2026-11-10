@@ -56,7 +56,7 @@
         "resource-summary:script:size": [
           "error",
           {
-            "maxNumericValue": 70000,
+            "maxNumericValue": 80000,
             "aggregationMethod": "median-run"
           }
         ],

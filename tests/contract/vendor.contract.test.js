@@ -10,10 +10,11 @@ const installed = (path) => readFileSync(join(PROJECT, 'node_modules', path));
 /**
  * source/js/vendor/ holds the libraries the browser runs (0011), each a copy of its npm file, because source/ runs without a
  * build. The copy moves only with the version pinned in package.json, so Dependabot, the release age and the trust policy of
- * 0007 still choose it. After an update: cp node_modules/web-vitals/dist/web-vitals.attribution.js source/js/vendor/
+ * 0007 still choose it. After an update: cp node_modules/web-vitals/dist/web-vitals.attribution.js{,.map} source/js/vendor/
  */
 const COPIES = [
   ['js/vendor/web-vitals.attribution.js', 'web-vitals/dist/web-vitals.attribution.js'],
+  ['js/vendor/web-vitals.attribution.js.map', 'web-vitals/dist/web-vitals.attribution.js.map'],
   ['js/vendor/web-vitals-LICENSE.txt', 'web-vitals/LICENSE'],
 ];
 

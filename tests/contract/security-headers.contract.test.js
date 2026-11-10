@@ -86,6 +86,19 @@ describe('security headers', () => {
       ]);
     });
 
+    it('let the development pages send to the collector of edge:dev too, and production pages only to the one online', () => {
+      const connectSources = (policy) => new CspParser(policy).csp.directives['connect-src'];
+      expect([
+        connectSources(SiteHeaders.production(INDEX)['Content-Security-Policy']),
+        connectSources(
+          SiteHeaders.development({ html: INDEX, isDocument: true })['Content-Security-Policy'],
+        ),
+      ]).toStrictEqual([
+        ["'self'", 'https://eklund.eklund.workers.dev'],
+        ["'self'", 'https://eklund.eklund.workers.dev', 'http://127.0.0.1:8787'],
+      ]);
+    });
+
     it('add Content-Language only for documents', () => {
       expect([
         SiteHeaders.development({ html: INDEX, isDocument: true })['Content-Language'],
@@ -103,7 +116,7 @@ describe('security headers', () => {
           'accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()',
         'Cross-Origin-Opener-Policy': 'same-origin',
         'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
-        'Content-Security-Policy': `default-src 'self'; script-src 'self' ${sha256(inlineScripts[0])}; style-src 'self'; style-src-attr 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests`,
+        'Content-Security-Policy': `default-src 'self'; script-src 'self' ${sha256(inlineScripts[0])}; style-src 'self'; style-src-attr 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://eklund.eklund.workers.dev; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests`,
       });
     });
   });
@@ -190,7 +203,7 @@ describe('security headers', () => {
         'worker-src': ["'self'"],
         'img-src': ["'self'", 'data:'],
         'font-src': ["'self'"],
-        'connect-src': ["'self'"],
+        'connect-src': ["'self'", 'https://eklund.eklund.workers.dev'],
         'manifest-src': ["'self'"],
         'object-src': ["'none'"],
         'base-uri': ["'self'"],

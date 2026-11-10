@@ -1,4 +1,5 @@
 import { spawn } from 'node:child_process';
+import { ReportEndpoint } from '../../../source/js/field-report/report-endpoint.js';
 import { SiteSource } from './site-source.js';
 
 const PORT = 8736;
@@ -22,13 +23,27 @@ export class BrowserSession {
     BrowserSession.#browser ??= await (
       await import('playwright')
     ).chromium.launch({ headless: true, args: SOFTWARE_GL });
-    return BrowserSession.#browser.newContext({
+    const context = await BrowserSession.#browser.newContext({
       baseURL: BrowserSession.baseUrl,
       viewport: { width: 1280, height: 800 },
       timezoneId: 'America/Sao_Paulo',
       serviceWorkers: 'block',
       ...options,
     });
+    // The pages send their reports to the collector of `pnpm run edge:dev` (ReportEndpoint): the scenarios answer for it,
+    // and cut off the one online, so nothing reaches the real data.
+    await context.route(`${ReportEndpoint.LOCAL_COLLECTOR}/**`, (route) =>
+      route
+        .fulfill({
+          status: 204,
+          headers: { 'access-control-allow-origin': route.request().headers().origin ?? '*' },
+        })
+        .catch(() => {}),
+    );
+    await context.route(`${ReportEndpoint.COLLECTOR}/**`, (route) =>
+      route.abort('blockedbyclient').catch(() => {}),
+    );
+    return context;
   }
 
   static async shutdown() {

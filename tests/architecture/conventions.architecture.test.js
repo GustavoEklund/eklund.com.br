@@ -43,6 +43,7 @@ describe('the layout of the site', () => {
       'contact',
       'cursor',
       'dashboard',
+      'field-report',
       'globe',
       'hero',
       'history',

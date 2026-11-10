@@ -2,7 +2,8 @@
 // usage: node tools/changelog.mjs check                     the file keeps the format, and package.json has the newest released version
 //        node tools/changelog.mjs notes VERSION             the entries of a version, as the notes of its GitHub release
 //        node tools/changelog.mjs verify-release TAG        a tag like v1.2.0 names the newest released version, with a date
-//        node tools/changelog.mjs release VERSION [DATE]    moves [Unreleased] into a new version and bumps package.json
+//        node tools/changelog.mjs release VERSION [DATE]    moves [Unreleased] into a new version and bumps package.json and
+//                                                           the version the pages report (source/js/field-report/site-version.js)
 //        node tools/changelog.mjs require TITLE BASE HEAD   a pull request that changes what visitors get must touch the changelog
 import { execFile } from 'node:child_process';
 import { readFile, writeFile } from 'node:fs/promises';
@@ -411,9 +412,14 @@ export class ChangelogCommand {
     const manifest = JSON.parse(await readFile(file, 'utf8'));
     manifest.version = version;
     await writeFile(file, `${JSON.stringify(manifest, null, 2)}\n`);
+    const site = join(PROJECT, 'source', 'js', 'field-report', 'site-version.js');
+    await writeFile(
+      site,
+      (await readFile(site, 'utf8')).replace(/NUMBER = '[^']*'/, `NUMBER = '${version}'`),
+    );
     return {
       lines: [
-        `release: [Unreleased] is now ${version} (${date}); package.json says ${version}`,
+        `release: [Unreleased] is now ${version} (${date}); package.json and site-version.js say ${version}`,
         'next: review CHANGELOG.md, then commit "chore(release): ' +
           version +
           '" and tag v' +

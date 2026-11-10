@@ -116,6 +116,7 @@ describe('where the tests live', () => {
       'js/main.js',
       'js/vendor/web-vitals-LICENSE.txt',
       'js/vendor/web-vitals.attribution.js',
+      'js/vendor/web-vitals.attribution.js.map',
     ]);
   });
 

@@ -12,17 +12,20 @@ export class CommandPalette {
   #emptyMessage;
   #openButton;
   #onResults;
+  #onOpen;
   #commands = [];
   #visible = [];
   #selectedIndex = 0;
 
-  constructor({ dialog, input, list, emptyMessage, openButton, onResults }) {
+  /** `onOpen(how)` runs each time the palette opens: how is 'button' or 'shortcut'. */
+  constructor({ dialog, input, list, emptyMessage, openButton, onResults, onOpen }) {
     this.#dialog = dialog;
     this.#input = input;
     this.#list = list;
     this.#emptyMessage = emptyMessage;
     this.#openButton = openButton;
     this.#onResults = onResults;
+    this.#onOpen = onOpen;
   }
 
   /** Swaps the whole command list (titles and keywords change with the language). */
@@ -55,13 +58,14 @@ export class CommandPalette {
     });
   }
 
-  open() {
+  open(how = 'button') {
     if (this.#dialog.open) return;
     this.#selectedIndex = 0;
     this.#input.value = '';
     this.#render();
     this.#dialog.showModal();
     this.#input.focus();
+    this.#onOpen?.(how);
   }
 
   close() {
@@ -72,7 +76,7 @@ export class CommandPalette {
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
       event.preventDefault();
       if (this.#dialog.open) this.close();
-      else this.open();
+      else this.open('shortcut');
     }
     if (!this.#dialog.open) return;
     const count = this.#visible.length;

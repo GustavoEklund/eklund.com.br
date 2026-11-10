@@ -1,6 +1,6 @@
 /** Architecture rules for source/js: Screaming Architecture with features that only know shared/ and i18n/. */
 const FEATURES =
-  'architecture-map|command-palette|contact|cursor|dashboard|globe|hero|history|load-test|marquee|navigation|privacy|scrollbar|status-page|theme|trace-viewer';
+  'architecture-map|command-palette|contact|cursor|dashboard|field-report|globe|hero|history|load-test|marquee|navigation|privacy|scrollbar|status-page|theme|trace-viewer';
 
 module.exports = {
   forbidden: [

@@ -11,7 +11,7 @@ const PROJECT = join(import.meta.dirname, '..', '..');
 describe('tools/serve.mjs', () => {
   let root, server;
   const BASE_POLICY =
-    "default-src 'self'; script-src 'self'; style-src 'self'; style-src-attr 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests";
+    "default-src 'self'; script-src 'self'; style-src 'self'; style-src-attr 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://eklund.eklund.workers.dev http://127.0.0.1:8787; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests";
 
   beforeAll(async () => {
     root = mkdtempSync(join(tmpdir(), 'serve-root-'));
@@ -269,14 +269,17 @@ describe('tools/serve.mjs with its defaults', () => {
     }
   });
 
-  it('sends the policy production sends for the real page, with the hash of its inline script', async () => {
+  it('sends the policy production sends for the real page, with the hash of its inline script and the local collector', async () => {
     const server = await RunningServer.start();
     try {
       const headers = await server.headers('/');
       expect(headers['content-security-policy']).toBe(
         SiteHeaders.production(readFileSync(join(PROJECT, 'source', 'index.html'), 'utf8'))[
           'Content-Security-Policy'
-        ],
+        ].replace(
+          "connect-src 'self' https://eklund.eklund.workers.dev;",
+          "connect-src 'self' https://eklund.eklund.workers.dev http://127.0.0.1:8787;",
+        ),
       );
     } finally {
       server.stop();

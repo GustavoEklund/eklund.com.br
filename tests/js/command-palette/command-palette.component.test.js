@@ -345,6 +345,36 @@ describe('CommandPalette', () => {
     });
   });
 
+  describe('telling how it was opened', () => {
+    it('says button or shortcut each time it opens, and nothing when it was already open', () => {
+      // The palette of beforeEach would open the dialog first: its listeners go, and its button with them.
+      listeners.release();
+      listeners = new WindowListeners().track();
+      const button = openButton.cloneNode(true);
+      openButton.replaceWith(button);
+      const onOpen = vi.fn();
+      palette = new CommandPalette({
+        dialog,
+        input,
+        list,
+        emptyMessage: empty,
+        openButton: button,
+        onOpen,
+      });
+      palette.install();
+      button.click();
+      palette.open();
+      palette.close();
+      key({ ctrlKey: true, key: 'k' });
+      key({ ctrlKey: true, key: 'k' });
+      palette.open();
+      expect(onOpen).toHaveBeenCalledTimes(3);
+      expect(onOpen).toHaveBeenNthCalledWith(1, 'button');
+      expect(onOpen).toHaveBeenNthCalledWith(2, 'shortcut');
+      expect(onOpen).toHaveBeenNthCalledWith(3, 'button');
+    });
+  });
+
   describe('replace', () => {
     it('re-renders at once while open, keeping the query', () => {
       palette.open();

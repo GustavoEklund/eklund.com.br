@@ -7,6 +7,7 @@ const FEATURES = [
   'contact',
   'cursor',
   'dashboard',
+  'field-report',
   'globe',
   'hero',
   'history',
