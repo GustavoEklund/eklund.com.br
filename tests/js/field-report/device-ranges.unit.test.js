@@ -49,6 +49,21 @@ describe('DeviceRanges', () => {
     ]);
   });
 
+  it('gives the same range for a width alone, as a click of a recording names it', () => {
+    expect(
+      [0, 390, 1023, 1440, 2560].map((width) => [
+        DeviceRanges.viewport(width),
+        DeviceRanges.of({ ...PHONE, width }).viewport,
+      ]),
+    ).toStrictEqual([
+      ['0-359', '0-359'],
+      ['360-413', '360-413'],
+      ['768-1023', '768-1023'],
+      ['1280-1535', '1280-1535'],
+      ['1536+', '1536+'],
+    ]);
+  });
+
   it('puts each pixel ratio in its range', () => {
     expect(
       [1, 1.25, 1.5, 1.75, 2, 2.625, 3, 4].map(

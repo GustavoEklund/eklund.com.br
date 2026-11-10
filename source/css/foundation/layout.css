@@ -1369,4 +1369,9 @@
   footer kbd {
     font-size: 0.62rem;
   }
+
+  /* A link that wraps has no point of its own in the middle of its box, where focus and clicks are checked. */
+  footer a {
+    white-space: nowrap;
+  }
 }

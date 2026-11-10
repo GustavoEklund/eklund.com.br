@@ -2,16 +2,13 @@ import { onCLS, onFCP, onINP, onLCP, onTTFB } from '../vendor/web-vitals.attribu
 import { DeviceRanges } from './device-ranges.js';
 import { LoadReport } from './load-report.js';
 import { PageActivity } from './page-activity.js';
+import { PageAddress } from './page-address.js';
 import { PageErrors } from './page-errors.js';
-import { ReportEndpoint } from './report-endpoint.js';
+import { ReportEndpoint } from '../shared/report-endpoint.js';
 import { ReportText } from './report-text.js';
 import { SiteVersion } from './site-version.js';
 import { VitalSummary } from './vital-summary.js';
 
-/** The pages that run the site's scripts; the legal pages run none. */
-const PAGES = ['/', '/en/'];
-/** A release folder in front of a page: /1.1.0/en/ is /en/ of release 1.1.0. */
-const RELEASE_FOLDER = /^\/\d{1,3}\.\d{1,3}\.\d{1,3}(?:-[0-9a-z.]{1,20})?(?=\/)/;
 const NAVIGATION_TYPES = {
   navigate: 'navigate',
   reload: 'reload',
@@ -101,8 +98,7 @@ export class FieldReport {
 
   /** The page a report names, or null for an address that is not one of the pages that measure. */
   static pageOf(pathname) {
-    const page = pathname.replace(RELEASE_FOLDER, '').replace(/index\.html$/, '');
-    return PAGES.includes(page) ? page : null;
+    return PageAddress.of(pathname);
   }
 
   /** How the page was reached, from its navigation entry and the document. */

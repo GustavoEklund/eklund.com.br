@@ -18,14 +18,16 @@
       "migrations_dir": "migrations",
     },
   ],
-  // The full Lighthouse report of each median run of the lab job, under lab/<day>/. Created in the EU jurisdiction:
+  // The full Lighthouse report of each median run of the lab job, under lab/<day>/, and the chunks of the session recordings
+  // that visitors consented to, under recordings/<day>/<code>/, deleted after 30 days. Created in the EU jurisdiction:
   // `wrangler r2 bucket create eklund --jurisdiction eu`.
   "r2_buckets": [{ "binding": "REPORTS", "bucket_name": "eklund", "jurisdiction": "eu" }],
   // The clients, grants and tokens of the OAuth provider that guards /mcp and /api/v1. Created with
   // `wrangler kv namespace create OAUTH_KV`; KV has no jurisdiction, and nothing in it is about a visitor.
   "kv_namespaces": [{ "binding": "OAUTH_KV", "id": "78f36fc5c15745ca9371fa8636790116" }],
-  // How many reports one client may send to /v1/page in a minute, in each Cloudflare location (edge/src/send-limit.js). A page
-  // sends a few reports per load, so sixty a minute leaves room for a dozen pages and for several visitors behind one address.
+  // How many reports one client may send to /v1/page and /v1/session in a minute, in each Cloudflare location
+  // (edge/src/send-limit.js). A page sends a few reports per load, and a recording a chunk every ten seconds or so, so sixty a
+  // minute leaves room for several pages and for several visitors behind one address.
   // The namespace id is any number unique in the account; nothing has to be created for it.
   "ratelimits": [
     { "name": "SEND_LIMIT", "namespace_id": "1001", "simple": { "limit": 60, "period": 60 } },

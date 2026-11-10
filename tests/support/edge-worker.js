@@ -63,6 +63,38 @@ export class EdgeWorker {
     });
   }
 
+  /** A chunk of a recording as a page sends it: gzip bytes, or text, without a content type, from the site's origin. */
+  sendChunk(body, headers = {}) {
+    return this.fetch('/v1/session', {
+      method: 'POST',
+      body,
+      headers: {
+        origin: EdgeWorker.ORIGIN,
+        'user-agent':
+          'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
+        ...headers,
+      },
+    });
+  }
+
+  /** The request a page sends to delete the recordings of these codes. */
+  forget(codes, headers = {}) {
+    return this.fetch('/v1/session/delete', {
+      method: 'POST',
+      body: JSON.stringify({ v: 1, codes }),
+      headers: {
+        origin: EdgeWorker.ORIGIN,
+        'content-type': 'text/plain;charset=UTF-8',
+        ...headers,
+      },
+    });
+  }
+
+  /** The keys of the R2 bucket under a prefix, in order. */
+  async keys(prefix = '') {
+    return (await (await this.reports()).list({ prefix })).objects.map(({ key }) => key);
+  }
+
   /** Runs a Cron Trigger: the daily retention unless `cron` names another one. */
   scheduled(scheduledTime, cron = '17 6 * * *') {
     return this.#worker.scheduled({ cron, scheduledTime });

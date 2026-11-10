@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { ReadingInputs } from '../../edge/src/reading-inputs.js';
 
 describe('ReadingInputs', () => {
-  it('names twelve readings, each with a description', () => {
+  it('names fourteen readings, each with a description', () => {
     expect([
       ReadingInputs.NAMES,
       ReadingInputs.NAMES.filter((name) => ReadingInputs.TOOLS[name].description.length < 40),
@@ -20,6 +20,8 @@ describe('ReadingInputs', () => {
         'crux',
         'search',
         'certificates',
+        'recordings',
+        'heat_map',
       ],
       [],
     ]);
@@ -93,5 +95,37 @@ describe('ReadingInputs', () => {
         after_to: '2026-10-20',
       }),
     ).toStrictEqual({ ok: false, reason: 'before_to: before_to comes before before_from' });
+  });
+
+  it('reads the recordings and the heat map of a recorded page, filtered by part and width of the window', () => {
+    expect([
+      ReadingInputs.parse('recordings', { from: '2026-11-01', to: '2026-11-08', page: '/en/' }),
+      ReadingInputs.parse('heat_map', {
+        from: '2026-11-01',
+        to: '2026-11-08',
+        page: '/',
+        region: 'contato',
+        viewport: '1280-1535',
+      }),
+      ReadingInputs.parse('recordings', { from: '2026-11-01', to: '2026-11-08', page: '/termos/' })
+        .reason,
+      ReadingInputs.parse('heat_map', { from: '2026-11-01', to: '2026-11-08', region: 'main' }).ok,
+      ReadingInputs.parse('recordings', { from: '2026-11-01', to: '2026-11-08', code: 'x' }).reason,
+    ]).toStrictEqual([
+      { ok: true, input: { from: '2026-11-01', to: '2026-11-08', page: '/en/' } },
+      {
+        ok: true,
+        input: {
+          from: '2026-11-01',
+          to: '2026-11-08',
+          page: '/',
+          region: 'contato',
+          viewport: '1280-1535',
+        },
+      },
+      'page: Invalid option: expected one of "/"|"/en/"',
+      false,
+      'Unrecognized key: "code"',
+    ]);
   });
 });

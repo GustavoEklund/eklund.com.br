@@ -188,9 +188,9 @@ describe('the legal pages', () => {
       listed('en/cookies/index.html'),
       [...stored].sort(),
     ]).toStrictEqual([
-      ['theme', 'hue', 'motion', 'lang', 'privacy'],
-      ['theme', 'hue', 'motion', 'lang', 'privacy'],
-      ['hue', 'lang', 'motion', 'privacy', 'theme'],
+      ['theme', 'hue', 'motion', 'lang', 'privacy', 'recordings'],
+      ['theme', 'hue', 'motion', 'lang', 'privacy', 'recordings'],
+      ['hue', 'lang', 'motion', 'privacy', 'recordings', 'theme'],
     ]);
   });
 

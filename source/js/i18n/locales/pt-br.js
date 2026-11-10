@@ -74,8 +74,11 @@ export const PT_BR = {
       refuseAll: 'Recusar tudo',
       deleteRecordings: 'Apagar minhas gravações',
       noRecordings: 'Este navegador não guarda nenhuma gravação para apagar.',
+      heldRecordings:
+        'Este navegador guarda os códigos das suas gravações dos últimos 30 dias. Apagar pede que elas sejam apagadas na hora.',
       saved: 'Escolha de privacidade salva.',
       deleted: 'Gravações apagadas.',
+      deleteFailed: 'Não consegui apagar as gravações agora. Tente de novo daqui a pouco.',
     },
   },
 
@@ -170,7 +173,7 @@ export const PT_BR = {
       dependencies: {
         name: 'Dependências',
         detail:
-          '1 biblioteca · 0 frameworks · {images} imagens (logos, lazy) · 0 cookies · 0 rastreadores',
+          '2 bibliotecas · 0 frameworks · {images} imagens (logos, lazy) · 0 cookies · 0 rastreadores',
       },
       platform: { name: 'Plataforma' },
       contrast: {
@@ -679,7 +682,7 @@ export const PT_BR = {
 
   footer: {
     stack:
-      'Feito só com HTML, CSS e JavaScript, sem frameworks. Uma biblioteca, para medir o site: web-vitals ·',
+      'Feito só com HTML, CSS e JavaScript, sem frameworks. Duas bibliotecas, para medir o site: web-vitals e rrweb ·',
     uncompressed: 'de código, sem comprimir ·',
     source: 'Código-fonte no GitHub',
     // The legal pages (0014) are one page per language, so each link names the page of the language on screen.

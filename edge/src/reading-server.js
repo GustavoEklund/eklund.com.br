@@ -6,7 +6,9 @@ Real visits are anonymous: no address, no cookie and nothing that links one visi
 visits 13 months, errors 90 days, and daily totals 25 months. The daily totals of a day are complete two days later, so the
 readings count the last three days from their rows, and today shows up at once, still growing. The lab job
 runs PageSpeed Insights every night on / and /en/, five runs for mobile and five for desktop, and reads CrUX, Search Console
-and Bing. Every answer says how large its sample is; when it is too small, say so instead of drawing a conclusion. Days are UTC.`;
+and Bing. Visitors who consented are also recorded: the recordings and the clicks of their heat map are kept 30 days, and
+the readings list them and add the clicks up, but never change or delete them. Every answer says how large its sample is;
+when it is too small, say so instead of drawing a conclusion. Days are UTC.`;
 
 /**
  * The MCP server of the readings: one read-only tool for each reading of ReadingInputs, answered by ReadingQueries. A server

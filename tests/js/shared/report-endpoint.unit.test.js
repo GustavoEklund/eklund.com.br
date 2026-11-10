@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ReportEndpoint } from '@site/js/field-report/report-endpoint.js';
+import { ReportEndpoint } from '@site/js/shared/report-endpoint.js';
 
 const at = (address) => ReportEndpoint.for(new URL(address));
 
@@ -35,5 +35,21 @@ describe('ReportEndpoint', () => {
       at('http://eklund.com.br/'),
       at('https://www.eklund.com.br/'),
     ]).toStrictEqual([null, null, null, null]);
+  });
+
+  it('gives the same origins the paths of a recording: its chunks and the request to delete recordings', () => {
+    const paths = [ReportEndpoint.RECORDING_PATH, ReportEndpoint.DELETION_PATH];
+    expect(
+      ['https://eklund.com.br/en/', 'http://127.0.0.1:8737/', 'https://127.0.0.1:8738/'].map(
+        (address) => paths.map((path) => ReportEndpoint.for(new URL(address), path)),
+      ),
+    ).toStrictEqual([
+      [
+        'https://eklund.eklund.workers.dev/v1/session',
+        'https://eklund.eklund.workers.dev/v1/session/delete',
+      ],
+      ['http://127.0.0.1:8787/v1/session', 'http://127.0.0.1:8787/v1/session/delete'],
+      [null, null],
+    ]);
   });
 });

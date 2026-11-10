@@ -10,7 +10,7 @@ const REQUESTS = ['preferencias', 'preferences'];
  * the buttons that would allow something are disabled, and a note says why.
  */
 export class PrivacyDialog {
-  /** What the preferences use until the browser can hold recordings: none to delete. */
+  /** What the preferences use where the browser holds no recordings: none to delete. */
   static NO_RECORDINGS = Object.freeze({ held: () => false, deleteAll: () => Promise.resolve() });
 
   #dialog;
@@ -26,6 +26,7 @@ export class PrivacyDialog {
   #save;
   #accept;
   #delete;
+  #held;
 
   /**
    * @param {object} options
@@ -33,7 +34,8 @@ export class PrivacyDialog {
    * @param {import('./privacy-choice.js').PrivacyChoice} options.choice
    * @param {{ t: Function }} options.translator
    * @param {(message: string) => void} options.announce says something through the live region
-   * @param {{ held: () => boolean, deleteAll: () => Promise<void> }} [options.recordings] the codes of this browser's recordings
+   * @param {{ held: () => boolean, deleteAll: () => Promise<void> }} [options.recordings] the codes of this browser's
+   *   recordings: whether it keeps any, and the request that deletes them, which rejects when it fails
    * @param {HTMLElement} options.focusAfter takes the focus on close when what opened the dialog is gone
    * @param {HTMLAnchorElement[]} [options.openLinks] links that open the dialog on a plain click
    */
@@ -75,6 +77,7 @@ export class PrivacyDialog {
     this.#save = Dom.require('[data-privacy-action="save"]', this.#dialog);
     this.#accept = Dom.require('[data-privacy-action="accept"]', this.#dialog);
     this.#delete = Dom.require('#privacy-delete', this.#dialog);
+    this.#held = Dom.require('#privacy-no-recordings', this.#dialog);
     this.#dialog.addEventListener('click', (event) => this.#onClick(event));
     this.#dialog.addEventListener('close', () => this.#handFocusOn());
     for (const link of this.#openLinks)
@@ -108,7 +111,11 @@ export class PrivacyDialog {
     for (const control of [this.#measurement, this.#recording, this.#save, this.#accept])
       control.disabled = signal;
     this.#signal.hidden = !signal;
-    this.#delete.disabled = !this.#recordings.held();
+    const held = this.#recordings.held();
+    this.#delete.disabled = !held;
+    const note = held ? 'privacy.dialog.heldRecordings' : 'privacy.dialog.noRecordings';
+    this.#held.dataset.i18n = note;
+    this.#held.textContent = this.#translator.t(note);
   }
 
   #onClick(event) {
@@ -133,10 +140,17 @@ export class PrivacyDialog {
     this.#announce(this.#translator.t('privacy.dialog.saved'));
   }
 
+  /** Deletes them, and says whether it worked; the button is off while the request is on its way. */
   async #deleteRecordings() {
-    await this.#recordings.deleteAll();
+    this.#delete.disabled = true;
+    let outcome = 'privacy.dialog.deleted';
+    try {
+      await this.#recordings.deleteAll();
+    } catch {
+      outcome = 'privacy.dialog.deleteFailed';
+    }
     this.#sync();
-    this.#announce(this.#translator.t('privacy.dialog.deleted'));
+    this.#announce(this.#translator.t(outcome));
   }
 
   /**

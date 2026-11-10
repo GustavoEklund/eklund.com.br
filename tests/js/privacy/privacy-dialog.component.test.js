@@ -8,6 +8,9 @@ import { DictionaryText } from '../../support/dictionary-text.js';
 const NOW = Date.UTC(2026, 10, 9, 12);
 const SAVED = DictionaryText.entry('pt-BR', 'privacy.dialog.saved');
 const DELETED = DictionaryText.entry('pt-BR', 'privacy.dialog.deleted');
+const DELETE_FAILED = DictionaryText.entry('pt-BR', 'privacy.dialog.deleteFailed');
+const NO_RECORDINGS = DictionaryText.entry('pt-BR', 'privacy.dialog.noRecordings');
+const HELD_RECORDINGS = DictionaryText.entry('pt-BR', 'privacy.dialog.heldRecordings');
 const MARKUP = `
   <main id="main" tabindex="-1"><button id="opener">open</button><a id="link" href="/privacidade/#escolha">preferences</a></main>
   <dialog id="privacy-dialog">
@@ -16,7 +19,7 @@ const MARKUP = `
     <input type="checkbox" id="privacy-measurement"><input type="checkbox" id="privacy-recording">
     <p id="privacy-signal" hidden>signal</p>
     <button data-privacy-action="save">save</button><button data-privacy-action="accept">accept</button><button data-privacy-action="refuse">refuse</button>
-    <button id="privacy-delete" disabled>delete</button>
+    <button id="privacy-delete" disabled>delete</button><p id="privacy-no-recordings" data-i18n="privacy.dialog.noRecordings">none</p>
   </dialog>`;
 
 /** A stand-in for Preferences that holds values in a map. */
@@ -246,19 +249,46 @@ describe('PrivacyDialog', () => {
   });
 
   describe('the recordings of this browser', () => {
+    const note = () => [
+      element('privacy-no-recordings').dataset.i18n,
+      element('privacy-no-recordings').textContent,
+    ];
+
     it('enables deleting them while the browser holds some, and deletes them, then says so', async () => {
       recordings.held.mockReturnValueOnce(true).mockReturnValue(false);
       preferences.open();
-      const enabled = !element('privacy-delete').disabled;
+      const enabled = [!element('privacy-delete').disabled, note()];
       element('privacy-delete').click();
+      const during = element('privacy-delete').disabled;
       await vi.waitFor(() => expect(announce).toHaveBeenCalledTimes(1));
       expect(announce).toHaveBeenNthCalledWith(1, DELETED);
       expect(recordings.deleteAll).toHaveBeenCalledTimes(1);
       expect(recordings.deleteAll).toHaveBeenNthCalledWith(1);
-      expect([enabled, element('privacy-delete').disabled, dialog.open]).toStrictEqual([
+      expect([
+        enabled,
+        during,
+        element('privacy-delete').disabled,
+        note(),
+        dialog.open,
+      ]).toStrictEqual([
+        [true, ['privacy.dialog.heldRecordings', HELD_RECORDINGS]],
         true,
         true,
+        ['privacy.dialog.noRecordings', NO_RECORDINGS],
         true,
+      ]);
+    });
+
+    it('says when the deletion failed, and keeps the button for another try', async () => {
+      recordings.held.mockReturnValue(true);
+      recordings.deleteAll.mockRejectedValueOnce(new Error('the collector answered 503'));
+      preferences.open();
+      element('privacy-delete').click();
+      await vi.waitFor(() => expect(announce).toHaveBeenCalledTimes(1));
+      expect(announce).toHaveBeenNthCalledWith(1, DELETE_FAILED);
+      expect([element('privacy-delete').disabled, note()]).toStrictEqual([
+        false,
+        ['privacy.dialog.heldRecordings', HELD_RECORDINGS],
       ]);
     });
 

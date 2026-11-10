@@ -15,6 +15,7 @@ import { SiteSource } from '../support/site-source.js';
 const BUDGET_GZIP_BYTES = {
   'main js': 70_000,
   'measurement js': 10_500,
+  'recording js': 26_000,
   'main css': 18_500,
   'index.html': 14_500,
   'en/index.html': 14_500,
@@ -38,7 +39,9 @@ const HASHED_ASSETS = [
   'main-HASH.js',
   'okto-payments-logo-200-x-200-HASH.jpg',
   'pix-engine.worker-HASH.js',
+  'session-recording-HASH.js',
   'site-HASH.webmanifest',
+  'site-version-HASH.js',
 ];
 const PAGES = [
   ['index.html', 'index.html'],
@@ -389,6 +392,40 @@ describe('the production build', () => {
     });
   });
 
+  describe('the recording', () => {
+    it('is a chunk of its own, with rrweb inside, that the script imports by its built address and no page preloads', () => {
+      const name = site.hashedAssets().find((entry) => /^session-recording-.*\.js$/.test(entry));
+      const main = site.read(
+        `assets/${site.hashedAssets().find((entry) => /^main-.*\.js$/.test(entry))}`,
+      );
+      const pages = ['index.html', 'en/index.html'].map((page) => site.read(page));
+      expect([
+        new RegExp(`import\\([\`"']\\./${name.replace('.', '\\.')}[\`"']\\)`).test(main),
+        site.read(`assets/${name}`).includes('rr-block'),
+        main.includes('rr-block'),
+        site
+          .read(
+            `assets/${site.hashedAssets().find((entry) => /^field-report-.*\.js$/.test(entry))}`,
+          )
+          .includes('rr-block'),
+        pages.map((page) => page.includes(name)),
+      ]).toStrictEqual([true, true, false, false, [false, false]]);
+    });
+
+    it('shares with the measurement only a small chunk of their common helpers, which the script fetches with either and no page preloads', () => {
+      const shared = site.hashedAssets().find((entry) => /^site-version-.*\.js$/.test(entry));
+      const importers = site
+        .hashedAssets()
+        .filter((entry) => entry.endsWith('.js') && site.read(`assets/${entry}`).includes(shared))
+        .map((entry) => entry.replace(/-[\w-]{8}\.js$/, ''));
+      expect([
+        importers,
+        site.gzipBytes(`assets/${shared}`) < 1_500,
+        ['index.html', 'en/index.html'].map((page) => site.read(page).includes(shared)),
+      ]).toStrictEqual([['field-report', 'main', 'session-recording'], true, [false, false]]);
+    });
+  });
+
   describe('the web manifest', () => {
     it('is the manifest as it is written, as data, with each icon named from the root by the address it has in the build, and every icon exists', () => {
       const name = site.hashedAssets().find((entry) => /^site-.*\.webmanifest$/.test(entry));
@@ -422,6 +459,9 @@ describe('the production build', () => {
         'main js': site.gzipBytes(main('js')),
         'measurement js': site.gzipBytes(
           `assets/${site.hashedAssets().find((entry) => /^field-report-.*\.js$/.test(entry))}`,
+        ),
+        'recording js': site.gzipBytes(
+          `assets/${site.hashedAssets().find((entry) => /^session-recording-.*\.js$/.test(entry))}`,
         ),
         'main css': site.gzipBytes(main('css')),
         'index.html': site.gzipBytes('index.html'),

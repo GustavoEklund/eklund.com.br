@@ -1,6 +1,6 @@
 // Checks the site against the public filter lists that uBlock Origin and other blockers ship with.
-// 1. Network filters: every file the page can request, as https://eklund.com.br/<path>, and the collector it sends its
-//    reports to, must not match a rule.
+// 1. Network filters: every file the page can request, as https://eklund.com.br/<path>, and the routes of the collector it
+//    sends its reports, its recordings and their deletion to, must not match a rule.
 // 2. Cosmetic filters: no element of the live page may be hidden by a generic element-hiding rule (pt-BR and en-US).
 // Lists are cached in reports/adblock for a day. usage: node tools/adblock-check.mjs [--refresh]   (needs network the first time)
 import { spawn } from 'node:child_process';
@@ -10,7 +10,7 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { FiltersEngine, Request } from '@ghostery/adblocker';
 import { chromium } from 'playwright';
-import { ReportEndpoint } from '../source/js/field-report/report-endpoint.js';
+import { ReportEndpoint } from '../source/js/shared/report-endpoint.js';
 
 const PROJECT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const SOURCE = join(PROJECT, 'source');
@@ -57,11 +57,13 @@ class NetworkAudit {
     this.#engine = engine;
   }
 
-  /** [address, rule] for every requestable file, and the collector, that a rule would block. */
+  /** [address, rule] for every requestable file, and each route of the collector, that a rule would block. */
   blocked() {
     return [
       ...NetworkAudit.#requestable().map(({ path, type }) => ({ url: `${ORIGIN}${path}`, type })),
-      { url: `${ReportEndpoint.COLLECTOR}${ReportEndpoint.PATH}`, type: 'xmlhttprequest' },
+      ...[ReportEndpoint.PATH, ReportEndpoint.RECORDING_PATH, ReportEndpoint.DELETION_PATH].map(
+        (path) => ({ url: `${ReportEndpoint.COLLECTOR}${path}`, type: 'xmlhttprequest' }),
+      ),
     ].flatMap(({ url, type }) => {
       const { match, filter } = this.#engine.match(
         Request.fromRawDetails({ url, sourceUrl: ORIGIN, type }),

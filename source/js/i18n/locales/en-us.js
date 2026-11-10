@@ -74,8 +74,11 @@ export const EN_US = {
       refuseAll: 'Refuse all',
       deleteRecordings: 'Delete my recordings',
       noRecordings: 'This browser keeps no recording to delete.',
+      heldRecordings:
+        'This browser keeps the codes of your recordings of the last 30 days. Deleting asks for them to be deleted at once.',
       saved: 'Privacy choice saved.',
       deleted: 'Recordings deleted.',
+      deleteFailed: 'I could not delete the recordings now. Try again in a moment.',
     },
   },
 
@@ -166,7 +169,8 @@ export const EN_US = {
       layoutShift: { name: 'Layout shift', detail: 'CLS {value} · worst 5 s window' },
       dependencies: {
         name: 'Dependencies',
-        detail: '1 library · 0 frameworks · {images} images (logos, lazy) · 0 cookies · 0 trackers',
+        detail:
+          '2 libraries · 0 frameworks · {images} images (logos, lazy) · 0 cookies · 0 trackers',
       },
       platform: { name: 'Platform' },
       contrast: {
@@ -675,7 +679,7 @@ export const EN_US = {
 
   footer: {
     stack:
-      'Built with just HTML, CSS and JavaScript, no frameworks. One library, to measure the site: web-vitals ·',
+      'Built with just HTML, CSS and JavaScript, no frameworks. Two libraries, both to measure the site: web-vitals and rrweb ·',
     uncompressed: 'of code, uncompressed ·',
     source: 'Source code on GitHub',
     // The legal pages (0014) are one page per language, so each link names the page of the language on screen.

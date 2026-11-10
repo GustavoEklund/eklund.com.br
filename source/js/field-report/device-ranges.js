@@ -45,7 +45,7 @@ export class DeviceRanges {
    */
   static of({ width, pixelRatio, memory, cores, roundTrip, saveData, dark, reducedMotion }) {
     return {
-      viewport: DeviceRanges.#range(width, WIDTHS, '1536+'),
+      viewport: DeviceRanges.viewport(width),
       pixelRatio: DeviceRanges.#range(pixelRatio, PIXEL_RATIOS, '3+'),
       memory: DeviceRanges.#known(memory, 0)
         ? DeviceRanges.#range(memory, MEMORIES, '8+')
@@ -58,6 +58,11 @@ export class DeviceRanges {
       colorScheme: dark ? 'dark' : 'light',
       reducedMotion: reducedMotion === true,
     };
+  }
+
+  /** The range of a window's width, in CSS pixels. */
+  static viewport(width) {
+    return DeviceRanges.#range(width, WIDTHS, '1536+');
   }
 
   /** The device of this window, read from the browser. */
