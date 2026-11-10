@@ -514,7 +514,11 @@
                   "speedDown",
                   "pointsUp",
                   "pointsDown",
-                  "spinGlobe"
+                  "spinGlobe",
+                  "privacyPreferences",
+                  "privacyPolicy",
+                  "cookiePolicy",
+                  "terms"
                 ]
               },
               "value": {

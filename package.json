@@ -46,7 +46,7 @@
     "changelog": "node tools/changelog.mjs",
     "adblock": "node tools/adblock-check.mjs",
     "validate:html": "node tools/validate-html.mjs",
-    "a11y": "playwright test tests/e2e/accessibility.e2e.test.js tests/e2e/aria-patterns.e2e.test.js tests/e2e/wcag22.e2e.test.js",
+    "a11y": "playwright test tests/e2e/accessibility.e2e.test.js tests/e2e/aria-patterns.e2e.test.js tests/e2e/wcag22.e2e.test.js tests/e2e/privacy.e2e.test.js",
     "contrast": "node tools/contrast-audit.mjs",
     "measure": "node tools/measure-sections.mjs --write",
     "test": "vp check && node tools/i18n-check.mjs && pnpm run proofread && vp test run && cucumber-js && playwright test",

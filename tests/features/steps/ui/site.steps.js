@@ -157,3 +157,61 @@ Then(
     assert.deepStrictEqual(lines, { approved, failed });
   },
 );
+
+Given('que o navegador do visitante envia o sinal Global Privacy Control', async function () {
+  await this.context.addInitScript(() =>
+    Object.defineProperty(Navigator.prototype, 'globalPrivacyControl', { get: () => true }),
+  );
+});
+
+When('o visitante clica em {string} no aviso de privacidade', async function (label) {
+  await this.page
+    .locator('#privacy-notice')
+    .getByRole('button', { name: label, exact: true })
+    .click();
+});
+
+When('o visitante clica em {string} nas preferências de privacidade', async function (label) {
+  await this.page
+    .locator('#privacy-dialog')
+    .getByRole('button', { name: label, exact: true })
+    .click();
+});
+
+When('o visitante clica em {string} no rodapé', async function (label) {
+  await this.page.locator('footer').getByRole('link', { name: label, exact: true }).click();
+});
+
+When('o visitante liga {string} e salva a escolha', async function (label) {
+  const dialog = this.page.locator('#privacy-dialog');
+  await dialog.getByLabel(label, { exact: true }).check();
+  await dialog.getByRole('button', { name: PT_BR.privacy.dialog.save, exact: true }).click();
+});
+
+Then('o aviso de privacidade está visível', async function () {
+  await expect(this.page.locator('#privacy-notice')).toBeVisible();
+});
+
+Then('o aviso de privacidade está escondido', async function () {
+  await expect(this.page.locator('#privacy-notice')).toBeHidden();
+});
+
+Then('as preferências de privacidade estão abertas', async function () {
+  await expect(this.page.locator('#privacy-dialog')).toBeVisible();
+});
+
+/** What window.eklund.privacy allows, as the scenarios name it. */
+const PURPOSES = {
+  'a medição anônima': 'measurementAllowed',
+  'a gravação de sessão': 'recordingAllowed',
+};
+
+Then(
+  /^(a medição anônima|a gravação de sessão) está (ligada|desligada)$/,
+  async function (purpose, state) {
+    assert.strictEqual(
+      await this.page.evaluate((name) => window.eklund.privacy[name], PURPOSES[purpose]),
+      state === 'ligada',
+    );
+  },
+);

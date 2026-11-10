@@ -33,6 +33,9 @@ import { Translator } from './i18n/translator.js';
 import { LocaleSwitcher } from './i18n/locale-switcher.js';
 import { LanguageOffer } from './i18n/language-offer.js';
 import { Dictionaries } from './i18n/dictionaries.js';
+import { PrivacyChoice } from './privacy/privacy-choice.js';
+import { PrivacyNotice } from './privacy/privacy-notice.js';
+import { PrivacyDialog } from './privacy/privacy-dialog.js';
 
 const FRAME_RATE_CHIP_INTERVAL_MS = 500;
 const TRACE_RENDER_DEBOUNCE_MS = 150;
@@ -73,12 +76,15 @@ class App {
   #motion;
   #marquee;
   #history;
+  #privacy;
+  #privacyDialog;
   #traceRenderTimer = 0;
 
   start() {
     performance.mark('app:start');
     this.#mountLocale();
     this.#mountMotion();
+    this.#mountPrivacy();
     this.#mountTheme();
     this.#mountHero();
     this.#mountGlobe();
@@ -153,6 +159,34 @@ class App {
   #mountMotion() {
     this.#announcer = new LiveAnnouncer(Dom.require('#announcer'));
     this.#motion = new MotionToggle({ button: Dom.require('#motion-toggle') }).mount();
+  }
+
+  /**
+   * The privacy choice (0010), the notice that asks for it and the preferences that change it. `#privacy` is what the parts
+   * that measure or record ask before they do, and they follow its onChange. Opening /?preferencias (or /en/?preferences), the
+   * address the legal pages link to, opens the preferences at once.
+   */
+  #mountPrivacy() {
+    const main = Dom.require('#main');
+    this.#privacy = new PrivacyChoice({ globalPrivacyControl: navigator.globalPrivacyControl });
+    this.#privacyDialog = new PrivacyDialog({
+      dialog: Dom.require('#privacy-dialog'),
+      choice: this.#privacy,
+      translator: this.#translator,
+      announce: (message) => this.#announcer.announce(message),
+      focusAfter: main,
+      openLinks: [Dom.require('#privacy-preferences-link')],
+    }).mount();
+    new PrivacyNotice({
+      root: Dom.require('#privacy-notice'),
+      choice: this.#privacy,
+      onChoose: () => this.#privacyDialog.open(),
+      focusAfter: main,
+    }).install();
+    if (PrivacyDialog.requested(location.search)) {
+      history.replaceState(null, '', PrivacyDialog.withoutRequest(location.href));
+      this.#privacyDialog.open();
+    }
   }
 
   /** Everything that moves by itself follows the pause button; CSS animations follow it through data-motion. */
@@ -433,6 +467,26 @@ class App {
         'globe',
         closeThen(() => this.#globe?.kick()),
       ),
+      command(
+        'privacyPreferences',
+        'privacy',
+        closeThen(() => this.#privacyDialog.open()),
+      ),
+      command(
+        'privacyPolicy',
+        'page',
+        closeThen(() => location.assign(this.#translator.t('footer.legal.privacyAddress'))),
+      ),
+      command(
+        'cookiePolicy',
+        'page',
+        closeThen(() => location.assign(this.#translator.t('footer.legal.cookiesAddress'))),
+      ),
+      command(
+        'terms',
+        'page',
+        closeThen(() => location.assign(this.#translator.t('footer.legal.termsAddress'))),
+      ),
     ];
   }
 
@@ -496,6 +550,7 @@ class App {
       loadTest: this.#loadTest,
       theme: this.#theme,
       translator: this.#translator,
+      privacy: this.#privacy,
       setLocale: (tag) => this.setLocale(tag),
     };
   }

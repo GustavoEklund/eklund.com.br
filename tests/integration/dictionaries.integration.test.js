@@ -242,6 +242,10 @@ describe('the dictionaries', () => {
           'pointsUp',
           'pointsDown',
           'spinGlobe',
+          'privacyPreferences',
+          'privacyPolicy',
+          'cookiePolicy',
+          'terms',
         ]);
       },
     );

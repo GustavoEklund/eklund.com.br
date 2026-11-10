@@ -20,6 +20,7 @@ flowchart LR
       map["architecture-map"]
       load["load-test"]
       palette["command-palette"]
+      privacy["privacy"]
       more["history, contact, theme,<br/>cursor, marquee, scrollbar, navigation"]
     end
     shared["shared<br/>Dom, Formatter, Environment, Preferences,<br/>ThemeColors, RenderLoop, PageReadings"]
@@ -32,6 +33,16 @@ flowchart LR
 ```
 
 The arrows are rules, and `tests/architecture` fails when code breaks them: a feature imports only `shared/` and `i18n/`, `shared/` imports nothing of the site, and only `main.js` composes features.
+
+## The privacy choice
+
+[0010](decisions/0010-privacy-by-the-anpd-guidance.md) sets what the site asks and when, and [`privacy.md`](privacy.md) what it processes. In the code:
+
+- `PrivacyChoice` keeps the choice in `localStorage` under `privacy`, as JSON with the version of the purposes (`PrivacyChoice.VERSION`), whether measurement and recording are on, and the moment it stops counting, six calendar months after it was saved. A choice counts while its version is the current one and its expiry is in the future. Raising the version asks every visitor again. Global Privacy Control (`navigator.globalPrivacyControl === true`) counts as refusing everything, whatever was saved, and `/.well-known/gpc.json` says the site honors it.
+- The inline script in the head of `index.html` makes the same decision before the first paint and sets `data-privacy="ask"` on the root element, which is what shows the notice, so the notice never moves the layout. `tests/contract/head-script.contract.test.js` checks that the script and `PrivacyChoice` agree in every case.
+- `PrivacyNotice` is the card fixed at the bottom: three buttons of the same size and style and no close button. While it shows, it writes its height to `--privacy-notice-height`, which `privacy.css` turns into `scroll-padding-bottom` on the root and room under the footer, so the focused control and the last link stay above it.
+- `PrivacyDialog` is the second layer, a modal `<dialog>`. The footer link "Privacy preferences" and the command palette open it, and so does the address `/?preferencias` or `/en/?preferences`, which the legal pages link to; the app opens it and takes the query out of the address. Without scripts, the footer link leads to the part of the privacy policy about the choice, and nothing measures.
+- What measures or records later asks `PrivacyChoice` first (`measurementAllowed`, `recordingAllowed`) and follows `onChange`. "Delete my recordings" calls the `recordings` that `App` gives the dialog, `{ held(), deleteAll() }`; until recordings exist, `PrivacyDialog.NO_RECORDINGS` holds none, and the button stays disabled.
 
 ## What the page measures about itself
 
@@ -61,7 +72,8 @@ source/                    everything that is deployed
   css/
     foundation/            tokens (layers, colors, fonts), layout, shared components, effects
     <feature>.css          hero, marquee, status-page, trace-viewer, profile, charts, dashboard,
-                           architecture-map, load-test, history, contact, command-palette, scrollbar, cursor, locale-switcher
+                           architecture-map, load-test, history, contact, command-palette, scrollbar, cursor, locale-switcher,
+                           language-offer, privacy
   js/
     main.js                App: composition root, wires every feature
     shared/                Dom, Numbers, SeededRandom, Formatter, Environment, Preferences,
@@ -74,9 +86,10 @@ source/                    everything that is deployed
     load-test/             PixEngine, pix-engine.worker.js (the Web Worker shell), RampScenario, SeriesResampler,
                            LoadTestCharts, TerminalLog, WorkerPool, LoadTest
     i18n/                  Locale, Translator, LocaleSwitcher, Dictionaries, locales/pt-br.js, locales/en-us.js
+    privacy/               PrivacyChoice, PrivacyNotice, PrivacyDialog (see The privacy choice)
     history/ contact/ command-palette/ theme/ cursor/ hero/ marquee/ scrollbar/ navigation/
   .htaccess                security headers, cache and compression rules for Hostinger
-  robots.txt sitemap.xml site.webmanifest icon.svg favicon.ico apple-touch-icon.png .well-known/security.txt
+  robots.txt sitemap.xml site.webmanifest icon.svg favicon.ico apple-touch-icon.png .well-known/security.txt .well-known/gpc.json
   <key>.txt                the IndexNow key, a file named after its content (tools/index-now.mjs)
   privacidade/ cookies/ termos/   the legal pages in Portuguese, and en/privacy/, en/cookies/, en/terms/ in English: static HTML with
                            one stylesheet, css/legal.css, and the head script of index.html (docs/decisions/0014)

@@ -1,0 +1,211 @@
+@layer components {
+  /*
+   * The privacy notice (0010): a card fixed at the bottom that does not block the page. The head script sets
+   * data-privacy="ask" on the root before the first paint, so the card is there from the start and moves nothing.
+   * PrivacyNotice writes its height to --privacy-notice-height, which keeps the focused control and the end of the
+   * footer above it (WCAG 2.4.11).
+   */
+  .privacy-notice {
+    display: none;
+  }
+
+  :root[data-privacy='ask'] {
+    scroll-padding-bottom: var(--privacy-notice-height, 0);
+  }
+
+  :root[data-privacy='ask'] footer {
+    padding-bottom: calc(2rem + env(safe-area-inset-bottom) + var(--privacy-notice-height, 0px));
+  }
+
+  :root[data-privacy='ask'] .privacy-notice {
+    position: fixed;
+    inset: auto var(--gutter) calc(1rem + env(safe-area-inset-bottom));
+    z-index: 50;
+    display: grid;
+    gap: 0.9rem;
+    max-width: 44rem;
+    margin-inline: auto;
+    padding: 1.1rem 1.2rem;
+    border-radius: 1rem;
+    background: var(--bg-2);
+    box-shadow:
+      inset 0 0 0 1px var(--line),
+      0 24px 48px -24px oklch(0% 0 0deg / 50%);
+    color: var(--fg);
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  .privacy-notice p {
+    text-wrap: pretty;
+  }
+
+  /* On a phone the card stays short: smaller text, and the three buttons still side by side. */
+  @media (width < 40rem) {
+    :root[data-privacy='ask'] .privacy-notice {
+      gap: 0.7rem;
+      padding: 0.9rem;
+      font-size: 0.78rem;
+      line-height: 1.45;
+    }
+
+    .privacy-actions {
+      gap: 0.4rem;
+    }
+  }
+
+  .privacy-notice a,
+  .privacy-dialog a {
+    color: var(--accent-text);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  /* "Accept all", "Refuse all" and "Choose" look the same and take the same room, so none is easier to pick (0010). */
+  .privacy-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.6rem;
+  }
+
+  :is(.privacy-actions, .privacy-recordings) button {
+    min-height: 2.5rem;
+    padding: 0.5rem 0.8rem;
+    border: 0;
+    border-radius: 999px;
+    background: var(--bg);
+    box-shadow: inset 0 0 0 1px var(--fg-2);
+    color: var(--fg);
+    font: inherit;
+    font-weight: 500;
+    line-height: 1.2;
+    cursor: pointer;
+  }
+
+  :is(.privacy-actions, .privacy-recordings) button:hover:enabled {
+    background: var(--accent);
+    box-shadow: inset 0 0 0 1px var(--accent);
+    color: var(--ink);
+  }
+
+  :is(.privacy-actions, .privacy-recordings) button:disabled {
+    opacity: 0.55;
+    cursor: default;
+  }
+
+  @media (width < 22rem) {
+    .privacy-actions {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  /* No motion in the card itself; only with motion on does it rise into place, and a transform shifts no layout. */
+  :root[data-motion='full'][data-privacy='ask'] .privacy-notice {
+    animation: privacy-notice-rise 0.35s var(--ease-out);
+  }
+
+  @keyframes privacy-notice-rise {
+    from {
+      opacity: 0;
+      translate: 0 1rem;
+    }
+  }
+
+  /* The preferences, the second layer of the notice. The dialog scrolls itself on a short screen, so no inner box takes the first focus from its controls. */
+  .privacy-dialog {
+    width: min(92vw, 600px);
+    max-height: 84vh;
+    margin-top: 8vh;
+    overflow: auto;
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  .privacy-dialog-body {
+    display: grid;
+    gap: 1rem;
+    padding: 1.1rem 1.3rem 1.4rem;
+  }
+
+  .privacy-dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .privacy-dialog h2 {
+    margin: 0;
+    font-size: 1.35rem;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  .privacy-dialog p + p {
+    margin-top: 0;
+  }
+
+  .privacy-lead,
+  .privacy-purpose p,
+  .privacy-recordings p {
+    color: var(--fg-2);
+  }
+
+  .privacy-purposes {
+    display: grid;
+    gap: 0.6rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .privacy-purpose {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0.25rem 0.7rem;
+    padding: 0.8rem 0.9rem;
+    border-radius: 0.8rem;
+    background: var(--bg-2);
+  }
+
+  /* At least 24 px, the target size of WCAG 2.5.8, whatever the root font size. */
+  .privacy-purpose input {
+    width: max(24px, 1.5rem);
+    height: max(24px, 1.5rem);
+    margin: 0;
+    accent-color: var(--accent);
+  }
+
+  .privacy-purpose label {
+    font-weight: 600;
+  }
+
+  .privacy-basis {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+  }
+
+  .privacy-purpose p {
+    grid-column: 2 / -1;
+  }
+
+  .privacy-signal {
+    padding: 0.7rem 0.9rem;
+    border-radius: 0.8rem;
+    box-shadow: inset 0 0 0 1px var(--accent);
+  }
+
+  .privacy-signal[hidden] {
+    display: none;
+  }
+
+  .privacy-recordings {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.9rem;
+  }
+}

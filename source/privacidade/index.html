@@ -17,7 +17,7 @@
 
 <!-- The inline script of the head of index.html, byte for byte, so the Content-Security-Policy allows it by the same hash: here it only applies the theme, hue and motion the visitor chose. tools/i18n-check.mjs copies it, with its fix-html option. -->
 <script>document.documentElement.classList.add('js');
-let motion, language;
+let motion, language, privacy;
 try {
   const theme = localStorage.getItem('theme');
   if (theme) document.documentElement.dataset.theme = theme;
@@ -25,8 +25,10 @@ try {
   if (hue) document.documentElement.style.setProperty('--hue', hue);
   motion = localStorage.getItem('motion');
   language = localStorage.getItem('lang');
+  privacy = JSON.parse(localStorage.getItem('privacy'));
 } catch {}
 document.documentElement.dataset.motion = motion === 'paused' || motion === 'full' ? motion : matchMedia('(prefers-reduced-motion: reduce)').matches ? 'paused' : 'full';
+if (navigator.globalPrivacyControl !== true && !(privacy?.version === 1 && privacy.expires > Date.now())) document.documentElement.dataset.privacy = 'ask';
 if (location.pathname === '/' || location.pathname === '/index.html') {
   const query = new URLSearchParams(location.search);
   const translated = (tag) => {
@@ -97,8 +99,8 @@ if (location.pathname === '/' || location.pathname === '/index.html') {
 <p>Você pode se opor a qualquer momento. Recusar tudo no aviso de privacidade, ou depois pelo link de preferências no rodapé, desliga a medição no seu navegador a partir dali, e a página nem baixa o código que mede.</p>
 <p>Se o seu navegador envia o sinal Global Privacy Control, eu o trato como uma recusa de tudo: o aviso não aparece e nada é enviado.</p>
 
-<h2>A sua escolha</h2>
-<p>Guardo a sua escolha no seu navegador por seis meses, junto com a versão das finalidades. O aviso pergunta de novo quando esse prazo acaba ou quando uma finalidade muda.</p>
+<h2 id="escolha">A sua escolha</h2>
+<p>Guardo a sua escolha no seu navegador por seis meses, junto com a versão das finalidades. O aviso pergunta de novo quando esse prazo acaba ou quando uma finalidade muda. Você muda a escolha quando quiser nas <a href="/?preferencias">preferências de privacidade</a>, que o link de preferências no rodapé de cada página abre.</p>
 
 <h2>Quem mais participa</h2>
 <ul>
@@ -130,6 +132,7 @@ if (location.pathname === '/' || location.pathname === '/index.html') {
       <li><a href="/privacidade/" aria-current="page">Política de Privacidade</a></li>
       <li><a href="/cookies/">Política de Cookies</a></li>
       <li><a href="/termos/">Termos de Uso</a></li>
+      <li><a href="/?preferencias">Preferências de privacidade</a></li>
     </ul>
   </nav>
 </footer>

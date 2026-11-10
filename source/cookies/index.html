@@ -17,7 +17,7 @@
 
 <!-- The inline script of the head of index.html, byte for byte, so the Content-Security-Policy allows it by the same hash: here it only applies the theme, hue and motion the visitor chose. tools/i18n-check.mjs copies it, with its fix-html option. -->
 <script>document.documentElement.classList.add('js');
-let motion, language;
+let motion, language, privacy;
 try {
   const theme = localStorage.getItem('theme');
   if (theme) document.documentElement.dataset.theme = theme;
@@ -25,8 +25,10 @@ try {
   if (hue) document.documentElement.style.setProperty('--hue', hue);
   motion = localStorage.getItem('motion');
   language = localStorage.getItem('lang');
+  privacy = JSON.parse(localStorage.getItem('privacy'));
 } catch {}
 document.documentElement.dataset.motion = motion === 'paused' || motion === 'full' ? motion : matchMedia('(prefers-reduced-motion: reduce)').matches ? 'paused' : 'full';
+if (navigator.globalPrivacyControl !== true && !(privacy?.version === 1 && privacy.expires > Date.now())) document.documentElement.dataset.privacy = 'ask';
 if (location.pathname === '/' || location.pathname === '/index.html') {
   const query = new URLSearchParams(location.search);
   const translated = (tag) => {
@@ -66,10 +68,11 @@ if (location.pathname === '/' || location.pathname === '/index.html') {
 <tr><td><code translate="no">hue</code></td><td>A cor de destaque que você escolheu no globo, um ângulo de 0 a 360.</td><td>Até você apagar os dados do site</td></tr>
 <tr><td><code translate="no">motion</code></td><td>Se as animações ficam paradas (<code translate="no">paused</code>) ou ligadas (<code translate="no">full</code>).</td><td>Até você apagar os dados do site</td></tr>
 <tr><td><code translate="no">lang</code></td><td>O idioma que você escolheu (<code translate="no">pt-BR</code> ou <code translate="no">en-US</code>). É também como a página em português sabe que você já disse se quer a versão em inglês.</td><td>Até você apagar os dados do site</td></tr>
+<tr><td><code translate="no">privacy</code></td><td>A sua escolha no aviso de privacidade: se a medição anônima e a gravação de sessão estão ligadas, a versão das finalidades e até quando a escolha vale.</td><td>Seis meses</td></tr>
 </tbody>
 </table>
 </div>
-<p>O aviso de privacidade guarda também a sua escolha, por seis meses, junto com a versão das finalidades. Se você aceitar a gravação de sessão, o navegador guarda ainda os códigos aleatórios das suas gravações, por 30 dias, para que você possa apagá-las. Esses códigos vão junto com cada gravação e com o pedido de apagar.</p>
+<p>Se você aceitar a gravação de sessão, o navegador guarda também os códigos aleatórios das suas gravações, por 30 dias, para que você possa apagá-las. Esses códigos vão junto com cada gravação e com o pedido de apagar.</p>
 <p>A medição anônima não guarda nada no navegador: o código de cada carregamento existe só na memória da página e some quando ela fecha. A <a href="/privacidade/">Política de Privacidade</a> diz o que a medição envia e por quê.</p>
 
 <h2>Por que não preciso do seu consentimento para isso</h2>
@@ -89,6 +92,7 @@ if (location.pathname === '/' || location.pathname === '/index.html') {
       <li><a href="/privacidade/">Política de Privacidade</a></li>
       <li><a href="/cookies/" aria-current="page">Política de Cookies</a></li>
       <li><a href="/termos/">Termos de Uso</a></li>
+      <li><a href="/?preferencias">Preferências de privacidade</a></li>
     </ul>
   </nav>
 </footer>

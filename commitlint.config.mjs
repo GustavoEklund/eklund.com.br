@@ -14,6 +14,7 @@ const FEATURES = [
   'load-test',
   'marquee',
   'navigation',
+  'privacy',
   'scrollbar',
   'shared',
   'status-page',

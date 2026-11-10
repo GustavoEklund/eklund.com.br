@@ -12,11 +12,12 @@ const PAGES = LegalPages.PAGES.map(({ file, language, counterpart }) => ({
   language,
   other: LegalPages.address(counterpart),
 }));
-/** The footer links of the home page in one language: [text, address] of each, in order. */
+/** The footer links of the home page in one language, the privacy preferences last: [text, address] of each, in order. */
 const footerLinks = (text) => [
   [text.footer.legal.privacy, text.footer.legal.privacyAddress],
   [text.footer.legal.cookies, text.footer.legal.cookiesAddress],
   [text.footer.legal.terms, text.footer.legal.termsAddress],
+  [text.footer.legal.preferences, text.footer.legal.preferencesAddress],
 ];
 const readLinks = (locator) =>
   locator.evaluateAll((links) =>
@@ -75,14 +76,18 @@ test.describe('the legal pages', () => {
 });
 
 test.describe('the footer of the home page', () => {
-  test('links the three legal pages of the Portuguese page', async ({ site }) => {
+  test('links the three legal pages and the privacy preferences of the Portuguese page', async ({
+    site,
+  }) => {
     await site.open('/');
     expect(
       await readLinks(site.page.locator('footer a[id$="-link"]:not(#source-link)')),
     ).toStrictEqual(footerLinks(PT_BR));
   });
 
-  test('links the three legal pages of the English page', async ({ site }) => {
+  test('links the three legal pages and the privacy preferences of the English page', async ({
+    site,
+  }) => {
     await site.open('/en/');
     expect(
       await readLinks(site.page.locator('footer a[id$="-link"]:not(#source-link)')),

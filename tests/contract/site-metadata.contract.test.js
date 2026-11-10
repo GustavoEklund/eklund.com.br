@@ -270,4 +270,27 @@ describe('site metadata', () => {
       expect(Intl.getCanonicalLocales(tags)).toStrictEqual(['pt-BR', 'en']);
     });
   });
+
+  describe('gpc.json (0010)', () => {
+    const resource = () => JSON.parse(SiteSource.read('.well-known/gpc.json'));
+
+    it('says the site honors Global Privacy Control, as of a real date that is not in the future', () => {
+      const { gpc, lastUpdate } = resource();
+      expect([
+        Object.keys(resource()),
+        gpc,
+        /^\d{4}-\d{2}-\d{2}$/.test(lastUpdate),
+        new Date(`${lastUpdate}T00:00:00Z`).toISOString().slice(0, 10) === lastUpdate,
+        Date.parse(lastUpdate) <= Date.now(),
+      ]).toStrictEqual([['gpc', 'lastUpdate'], true, true, true, true]);
+    });
+
+    it('is served as JSON by production, which names the type in the root .htaccess', () => {
+      expect(
+        SiteSource.read('.htaccess')
+          .split('\n')
+          .filter((line) => /^AddType .*\.json\b/.test(line)),
+      ).toStrictEqual(['AddType application/json .json']);
+    });
+  });
 });

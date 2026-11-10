@@ -33,6 +33,10 @@ const ALL_COMMANDS = [
   COMMANDS.pointsUp.title + TAGS.globe,
   COMMANDS.pointsDown.title + TAGS.globe,
   COMMANDS.spinGlobe.title + TAGS.globe,
+  COMMANDS.privacyPreferences.title + TAGS.privacy,
+  COMMANDS.privacyPolicy.title + TAGS.page,
+  COMMANDS.cookiePolicy.title + TAGS.page,
+  COMMANDS.terms.title + TAGS.page,
 ];
 
 test.describe('command palette', () => {

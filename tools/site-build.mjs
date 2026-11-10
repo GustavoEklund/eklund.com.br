@@ -31,6 +31,8 @@ export class SiteBuild {
     'sitemap.xml',
     'favicon.ico',
     '.well-known/security.txt',
+    // Global Privacy Control (0010): the site says it honors the signal.
+    '.well-known/gpc.json',
     // The IndexNow key (tools/index-now.mjs): a file named after its content proves that a list of pages came from the site.
     'dae891d401f577ebb14b9f13900c6235.txt',
   ];

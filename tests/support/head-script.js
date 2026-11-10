@@ -3,7 +3,8 @@ import { SiteSource } from './site-source.js';
 /**
  * The inline script in the head of a page, run against a stand-in browser: what it settles before the first paint.
  * It sets the theme, the hue and the motion setting on the root element and, on the Portuguese page, sends to /en/ the
- * visitors who chose English, by ?lang=en or on an earlier visit. The script is the real one from the file; only the browser around it is made up.
+ * visitors who chose English, by ?lang=en or on an earlier visit. It also marks whether the privacy notice shows (data-privacy).
+ * The script is the real one from the file; only the browser around it is made up, and its clock is the global Date.
  */
 export class HeadScript {
   /** The code of the one inline classic script of a page. */
@@ -23,6 +24,7 @@ export class HeadScript {
    * @param {string[]} [visitor.languages] navigator.languages
    * @param {string} [visitor.userAgent] @param {boolean} [visitor.reducedMotion] the system asks for less motion
    * @param {boolean} [visitor.storageBlocked] localStorage throws, as in a private window of some browsers
+   * @param {unknown} [visitor.globalPrivacyControl] navigator.globalPrivacyControl
    * @returns {{ redirectedTo: string | null, dataset: object, classes: string[], properties: object }}
    */
   static run({
@@ -34,6 +36,7 @@ export class HeadScript {
     userAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/130 Safari/537.36',
     reducedMotion = false,
     storageBlocked = false,
+    globalPrivacyControl,
     html,
   } = {}) {
     const classes = [];
@@ -62,7 +65,7 @@ export class HeadScript {
       },
     };
     const matchMedia = (query) => ({ matches: reducedMotion && query.includes('reduce') });
-    const navigator = { languages, language: languages[0] ?? '', userAgent };
+    const navigator = { languages, language: languages[0] ?? '', userAgent, globalPrivacyControl };
     new Function(
       'document',
       'localStorage',

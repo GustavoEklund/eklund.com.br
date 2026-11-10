@@ -31,9 +31,9 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
 
-<!-- Theme, hue and motion before first paint, so nothing flashes. The script has no whitespace before or after it, which the markup minifier of the build would otherwise change, and with it the hash the Content-Security-Policy allows it by. On the Portuguese page it also sends to /en/ the readers who chose English, by ?lang=en or on an earlier visit. The browser language alone sends no one (0012): a browser that prefers English sees an offer of the English page instead. -->
+<!-- Theme, hue and motion before first paint, so nothing flashes, and whether the privacy notice shows (0010), so it never moves the layout: it does unless a choice of the current version is saved and still counts (PrivacyChoice), or the browser sends Global Privacy Control. The script has no whitespace before or after it, which the markup minifier of the build would otherwise change, and with it the hash the Content-Security-Policy allows it by. On the Portuguese page it also sends to /en/ the readers who chose English, by ?lang=en or on an earlier visit. The browser language alone sends no one (0012): a browser that prefers English sees an offer of the English page instead. -->
 <script>document.documentElement.classList.add('js');
-let motion, language;
+let motion, language, privacy;
 try {
   const theme = localStorage.getItem('theme');
   if (theme) document.documentElement.dataset.theme = theme;
@@ -41,8 +41,10 @@ try {
   if (hue) document.documentElement.style.setProperty('--hue', hue);
   motion = localStorage.getItem('motion');
   language = localStorage.getItem('lang');
+  privacy = JSON.parse(localStorage.getItem('privacy'));
 } catch {}
 document.documentElement.dataset.motion = motion === 'paused' || motion === 'full' ? motion : matchMedia('(prefers-reduced-motion: reduce)').matches ? 'paused' : 'full';
+if (navigator.globalPrivacyControl !== true && !(privacy?.version === 1 && privacy.expires > Date.now())) document.documentElement.dataset.privacy = 'ask';
 if (location.pathname === '/' || location.pathname === '/index.html') {
   const query = new URLSearchParams(location.search);
   const translated = (tag) => {
@@ -80,6 +82,7 @@ if (location.pathname === '/' || location.pathname === '/index.html') {
 <link rel="stylesheet" href="/css/history.css">
 <link rel="stylesheet" href="/css/contact.css">
 <link rel="stylesheet" href="/css/command-palette.css">
+<link rel="stylesheet" href="/css/privacy.css">
 <link rel="stylesheet" href="/css/foundation/effects.css">
 <link rel="stylesheet" href="/css/accessibility.css">
 
@@ -127,6 +130,9 @@ if (location.pathname === '/' || location.pathname === '/index.html') {
 <link rel="modulepreload" href="/js/load-test/worker-pool.js">
 <link rel="modulepreload" href="/js/marquee/marquee.js">
 <link rel="modulepreload" href="/js/navigation/anchor-links.js">
+<link rel="modulepreload" href="/js/privacy/privacy-choice.js">
+<link rel="modulepreload" href="/js/privacy/privacy-dialog.js">
+<link rel="modulepreload" href="/js/privacy/privacy-notice.js">
 <link rel="modulepreload" href="/js/scrollbar/custom-scrollbar.js">
 <link rel="modulepreload" href="/js/scrollbar/reading-progress.js">
 <link rel="modulepreload" href="/js/shared/contrast-audit.js">
@@ -248,6 +254,9 @@ if (location.pathname === '/' || location.pathname === '/index.html') {
 
 <!-- The offer of the English page, to a browser that prefers English on a first visit (0012). In English on both pages; the script shows it. -->
 <aside class="language-offer" lang="en" hidden data-i18n-attr="aria-label:languageOffer.label" aria-label="English version"><p data-i18n="languageOffer.text">I also wrote this page in English.</p><a href="/en/" data-locale="en-US" hreflang="en" data-i18n="languageOffer.accept">Read it in English</a><button type="button" data-i18n="languageOffer.decline">Stay in Portuguese</button></aside>
+
+<!-- The privacy notice (0010). The head script shows it before the first paint, fixed at the bottom of the screen, so it moves nothing. Its three buttons look the same, and it has no close button: it goes away with a choice. -->
+<aside class="privacy-notice" id="privacy-notice" data-i18n-attr="aria-label:privacy.notice.label" aria-label="Privacy notice"><p><span data-i18n="privacy.notice.text">I measure, anonymously and without cookies, how this site loads and how it is used, so I can make it faster and fix what breaks. If you allow it, I also record the session and the clicks, without anything you type. You can refuse all of it now or later, in the footer.</span> <a href="/en/privacy/" data-i18n="privacy.notice.policy" data-i18n-attr="href:footer.legal.privacyAddress">Privacy Policy</a></p><div class="privacy-actions"><button type="button" data-privacy-action="accept" data-i18n="privacy.notice.acceptAll">Accept all</button><button type="button" data-privacy-action="refuse" data-i18n="privacy.notice.refuseAll">Refuse all</button><button type="button" data-privacy-action="choose" aria-haspopup="dialog" data-i18n="privacy.notice.choose">Choose</button></div></aside>
 
 <main id="main" tabindex="-1">
   <!-- Hero -->
@@ -508,12 +517,28 @@ if (location.pathname === '/' || location.pathname === '/index.html') {
 <footer class="container">
   <p>© <span id="current-year">2026</span> <b>Gustavo Eklund</b> · Taubaté–SP</p>
   <p><bdi data-i18n="footer.stack">Built with just HTML, CSS and JavaScript, no frameworks and no libraries ·</bdi> <b><span id="page-size">—</span> KB</b> <bdi data-i18n="footer.uncompressed">of code, uncompressed ·</bdi> <a id="source-link" href="https://github.com/GustavoEklund/eklund.com.br" target="_blank" rel="noopener" data-cursor="open" data-i18n="footer.source" data-i18n-attr="data-cursor:cursor.open">Source code on GitHub</a></p>
-  <p><a id="privacy-link" href="/en/privacy/" data-i18n="footer.legal.privacy" data-i18n-attr="href:footer.legal.privacyAddress">Privacy Policy</a> · <a id="cookies-link" href="/en/cookies/" data-i18n="footer.legal.cookies" data-i18n-attr="href:footer.legal.cookiesAddress">Cookie Policy</a> · <a id="terms-link" href="/en/terms/" data-i18n="footer.legal.terms" data-i18n-attr="href:footer.legal.termsAddress">Terms of Use</a></p>
+  <p><a id="privacy-link" href="/en/privacy/" data-i18n="footer.legal.privacy" data-i18n-attr="href:footer.legal.privacyAddress">Privacy Policy</a> · <a id="cookies-link" href="/en/cookies/" data-i18n="footer.legal.cookies" data-i18n-attr="href:footer.legal.cookiesAddress">Cookie Policy</a> · <a id="terms-link" href="/en/terms/" data-i18n="footer.legal.terms" data-i18n-attr="href:footer.legal.termsAddress">Terms of Use</a> · <a id="privacy-preferences-link" href="/en/privacy/#choice" data-i18n="footer.legal.preferences" data-i18n-attr="href:footer.legal.preferencesAddress">Privacy preferences</a></p>
 </footer>
 
 <dialog class="dialog code-dialog" id="shader-dialog" data-i18n-attr="aria-label:shader.label" aria-label="Globe code">
   <div class="code-dialog-header"><span data-i18n="shader.title">GLSL ES 3.0 · exactly what is running on the globe</span><button class="icon-button" id="shader-close" type="button" data-i18n-attr="aria-label:shader.close" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
   <pre class="quiet-scroller" translate="no" tabindex="0" role="region" data-i18n-attr="aria-label:shader.source" aria-label="Shader source code"><code id="shader-code"></code></pre>
+</dialog>
+
+<!-- The second layer of the privacy notice: every purpose, its legal basis and its switch. Without the scripts, the footer link that opens it leads to the part of the privacy policy about the choice. -->
+<dialog class="dialog privacy-dialog quiet-scroller" id="privacy-dialog" aria-labelledby="privacy-dialog-title">
+  <div class="privacy-dialog-body">
+    <div class="privacy-dialog-header"><h2 id="privacy-dialog-title" data-i18n="privacy.dialog.title">Privacy preferences</h2><button class="icon-button" id="privacy-close" type="button" data-i18n-attr="aria-label:privacy.dialog.close" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <p class="privacy-lead"><span data-i18n="privacy.dialog.lead">Choose what the site may do in your browser. You can change it whenever you like through the preferences link in the footer.</span> <a href="/en/privacy/" data-i18n="privacy.dialog.policy" data-i18n-attr="href:footer.legal.privacyAddress">Privacy Policy</a></p>
+    <ul class="privacy-purposes">
+      <li class="privacy-purpose"><input type="checkbox" id="privacy-preferences" checked disabled aria-describedby="privacy-preferences-basis privacy-preferences-text"><label for="privacy-preferences" data-i18n="privacy.dialog.preferences.title">Site preferences</label><span class="privacy-basis" id="privacy-preferences-basis" data-i18n="privacy.dialog.preferences.basis">Always on</span><p id="privacy-preferences-text" data-i18n="privacy.dialog.preferences.text">The theme, the color, the language, the animations and this choice stay in your browser and are never sent.</p></li>
+      <li class="privacy-purpose"><input type="checkbox" id="privacy-measurement" aria-describedby="privacy-measurement-basis privacy-measurement-text"><label for="privacy-measurement" data-i18n="privacy.dialog.measurement.title">Anonymous measurement</label><span class="privacy-basis" id="privacy-measurement-basis" data-i18n="privacy.dialog.measurement.basis">Legitimate interest</span><p id="privacy-measurement-text" data-i18n="privacy.dialog.measurement.text">How the site loads and is used, without cookies and without anything that links one visit to another. It stays on by legitimate interest until you refuse it.</p></li>
+      <li class="privacy-purpose"><input type="checkbox" id="privacy-recording" aria-describedby="privacy-recording-basis privacy-recording-text"><label for="privacy-recording" data-i18n="privacy.dialog.recording.title">Session recording and heat map</label><span class="privacy-basis" id="privacy-recording-basis" data-i18n="privacy.dialog.recording.basis">Consent</span><p id="privacy-recording-text" data-i18n="privacy.dialog.recording.text">The session and the clicks, without anything you type, kept for 30 days. Only with your consent.</p></li>
+    </ul>
+    <p class="privacy-signal" id="privacy-signal" data-i18n="privacy.dialog.signal" hidden>Your browser sends the Global Privacy Control signal, which I treat as a refusal of everything.</p>
+    <div class="privacy-actions"><button type="button" data-privacy-action="save" data-i18n="privacy.dialog.save">Save choice</button><button type="button" data-privacy-action="accept" data-i18n="privacy.dialog.acceptAll">Accept all</button><button type="button" data-privacy-action="refuse" data-i18n="privacy.dialog.refuseAll">Refuse all</button></div>
+    <div class="privacy-recordings"><button type="button" id="privacy-delete" aria-describedby="privacy-no-recordings" disabled data-i18n="privacy.dialog.deleteRecordings">Delete my recordings</button><p id="privacy-no-recordings" data-i18n="privacy.dialog.noRecordings">This browser keeps no recording to delete.</p></div>
+  </div>
 </dialog>
 
 <dialog class="dialog command-palette" id="command-palette" data-i18n-attr="aria-label:palette.label" aria-label="Command palette">

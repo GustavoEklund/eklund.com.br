@@ -17,7 +17,7 @@
 
 <!-- The inline script of the head of index.html, byte for byte, so the Content-Security-Policy allows it by the same hash: here it only applies the theme, hue and motion the visitor chose. tools/i18n-check.mjs copies it, with its fix-html option. -->
 <script>document.documentElement.classList.add('js');
-let motion, language;
+let motion, language, privacy;
 try {
   const theme = localStorage.getItem('theme');
   if (theme) document.documentElement.dataset.theme = theme;
@@ -25,8 +25,10 @@ try {
   if (hue) document.documentElement.style.setProperty('--hue', hue);
   motion = localStorage.getItem('motion');
   language = localStorage.getItem('lang');
+  privacy = JSON.parse(localStorage.getItem('privacy'));
 } catch {}
 document.documentElement.dataset.motion = motion === 'paused' || motion === 'full' ? motion : matchMedia('(prefers-reduced-motion: reduce)').matches ? 'paused' : 'full';
+if (navigator.globalPrivacyControl !== true && !(privacy?.version === 1 && privacy.expires > Date.now())) document.documentElement.dataset.privacy = 'ask';
 if (location.pathname === '/' || location.pathname === '/index.html') {
   const query = new URLSearchParams(location.search);
   const translated = (tag) => {
@@ -97,8 +99,8 @@ if (location.pathname === '/' || location.pathname === '/index.html') {
 <p>You can object at any time. Refusing everything in the privacy notice, or later through the preferences link in the footer, turns the measurement off in your browser from then on, and the page does not even download the code that measures.</p>
 <p>If your browser sends the Global Privacy Control signal, I treat it as a refusal of everything: the notice does not show and nothing is sent.</p>
 
-<h2>Your choice</h2>
-<p>I keep your choice in your browser for six months, together with the version of the purposes. The notice asks again when that time runs out or when a purpose changes.</p>
+<h2 id="choice">Your choice</h2>
+<p>I keep your choice in your browser for six months, together with the version of the purposes. The notice asks again when that time runs out or when a purpose changes. You can change your choice whenever you like in the <a href="/en/?preferences">privacy preferences</a>, which the preferences link in the footer of every page opens.</p>
 
 <h2>Who else takes part</h2>
 <ul>
@@ -130,6 +132,7 @@ if (location.pathname === '/' || location.pathname === '/index.html') {
       <li><a href="/en/privacy/" aria-current="page">Privacy Policy</a></li>
       <li><a href="/en/cookies/">Cookie Policy</a></li>
       <li><a href="/en/terms/">Terms of Use</a></li>
+      <li><a href="/en/?preferences">Privacy preferences</a></li>
     </ul>
   </nav>
 </footer>

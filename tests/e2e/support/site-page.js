@@ -38,6 +38,15 @@ export class SitePage {
   get languageOffer() {
     return this.#page.locator('.language-offer');
   }
+  get privacyNotice() {
+    return this.#page.locator('#privacy-notice');
+  }
+  get privacyDialog() {
+    return this.#page.locator('#privacy-dialog');
+  }
+  get privacyPreferencesLink() {
+    return this.#page.locator('#privacy-preferences-link');
+  }
   get themeToggle() {
     return this.#page.locator('#theme-toggle');
   }

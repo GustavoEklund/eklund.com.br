@@ -44,6 +44,7 @@ describe('the layout of the site', () => {
       'load-test',
       'marquee',
       'navigation',
+      'privacy',
       'scrollbar',
       'shared',
       'status-page',
