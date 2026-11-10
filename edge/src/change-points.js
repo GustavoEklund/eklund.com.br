@@ -29,11 +29,13 @@ export class ChangePoints {
     const penalty = 2 * ChangePoints.#variance(values) * Math.log(n);
     // A gain of rounding error is no gain: the floor scales with the series, as the costs do.
     const floor = 1e-9 * Math.max(cost(0, n), Number.MIN_VALUE);
+    // Two gains that differ by rounding error tie, and the earlier split wins, so scaling the series cannot flip a tie.
+    const beats = (gain, other) => gain > other + floor;
     const best = (start, end) => {
       let found = null;
       for (let split = start + minSegment; split <= end - minSegment; split += 1) {
         const gain = cost(start, end) - cost(start, split) - cost(split, end);
-        if (!found || gain > found.gain) found = { start, end, split, gain };
+        if (!found || beats(gain, found.gain)) found = { start, end, split, gain };
       }
       return found;
     };
@@ -43,7 +45,7 @@ export class ChangePoints {
       const candidate = segments
         .map(([start, end]) => best(start, end))
         .filter(Boolean)
-        .reduce((a, b) => (b.gain > a.gain ? b : a), { gain: -Infinity });
+        .reduce((a, b) => (beats(b.gain, a.gain) ? b : a), { gain: -Infinity });
       if (!(candidate.gain > penalty && candidate.gain > floor)) break;
       points.push(candidate.split);
       segments = segments.flatMap(([start, end]) =>

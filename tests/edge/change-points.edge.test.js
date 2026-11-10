@@ -51,6 +51,17 @@ describe('ChangePoints', () => {
       { numRuns: 300 },
     ));
 
+  it('breaks an exact tie between two splits the same way after scaling and shifting', () => {
+    const tied = [8, 4, 0, 34, 43, 35, 32, 23, 50, 7];
+    expect([
+      ChangePoints.find(tied),
+      ChangePoints.find(tied.map((value) => value - 64)),
+    ]).toStrictEqual([
+      [3, 6],
+      [3, 6],
+    ]);
+  });
+
   it('finds the same points after any positive scaling and shift', () =>
     fc.assert(
       fc.property(
