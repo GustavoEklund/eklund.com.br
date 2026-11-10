@@ -86,6 +86,7 @@ export class Retention {
         rows: Calendar.monthsBefore(today, Retention.ROW_MONTHS),
         errors: Calendar.daysBefore(today, Retention.ERROR_DAYS),
         totals: Calendar.monthsBefore(today, Retention.TOTAL_MONTHS),
+        writes: Retention.firstRecentDay(today),
       }),
     );
   }
@@ -97,7 +98,7 @@ export class Retention {
     );
   }
 
-  #deletions({ rows, errors, totals }) {
+  #deletions({ rows, errors, totals, writes }) {
     const older = (table) =>
       `DELETE FROM ${table} WHERE view_id IN (SELECT id FROM page_view WHERE day < ?1)`;
     return [
@@ -109,6 +110,8 @@ export class Retention {
       ...['daily_view', 'daily_vital', 'daily_event', 'daily_error', 'daily_uptime'].map((table) =>
         this.#db.prepare(`DELETE FROM ${table} WHERE day < ?1`).bind(totals),
       ),
+      // The count of the collector's rows only matters for the day it is in.
+      this.#db.prepare('DELETE FROM daily_writes WHERE day < ?1').bind(writes),
     ];
   }
 }

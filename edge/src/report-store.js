@@ -1,7 +1,7 @@
 /**
  * Writes a page report into D1. One report is one batch, and a batch is one transaction: the report is stored whole or not at
  * all. A page may report the same load again as it goes on (`seq` grows); the visit keeps its first values, and the
- * metrics keep their last.
+ * metrics keep their last. The same batch adds the report's rows to the count of the day that DailyCeiling reads.
  */
 export class ReportStore {
   #db;
@@ -10,9 +10,23 @@ export class ReportStore {
     this.#db = db;
   }
 
+  /**
+   * The rows D1 counts as written for a report: its visit and the visit's entry in the index by day, the count of the day,
+   * and its vitals, events and errors.
+   */
+  static rowsOf(report) {
+    return 3 + report.vitals.length + report.events.length + report.errors.length;
+  }
+
   async save(report, { receivedAt, day, host, country, agent }) {
     const { device } = report;
     await this.#db.batch([
+      this.#db
+        .prepare(
+          `INSERT INTO daily_writes (day, rows) VALUES (?1, ?2)
+           ON CONFLICT (day) DO UPDATE SET rows = daily_writes.rows + excluded.rows`,
+        )
+        .bind(day, ReportStore.rowsOf(report)),
       this.#db
         .prepare(
           `INSERT INTO page_view (id, day, first_seen, last_seen, host, page, version, language, referrer, country, device,

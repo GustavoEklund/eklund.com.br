@@ -263,6 +263,19 @@ describe('Retention.run, against D1 in workerd', () => {
     ]);
   });
 
+  it('keeps the count of the collector only for the last three days', async () => {
+    await database
+      .prepare('INSERT INTO daily_writes (day, rows) VALUES (?1, 5), (?2, 6), (?3, 7), (?4, 8)')
+      .bind('2026-10-26', '2026-10-27', '2026-10-28', '2026-10-29')
+      .run();
+    await new Retention(database).run(NOW);
+    expect(await worker.rows('SELECT day, rows FROM daily_writes ORDER BY day')).toStrictEqual([
+      { day: '2026-10-27', rows: 6 },
+      { day: '2026-10-28', rows: 7 },
+      { day: '2026-10-29', rows: 8 },
+    ]);
+  });
+
   it('runs from the daily Cron Trigger, and running twice changes nothing', async () => {
     const outcomes = [await worker.scheduled(NOW), await worker.scheduled(NOW)];
     expect([

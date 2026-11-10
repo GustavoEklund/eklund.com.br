@@ -16,6 +16,13 @@ export class Replies {
     return Replies.text(413, 'the report is too long\n', origin);
   }
 
+  /** A report past a limit of the collector, and how many seconds to wait before the next one. */
+  static tooMany(origin, seconds) {
+    return Replies.text(429, 'too many reports, try again later\n', origin, {
+      'retry-after': String(seconds),
+    });
+  }
+
   /** A request to the lab routes without the lab job's token. */
   static unauthorized() {
     return Replies.text(401, 'This needs the token of the lab job.\n', null, {

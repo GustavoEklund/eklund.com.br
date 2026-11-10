@@ -27,13 +27,26 @@ const requestOf = ({ body, headers = {}, cf = { country: 'BR' } }) =>
 
 describe('Collector.take', () => {
   let saved;
+  let allowed;
+  let ceilings;
+  let roomLeft;
   let collector;
 
   beforeEach(() => {
     saved = [];
+    allowed = true;
+    ceilings = [];
+    roomLeft = Infinity;
     collector = new Collector({
       origins: [ORIGIN, 'https://gustavo.eklund.com.br'],
       store: { save: async (report, context) => saved.push([report, context]) },
+      limit: { allows: async () => allowed },
+      ceiling: {
+        allows: async (day, rows) => {
+          ceilings.push([day, rows]);
+          return rows <= roomLeft;
+        },
+      },
       clock: { now: () => NOW },
     });
   });
@@ -119,6 +132,47 @@ describe('Collector.take', () => {
       [413, 'the report is too long\n'],
       [400, 'page is not one of the allowed values\n'],
       [],
+    ]);
+  });
+
+  it('answers 429 for a minute and stores nothing once the client is past its share, before reading the body', async () => {
+    allowed = false;
+    const response = await collector.take(requestOf({ body: 'not read' }));
+    expect([
+      response.status,
+      response.headers.get('retry-after'),
+      await response.text(),
+      ceilings,
+      saved,
+    ]).toStrictEqual([429, '60', 'too many reports, try again later\n', [], []]);
+  });
+
+  it('asks the day ceiling for the rows of the report, and answers 429 until midnight UTC past it', async () => {
+    roomLeft = 8;
+    const empty = PageReports.with((report) => {
+      report.vitals = [];
+      report.events = [];
+      report.errors = [];
+    });
+    const small = await collector.take(requestOf({ body: JSON.stringify(empty) }));
+    const large = await collector.take(requestOf({ body: JSON.stringify(PageReports.complete()) }));
+    expect([
+      small.status,
+      large.status,
+      large.headers.get('retry-after'),
+      ceilings,
+      saved.length,
+    ]).toStrictEqual([
+      204,
+      429,
+      // From 02:30 UTC to the next midnight.
+      String(21.5 * 3_600),
+      // The visit, its index entry and the count, then three vitals, three events and an error on top.
+      [
+        ['2026-10-29', 3],
+        ['2026-10-29', 10],
+      ],
+      1,
     ]);
   });
 });
