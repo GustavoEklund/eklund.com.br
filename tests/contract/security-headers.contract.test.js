@@ -248,7 +248,7 @@ describe('cache rules', () => {
       NAMED,
       NAMED,
       HASHED,
-      undefined,
+      NAMED,
     ]);
   });
 });

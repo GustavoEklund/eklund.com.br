@@ -55,7 +55,7 @@ export class SiteHeaders {
       'public, max-age=31536000, immutable',
     ],
     [
-      /^(robots\.txt|sitemap\.xml|favicon\.ico|security\.txt)$/,
+      /^(robots\.txt|sitemap\.xml|favicon\.ico|security\.txt|gpc\.json)$/,
       'public, max-age=86400, stale-while-revalidate=604800',
     ],
   ];

@@ -112,7 +112,7 @@ describe('the production build', () => {
         ],
         ['.htaccess', 'cookies', 'index.html', 'privacy', 'terms'],
         ...Array(6).fill(['index.html']),
-        ['security.txt'],
+        ['gpc.json', 'security.txt'],
         ['.htaccess', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'social-card.png'],
       ]);
     });
@@ -140,6 +140,7 @@ describe('the production build', () => {
         'sitemap.xml',
         'favicon.ico',
         '.well-known/security.txt',
+        '.well-known/gpc.json',
         'dae891d401f577ebb14b9f13900c6235.txt',
       ].concat(
         [
