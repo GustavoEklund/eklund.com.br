@@ -209,12 +209,17 @@ describe('index.html', () => {
       ]);
     });
 
-    it('gives each of the two dialogs a name', () => {
+    it('gives each of the three dialogs a name: its label, or the heading it is labelled by', () => {
       expect(
-        all('dialog').map((dialog) => [dialog.id, dialog.hasAttribute('aria-label')]),
+        all('dialog').map((dialog) => [
+          dialog.id,
+          dialog.hasAttribute('aria-label'),
+          page.getElementById(dialog.getAttribute('aria-labelledby'))?.localName ?? null,
+        ]),
       ).toStrictEqual([
-        ['shader-dialog', true],
-        ['command-palette', true],
+        ['shader-dialog', true, null],
+        ['privacy-dialog', false, 'h2'],
+        ['command-palette', true, null],
       ]);
     });
 

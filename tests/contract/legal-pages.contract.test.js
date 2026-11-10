@@ -11,6 +11,8 @@ const SETS = {
   'en-US': ['en/privacy/index.html', 'en/cookies/index.html', 'en/terms/index.html'],
 };
 const HOME = { 'pt-BR': '/', 'en-US': '/en/' };
+/** The address of the privacy preferences on the home page of each language, which the footer links after the three pages. */
+const PREFERENCES = { 'pt-BR': '/?preferencias', 'en-US': '/en/?preferences' };
 const MONTHS = [
   'janeiro',
   'fevereiro',
@@ -143,11 +145,11 @@ describe('the legal pages', () => {
       ]).toStrictEqual([[HOME[language]], [portuguese, english]]);
     });
 
-    it('lists the three pages of its language in the footer, and marks itself as the current one', () => {
+    it('lists the three pages of its language and the privacy preferences in the footer, and marks itself as the current one', () => {
       expect([
         attribute(document, '.legal-footer a', 'href'),
         attribute(document, '.legal-footer a[aria-current="page"]', 'href'),
-      ]).toStrictEqual([SETS[language].map(LegalPages.address), [own]]);
+      ]).toStrictEqual([[...SETS[language].map(LegalPages.address), PREFERENCES[language]], [own]]);
     });
 
     it('has one heading of the first level, and the title is that heading and the name of the site', () => {
@@ -186,9 +188,9 @@ describe('the legal pages', () => {
       listed('en/cookies/index.html'),
       [...stored].sort(),
     ]).toStrictEqual([
-      ['theme', 'hue', 'motion', 'lang'],
-      ['theme', 'hue', 'motion', 'lang'],
-      ['hue', 'lang', 'motion', 'theme'],
+      ['theme', 'hue', 'motion', 'lang', 'privacy'],
+      ['theme', 'hue', 'motion', 'lang', 'privacy'],
+      ['hue', 'lang', 'motion', 'privacy', 'theme'],
     ]);
   });
 

@@ -69,6 +69,7 @@ firefox
 foutside
 fract
 fround
+gdpr
 geolocation
 ghostery
 github
@@ -77,6 +78,7 @@ glsl
 googlebot
 gpgsign
 grafana
+gravacao
 grotesqu
 gstatic
 gustavo
@@ -114,11 +116,13 @@ lighthouseci
 lighthouserc
 lightningcss
 linkedin
+localstorage
 longtask
 lowp
 lycheeverse
 mann
 mbit
+medicao
 mediump
 mensageria
 microsservicos

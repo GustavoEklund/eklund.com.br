@@ -37,6 +37,48 @@ export const PT_BR = {
     decline: 'Stay in Portuguese',
   },
 
+  // The privacy notice and its preferences (0010). The legal pages call them "aviso de privacidade" and "link de preferências".
+  privacy: {
+    notice: {
+      label: 'Aviso de privacidade',
+      text: 'Meço, de forma anônima e sem cookies, como este site carrega e como ele é usado, para deixá-lo mais rápido e corrigir o que quebra. Se você permitir, também gravo a sessão e os cliques, sem nada do que você digita. Você pode recusar tudo agora ou depois, no rodapé.',
+      policy: 'Política de Privacidade',
+      acceptAll: 'Aceitar tudo',
+      refuseAll: 'Recusar tudo',
+      choose: 'Escolher',
+    },
+    dialog: {
+      title: 'Preferências de privacidade',
+      lead: 'Escolha o que o site pode fazer no seu navegador. Você muda isso quando quiser pelo link de preferências no rodapé.',
+      policy: 'Política de Privacidade',
+      close: 'Fechar',
+      preferences: {
+        title: 'Preferências do site',
+        basis: 'Sempre ligadas',
+        text: 'O tema, a cor, o idioma, as animações e esta escolha ficam só no seu navegador e nunca são enviados.',
+      },
+      measurement: {
+        title: 'Medição anônima',
+        basis: 'Legítimo interesse',
+        text: 'Como o site carrega e é usado, sem cookies e sem nada que ligue uma visita a outra. Fica ligada por legítimo interesse até você recusar.',
+      },
+      recording: {
+        title: 'Gravação de sessão e mapa de calor',
+        basis: 'Consentimento',
+        text: 'A sessão e os cliques, sem nada do que você digita, guardados por 30 dias. Só com o seu consentimento.',
+      },
+      signal:
+        'O seu navegador envia o sinal Global Privacy Control, que eu trato como uma recusa de tudo.',
+      save: 'Salvar escolha',
+      acceptAll: 'Aceitar tudo',
+      refuseAll: 'Recusar tudo',
+      deleteRecordings: 'Apagar minhas gravações',
+      noRecordings: 'Este navegador não guarda nenhuma gravação para apagar.',
+      saved: 'Escolha de privacidade salva.',
+      deleted: 'Gravações apagadas.',
+    },
+  },
+
   scrollbar: {
     hero: 'início',
     status: 'status',
@@ -647,6 +689,9 @@ export const PT_BR = {
       cookiesAddress: '/cookies/',
       terms: 'Termos de Uso',
       termsAddress: '/termos/',
+      // Opens the preferences; without the scripts, it leads to the part of the privacy policy about the choice.
+      preferences: 'Preferências de privacidade',
+      preferencesAddress: '/privacidade/#escolha',
     },
   },
 
@@ -676,6 +721,8 @@ export const PT_BR = {
       map: 'mapa',
       external: '↗',
       language: 'idioma',
+      privacy: 'privacidade',
+      page: 'página',
     },
     commands: {
       status: { title: 'Ir para Status', keywords: 'performance numeros stats medido' },
@@ -713,6 +760,16 @@ export const PT_BR = {
       pointsUp: { title: 'Mais pontos no globo', keywords: 'multiplicador instances gpu' },
       pointsDown: { title: 'Menos pontos no globo', keywords: 'multiplicador instances gpu' },
       spinGlobe: { title: 'Dar um giro no globo', keywords: 'girar rotate globe' },
+      privacyPreferences: {
+        title: 'Abrir as preferências de privacidade',
+        keywords: 'privacidade cookies medicao gravacao lgpd escolha recusar',
+      },
+      privacyPolicy: { title: 'Ler a Política de Privacidade', keywords: 'privacidade lgpd dados' },
+      cookiePolicy: {
+        title: 'Ler a Política de Cookies',
+        keywords: 'cookies armazenamento localstorage',
+      },
+      terms: { title: 'Ler os Termos de Uso', keywords: 'termos uso lei foro' },
     },
   },
 };

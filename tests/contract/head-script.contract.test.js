@@ -1,6 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { HeadScript } from '../support/head-script.js';
 import { Locale } from '@site/js/i18n/locale.js';
+import { PrivacyChoice } from '@site/js/privacy/privacy-choice.js';
 
 const redirect = (visitor) => HeadScript.run(visitor).redirectedTo;
 const GOOGLEBOT =
@@ -168,6 +169,89 @@ describe('the inline script in the head of index.html', () => {
     it('leaves the markup as it is when nothing was saved', () => {
       const { dataset, properties } = HeadScript.run({});
       expect([dataset.theme, properties]).toStrictEqual([undefined, {}]);
+    });
+  });
+
+  describe('the privacy notice (0010), decided before the first paint', () => {
+    const NOW = Date.UTC(2026, 10, 9, 12);
+    const stored = (fields) =>
+      JSON.stringify({
+        version: PrivacyChoice.VERSION,
+        measurement: true,
+        recording: false,
+        expires: NOW + 1000,
+        ...fields,
+      });
+    /** Whether the notice shows, by the script in the head and by PrivacyChoice, for the same browser. */
+    const asks = ({ saved = {}, globalPrivacyControl, storageBlocked = false }) => {
+      const head = HeadScript.run({ saved, globalPrivacyControl, storageBlocked }).dataset.privacy;
+      const choice = new PrivacyChoice({
+        storage: {
+          read: (key) => (storageBlocked ? null : (saved[key] ?? null)),
+          write: () => {},
+        },
+        now: () => NOW,
+        globalPrivacyControl,
+      });
+      return [head === 'ask', !choice.decided];
+    };
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(NOW);
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it.each([
+      ['nothing saved', {}, true],
+      ['a current choice', { saved: { privacy: stored() } }, false],
+      ['a current refusal', { saved: { privacy: stored({ measurement: false }) } }, false],
+      [
+        'a choice that ran out this very moment',
+        { saved: { privacy: stored({ expires: NOW }) } },
+        true,
+      ],
+      ['a choice that ran out', { saved: { privacy: stored({ expires: NOW - 1 }) } }, true],
+      ['a choice of an older version', { saved: { privacy: stored({ version: 0 }) } }, true],
+      [
+        'a choice of a newer version',
+        { saved: { privacy: stored({ version: PrivacyChoice.VERSION + 1 }) } },
+        true,
+      ],
+      ['a choice with no expiry', { saved: { privacy: stored({ expires: undefined }) } }, true],
+      ['a value that is not JSON', { saved: { privacy: 'yes' } }, true],
+      ['a value that is JSON but no object', { saved: { privacy: '1' } }, true],
+      ['localStorage blocked', { storageBlocked: true }, true],
+      ['Global Privacy Control, nothing saved', { globalPrivacyControl: true }, false],
+      [
+        'Global Privacy Control over a choice that ran out',
+        { globalPrivacyControl: true, saved: { privacy: stored({ expires: NOW - 1 }) } },
+        false,
+      ],
+      ['Global Privacy Control turned off', { globalPrivacyControl: false }, true],
+      ['a Global Privacy Control that is not true', { globalPrivacyControl: '1' }, true],
+    ])('%s: shows the notice is %s, as PrivacyChoice says', (_description, visitor, expected) => {
+      expect(asks(visitor)).toStrictEqual([expected, expected]);
+    });
+
+    it('leaves data-privacy out when nothing has to be asked, so the stylesheet keeps the notice hidden', () => {
+      expect(
+        Object.hasOwn(HeadScript.run({ saved: { privacy: stored() } }).dataset, 'privacy'),
+      ).toBe(false);
+    });
+
+    it('still applies the theme and the motion when the saved choice is not JSON', () => {
+      const { dataset } = HeadScript.run({
+        saved: { privacy: '{', theme: 'light', motion: 'paused' },
+      });
+      expect([dataset.theme, dataset.motion, dataset.privacy]).toStrictEqual([
+        'light',
+        'paused',
+        'ask',
+      ]);
     });
   });
 });

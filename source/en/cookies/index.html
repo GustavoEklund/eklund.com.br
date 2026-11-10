@@ -17,7 +17,7 @@
 
 <!-- The inline script of the head of index.html, byte for byte, so the Content-Security-Policy allows it by the same hash: here it only applies the theme, hue and motion the visitor chose. tools/i18n-check.mjs copies it, with its fix-html option. -->
 <script>document.documentElement.classList.add('js');
-let motion, language;
+let motion, language, privacy;
 try {
   const theme = localStorage.getItem('theme');
   if (theme) document.documentElement.dataset.theme = theme;
@@ -25,8 +25,10 @@ try {
   if (hue) document.documentElement.style.setProperty('--hue', hue);
   motion = localStorage.getItem('motion');
   language = localStorage.getItem('lang');
+  privacy = JSON.parse(localStorage.getItem('privacy'));
 } catch {}
 document.documentElement.dataset.motion = motion === 'paused' || motion === 'full' ? motion : matchMedia('(prefers-reduced-motion: reduce)').matches ? 'paused' : 'full';
+if (navigator.globalPrivacyControl !== true && !(privacy?.version === 1 && privacy.expires > Date.now())) document.documentElement.dataset.privacy = 'ask';
 if (location.pathname === '/' || location.pathname === '/index.html') {
   const query = new URLSearchParams(location.search);
   const translated = (tag) => {
@@ -66,10 +68,11 @@ if (location.pathname === '/' || location.pathname === '/index.html') {
 <tr><td><code translate="no">hue</code></td><td>The accent color you chose on the globe, an angle from 0 to 360.</td><td>Until you clear the site's data</td></tr>
 <tr><td><code translate="no">motion</code></td><td>Whether the animations are paused (<code translate="no">paused</code>) or on (<code translate="no">full</code>).</td><td>Until you clear the site's data</td></tr>
 <tr><td><code translate="no">lang</code></td><td>The language you chose (<code translate="no">pt-BR</code> or <code translate="no">en-US</code>). It is also how the Portuguese page knows you already said whether you want the English version.</td><td>Until you clear the site's data</td></tr>
+<tr><td><code translate="no">privacy</code></td><td>Your choice in the privacy notice: whether anonymous measurement and session recording are on, the version of the purposes, and until when the choice counts.</td><td>Six months</td></tr>
 </tbody>
 </table>
 </div>
-<p>The privacy notice also keeps your choice, for six months, together with the version of the purposes. If you accept session recording, the browser also keeps the random codes of your recordings, for 30 days, so that you can delete them. Those codes go with each recording and with the request to delete it.</p>
+<p>If you accept session recording, the browser also keeps the random codes of your recordings, for 30 days, so that you can delete them. Those codes go with each recording and with the request to delete it.</p>
 <p>The anonymous measurement keeps nothing in the browser: the code of each page load exists only in the page's memory and is gone when the page closes. The <a href="/en/privacy/">Privacy Policy</a> says what the measurement sends and why.</p>
 
 <h2>Why this needs no consent</h2>
@@ -89,6 +92,7 @@ if (location.pathname === '/' || location.pathname === '/index.html') {
       <li><a href="/en/privacy/">Privacy Policy</a></li>
       <li><a href="/en/cookies/" aria-current="page">Cookie Policy</a></li>
       <li><a href="/en/terms/">Terms of Use</a></li>
+      <li><a href="/en/?preferences">Privacy preferences</a></li>
     </ul>
   </nav>
 </footer>

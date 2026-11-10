@@ -50,6 +50,7 @@ const SECTIONS_TAB_ORDER = [
   'a:privacy-link',
   'a:cookies-link',
   'a:terms-link',
+  'a:privacy-preferences-link',
 ];
 const HEADER_TAB_ORDER = [
   'a:pt-BR',

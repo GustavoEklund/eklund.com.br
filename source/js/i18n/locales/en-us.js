@@ -37,6 +37,48 @@ export const EN_US = {
     decline: 'Stay in Portuguese',
   },
 
+  // The privacy notice and its preferences (0010). The legal pages call them "privacy notice" and "preferences link".
+  privacy: {
+    notice: {
+      label: 'Privacy notice',
+      text: 'I measure, anonymously and without cookies, how this site loads and how it is used, so I can make it faster and fix what breaks. If you allow it, I also record the session and the clicks, without anything you type. You can refuse all of it now or later, in the footer.',
+      policy: 'Privacy Policy',
+      acceptAll: 'Accept all',
+      refuseAll: 'Refuse all',
+      choose: 'Choose',
+    },
+    dialog: {
+      title: 'Privacy preferences',
+      lead: 'Choose what the site may do in your browser. You can change it whenever you like through the preferences link in the footer.',
+      policy: 'Privacy Policy',
+      close: 'Close',
+      preferences: {
+        title: 'Site preferences',
+        basis: 'Always on',
+        text: 'The theme, the color, the language, the animations and this choice stay in your browser and are never sent.',
+      },
+      measurement: {
+        title: 'Anonymous measurement',
+        basis: 'Legitimate interest',
+        text: 'How the site loads and is used, without cookies and without anything that links one visit to another. It stays on by legitimate interest until you refuse it.',
+      },
+      recording: {
+        title: 'Session recording and heat map',
+        basis: 'Consent',
+        text: 'The session and the clicks, without anything you type, kept for 30 days. Only with your consent.',
+      },
+      signal:
+        'Your browser sends the Global Privacy Control signal, which I treat as a refusal of everything.',
+      save: 'Save choice',
+      acceptAll: 'Accept all',
+      refuseAll: 'Refuse all',
+      deleteRecordings: 'Delete my recordings',
+      noRecordings: 'This browser keeps no recording to delete.',
+      saved: 'Privacy choice saved.',
+      deleted: 'Recordings deleted.',
+    },
+  },
+
   scrollbar: {
     hero: 'top',
     status: 'status',
@@ -644,6 +686,9 @@ export const EN_US = {
       cookiesAddress: '/en/cookies/',
       terms: 'Terms of Use',
       termsAddress: '/en/terms/',
+      // Opens the preferences; without the scripts, it leads to the part of the privacy policy about the choice.
+      preferences: 'Privacy preferences',
+      preferencesAddress: '/en/privacy/#choice',
     },
   },
 
@@ -673,6 +718,8 @@ export const EN_US = {
       map: 'map',
       external: '↗',
       language: 'language',
+      privacy: 'privacy',
+      page: 'page',
     },
     commands: {
       status: { title: 'Go to Status', keywords: 'performance numbers stats measured' },
@@ -710,6 +757,13 @@ export const EN_US = {
       pointsUp: { title: 'More points on the globe', keywords: 'multiplier instances gpu' },
       pointsDown: { title: 'Fewer points on the globe', keywords: 'multiplier instances gpu' },
       spinGlobe: { title: 'Give the globe a spin', keywords: 'rotate turn globe' },
+      privacyPreferences: {
+        title: 'Open the privacy preferences',
+        keywords: 'privacy cookies measurement recording gdpr lgpd choice refuse',
+      },
+      privacyPolicy: { title: 'Read the Privacy Policy', keywords: 'privacy lgpd data' },
+      cookiePolicy: { title: 'Read the Cookie Policy', keywords: 'cookies storage localstorage' },
+      terms: { title: 'Read the Terms of Use', keywords: 'terms use law courts' },
     },
   },
 };

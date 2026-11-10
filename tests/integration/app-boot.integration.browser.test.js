@@ -66,6 +66,7 @@ describe('the whole page, booted by importing main.js into the real markup', () 
       'loadTest',
       'theme',
       'translator',
+      'privacy',
       'setLocale',
     ]);
   });

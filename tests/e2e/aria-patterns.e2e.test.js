@@ -292,7 +292,7 @@ test.describe('the command palette as a combobox', () => {
     await site.paletteInput.fill('github');
     await expect(announcer).toHaveText(resultsText(2)); // the link to the profile and the link to the source code
     await site.paletteInput.fill('ir para');
-    await expect(announcer).toHaveText(resultsText(6));
+    await expect(announcer).toHaveText(resultsText(7)); // the six sections, and "Abrir as preferências de privacidade", whose letters follow in order
     await site.paletteInput.fill('zzzzzz');
     await expect(announcer).toHaveText(PT_BR.palette.empty);
     await expect(site.paletteInput).toHaveAttribute('aria-expanded', 'false');

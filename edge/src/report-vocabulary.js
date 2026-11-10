@@ -127,6 +127,10 @@ export class ReportVocabulary {
     'pointsUp',
     'pointsDown',
     'spinGlobe',
+    'privacyPreferences',
+    'privacyPolicy',
+    'cookiePolicy',
+    'terms',
   ];
 
   /** Each event and the details it may carry. An empty list means the event carries no detail. */
