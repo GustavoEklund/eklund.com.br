@@ -31,7 +31,7 @@ class Cruiser {
 describe('the real site', () => {
   it('cruises every module of the site, imports nothing it should not, and breaks none of the rules', () => {
     const modules = SiteSource.files('js').filter(
-      (file) => !file.endsWith('land-bitset.js'),
+      (file) => !file.endsWith('land-bitset.js') && !file.startsWith('js/vendor/'),
     ).length;
     const { cruised, violations } = Cruiser.run(PROJECT);
     expect([cruised, violations]).toStrictEqual([modules, []]);

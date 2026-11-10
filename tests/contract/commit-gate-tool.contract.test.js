@@ -123,7 +123,7 @@ describe('CommitConvention', () => {
       ...new Set(
         SiteSource.files('js')
           .map((file) => file.split('/'))
-          .filter((parts) => parts.length > 2)
+          .filter((parts) => parts.length > 2 && parts[1] !== 'vendor') // npm's files, which change as deps
           .map((parts) => parts[1]),
       ),
     ];

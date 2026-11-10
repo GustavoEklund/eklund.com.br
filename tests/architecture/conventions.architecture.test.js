@@ -2,9 +2,15 @@ import { describe, it, expect } from 'vitest';
 import { basename } from 'node:path';
 import { SiteSource } from '../support/site-source.js';
 
-/** The modules of the site that follow the code conventions: no dictionaries, no generated land data. */
+/**
+ * The modules of the site that follow the code conventions: no dictionaries, no generated land data, and none of the
+ * libraries of vendor/, which are npm's files as they are (0011).
+ */
 const MODULES = SiteSource.files('js').filter(
-  (file) => !file.includes('locales/') && !file.endsWith('land-bitset.js'),
+  (file) =>
+    !file.includes('locales/') &&
+    !file.endsWith('land-bitset.js') &&
+    !file.startsWith('js/vendor/'),
 );
 const linesOf = (file) => SiteSource.read(file).split('\n');
 /** [file, what matched] for every line that matches: the first capture group when the pattern has one, else the whole match. */
@@ -50,6 +56,7 @@ describe('the layout of the site', () => {
       'status-page',
       'theme',
       'trace-viewer',
+      'vendor',
     ]);
   });
 

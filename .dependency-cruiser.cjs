@@ -70,7 +70,8 @@ module.exports = {
   ],
   options: {
     doNotFollow: { path: 'node_modules' },
-    exclude: { path: '^source/js/globe/land-bitset\\.js$' },
+    // The generated land data, and the libraries of vendor/, which are npm's files as they are (0011).
+    exclude: { path: ['^source/js/globe/land-bitset\\.js$', '^source/js/vendor/'] },
     tsPreCompilationDeps: false,
     combinedDependencies: false,
   },

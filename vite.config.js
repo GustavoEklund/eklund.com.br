@@ -72,6 +72,8 @@ export default defineConfig({
       'source/en/{privacy,cookies,terms}/index.html',
       'dist/**',
       'source/js/globe/land-bitset.js',
+      // The libraries the browser runs, byte for byte as npm ships them (0011).
+      'source/js/vendor/**',
       'tools/land.json',
       'pnpm-lock.yaml',
       'reports/**',
@@ -96,6 +98,7 @@ export default defineConfig({
   lint: {
     ignorePatterns: [
       'source/js/globe/land-bitset.js',
+      'source/js/vendor/**',
       'dist/**',
       'reports/**',
       'node_modules/**',
@@ -127,7 +130,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       include: ['source/js/**/*.js'],
-      exclude: ['source/js/globe/land-bitset.js'],
+      exclude: ['source/js/globe/land-bitset.js', 'source/js/vendor/**'],
       reportsDirectory: 'reports/coverage',
       reporter: ['text-summary', 'html', 'lcov', 'json-summary'],
     },

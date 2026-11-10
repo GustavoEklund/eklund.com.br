@@ -99,7 +99,7 @@ describe('where the tests live', () => {
     expect(orphans).toStrictEqual([]);
   });
 
-  it('keeps a test for each module of the site, except these, which other suites cover', () => {
+  it('keeps a test for each module of the site, except these, which other suites cover or which are not ours', () => {
     const tested = new Set(
       MIRRORED.map((path) => {
         const [, feature, file] = path.split('/');
@@ -114,6 +114,8 @@ describe('where the tests live', () => {
       'js/i18n/locales/pt-br.js',
       'js/load-test/pix-engine.worker.js',
       'js/main.js',
+      'js/vendor/web-vitals-LICENSE.txt',
+      'js/vendor/web-vitals.attribution.js',
     ]);
   });
 

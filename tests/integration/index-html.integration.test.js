@@ -162,13 +162,15 @@ describe('index.html', () => {
       expect(preloaded).toStrictEqual([...preloaded].sort());
     });
 
-    it('leaves out only the worker and its engine, which the page never imports', () => {
+    it('leaves out only the worker and its engine, which the page never imports, and the libraries of vendor/', () => {
       const unreachable = SiteSource.files('js').filter(
         (file) => !SiteSource.reachableFrom('js/main.js').includes(file),
       );
       expect(unreachable).toStrictEqual([
         'js/load-test/pix-engine.js',
         'js/load-test/pix-engine.worker.js',
+        'js/vendor/web-vitals-LICENSE.txt',
+        'js/vendor/web-vitals.attribution.js',
       ]);
     });
   });
