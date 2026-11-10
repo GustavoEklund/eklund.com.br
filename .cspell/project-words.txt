@@ -155,6 +155,7 @@ playhead
 portugues
 português
 postgres
+preferencias
 prerender
 prerendering
 privacidade

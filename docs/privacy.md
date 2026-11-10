@@ -22,6 +22,10 @@ What the site processes, on which legal basis, the balancing test for its legiti
 
 Never collected: IP addresses (the Worker sees them in transit, as any server does, and stores none; a hash of the address keys the limit of reports one client may send in a minute, and lives only in that minute's counter at Cloudflare's edge), cookies, identifiers that link one visit to another, fingerprints, typed text, and the path or query of the page a visitor came from. Each recording has its own code, so two recordings of the same person cannot be linked.
 
+## How the choice is asked
+
+On the first visit to `/` or `/en/`, a privacy notice fixed at the bottom of the screen states the purposes and offers "Accept all", "Refuse all" and "Choose", which opens the privacy preferences: the site's preferences (always on), anonymous measurement (on, by legitimate interest) and session recording with the heat map (off until consented), with "Save choice", "Accept all", "Refuse all" and "Delete my recordings". The footer of every page links to the preferences, as "Privacy preferences". The choice stays in the browser under the `localStorage` key `privacy` for six months, with the version of the purposes, and the notice asks again when either runs out or changes. Global Privacy Control counts as "Refuse all", the notice does not show, and `/.well-known/gpc.json` says so. How the code does it is in [`architecture.md`](architecture.md#the-privacy-choice).
+
 ## Balancing test
 
 It covers the anonymous measurement and follows the three phases of the ANPD's guide on legitimate interest, of February 2024. Recording does not rely on it, because it needs consent.
@@ -30,7 +34,7 @@ It covers the anonymous measurement and follows the three phases of the ANPD's g
 
 - **The interest.** Knowing how the site loads, where it breaks and which parts are used, to improve it from one release to the next. It supports the controller's activity (Art. 10, I): the site is a portfolio, and how it performs is part of what it shows.
 - **Concrete and current.** The data feeds the comparison of each release with the previous one, a weekly report and the fixes that follow.
-- **Explicit.** The banner, the privacy policy and this record state the purpose before anything is sent.
+- **Explicit.** The privacy notice, the privacy policy and this record state the purpose before anything is sent.
 
 ### 2. Necessity
 
@@ -40,9 +44,9 @@ It covers the anonymous measurement and follows the three phases of the ANPD's g
 
 ### 3. Balancing and safeguards
 
-- **Expectations.** A visitor of a developer's portfolio that shows its own observability can expect it to measure itself, and the banner tells everyone on the first visit.
+- **Expectations.** A visitor of a developer's portfolio that shows its own observability can expect it to measure itself, and the privacy notice tells everyone on the first visit.
 - **Impact.** The data cannot be linked to a person. There is no profiling, no advertising, no sharing and no sale, and the stored data serves only this purpose.
-- **Safeguards.** "Refuse all", on the banner and later in the footer, stops everything at once. Global Privacy Control counts as a refusal, and nothing is sent after one. The code is public, the data stays in the EU, and retention follows the CNIL's conditions for exempt audience measurement.
+- **Safeguards.** "Refuse all", on the privacy notice and later in the privacy preferences that the footer opens, stops everything at once. Global Privacy Control counts as a refusal, and nothing is sent after one. The code is public, the data stays in the EU, and retention follows the CNIL's conditions for exempt audience measurement.
 - **Conclusion.** With these safeguards, the interest does not override the visitors' rights and freedoms. The test is done again when a purpose or a kind of data changes.
 
 ## Record of processing

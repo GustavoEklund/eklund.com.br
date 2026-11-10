@@ -13,6 +13,7 @@ All notable changes to this project are written here. The format follows [Keep a
 - The collector serves what it stored, read-only, to an AI agent through an MCP server and as JSON: visits, Core Web Vitals, events, errors, uptime, the lab nights, CrUX, search and certificates, with a Mann-Whitney U test between two releases or periods and the nights where the lab's numbers shifted. Only my GitHub account can sign in, and every answer says when its sample is too small to compare.
 - Limits on what the collector takes: 60 reports a minute from one client, counted by a hash of its address that is never stored, and 40,000 rows written a day, so the uptime monitor and the lab job always have room in the free plan.
 - A privacy policy, a cookie policy and terms of use, in Portuguese and in English, at `/privacidade/`, `/cookies/`, `/termos/` and their English pages under `/en/`, linked from the footer. They say what the site measures, on which legal basis, where the data is kept and for how long, and how to use the rights the LGPD gives.
+- A privacy notice at the bottom of the home page, in both languages, on the first visit. It says what the site measures and asks whether it may also record the session, with "Accept all", "Refuse all" and "Choose" side by side. "Choose" opens the privacy preferences, which the footer and the command palette open too. The choice stays in the browser for six months. A browser that sends Global Privacy Control counts as refusing everything and never sees the notice. Nothing measures yet.
 
 ### Fixed
 
