@@ -25,6 +25,8 @@ All notable changes to this project are written here. The format follows [Keep a
 
 - A browser in English that opens `eklund.com.br` for the first time stays on the Portuguese page, which offers the English one in a small note under the header, instead of being sent to `/en/`. The redirect made it download the fonts, the stylesheet and the script twice, about 180 kB more ([#19](https://github.com/GustavoEklund/eklund.com.br/issues/19)). A visitor who chose English is still sent to `/en/`.
 - The readings of the AI agent count today and the two days before it from the stored rows, so the uptime, the visits, the events and the errors of the last days show up at once instead of two days later.
+- The controls of the globe stay on one line whenever they fit over it, instead of always wrapping to two, and stay centered when motion is paused or reduced.
+- The note under the size of the page says "no frameworks" instead of "0 dependencies", now that two libraries measure the site apart from it.
 
 ## [1.1.0] - 2026-10-27
 
