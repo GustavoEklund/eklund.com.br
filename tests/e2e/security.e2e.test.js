@@ -20,7 +20,9 @@ const watchViolations = (page) =>
 const violations = (page) => page.evaluate(() => window.__violations);
 
 test.describe('content security policy', () => {
-  test('arrives with the page, with the same value production sends', async ({ page }) => {
+  test('arrives with the page, with the value production sends and the local collector', async ({
+    page,
+  }) => {
     const response = await page.goto('/');
     const headers = response.headers();
     expect([
@@ -30,7 +32,10 @@ test.describe('content security policy', () => {
       headers['cross-origin-opener-policy'],
       headers['content-language'],
     ]).toStrictEqual([
-      SiteHeaders.production(INDEX)['Content-Security-Policy'],
+      SiteHeaders.production(INDEX)['Content-Security-Policy'].replace(
+        "connect-src 'self' https://eklund.eklund.workers.dev;",
+        "connect-src 'self' https://eklund.eklund.workers.dev http://127.0.0.1:8787;",
+      ),
       'nosniff',
       'strict-origin-when-cross-origin',
       'same-origin',
