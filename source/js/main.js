@@ -3,6 +3,7 @@ import { Formatter } from './shared/format.js';
 import { Environment } from './shared/environment.js';
 import { ThemeColors } from './shared/theme-colors.js';
 import { PageReadings } from './shared/page-readings.js';
+import { ReportEndpoint } from './shared/report-endpoint.js';
 import { LiveAnnouncer } from './accessibility/live-announcer.js';
 import { MotionToggle } from './accessibility/motion-toggle.js';
 import { ThemeController } from './theme/theme-controller.js';
@@ -36,6 +37,7 @@ import { Dictionaries } from './i18n/dictionaries.js';
 import { PrivacyChoice } from './privacy/privacy-choice.js';
 import { PrivacyNotice } from './privacy/privacy-notice.js';
 import { PrivacyDialog } from './privacy/privacy-dialog.js';
+import { RecordingCodes } from './privacy/recording-codes.js';
 
 const FRAME_RATE_CHIP_INTERVAL_MS = 500;
 const TRACE_RENDER_DEBOUNCE_MS = 150;
@@ -56,6 +58,16 @@ const LINKS = {
   repository: 'https://github.com/GustavoEklund/eklund.com.br',
   linkedin: 'https://www.linkedin.com/in/gustavo-eklund',
 };
+/**
+ * The parts of the page a click of the heat map lands in, the first that holds it winning: the privacy notice and dialog, the
+ * header, each section and the footer. The names are the collector's closed list (edge/src/report-vocabulary.js).
+ */
+const CLICK_REGIONS = [
+  ['privacy', '#privacy-notice, #privacy-dialog'],
+  ['header', '.site-header'],
+  ...SECTIONS.map(({ selector }) => [selector.slice(1), selector]),
+  ['footer', 'body > footer'],
+];
 /** What the measurement reads from the page: the sections, the links that leave it, and the parts that respond to the pointer. */
 const MEASURED = {
   sections: SECTIONS.map(({ selector }) => selector.slice(1)).filter((id) => id !== 'hero'),
@@ -97,6 +109,13 @@ class App {
   #privacyDialog;
   #measurement = null;
   #measurementLoading = false;
+  #recordingCodes = new RecordingCodes({
+    address: ReportEndpoint.for(location, ReportEndpoint.DELETION_PATH),
+  });
+  #recording = null;
+  #recordingLoading = false;
+  /** After "Delete my recordings", this page records nothing more until consent is given again. */
+  #recordingDeleted = false;
   #traceRenderTimer = 0;
 
   start() {
@@ -113,6 +132,7 @@ class App {
     this.#mountChips();
     this.#motion.onChange(() => this.#syncMotion());
     this.#mountMeasurement();
+    this.#mountRecording();
     performance.mark('app:ready');
     this.#exposeDebugHandle();
   }
@@ -196,6 +216,10 @@ class App {
       choice: this.#privacy,
       translator: this.#translator,
       announce: (message) => this.#announcer.announce(message),
+      recordings: {
+        held: () => this.#recordingCodes.held(),
+        deleteAll: () => this.#deleteRecordings(),
+      },
       focusAfter: main,
       openLinks: [Dom.require('#privacy-preferences-link')],
     }).mount();
@@ -251,6 +275,62 @@ class App {
   #stopMeasurement() {
     this.#measurement?.stop();
     this.#measurement = null;
+  }
+
+  /**
+   * The session recording and the heat map (0010, 0011): its code and rrweb are downloaded only once the visitor consents to
+   * recording, when the page is idle. Withdrawing consent stops it at once and asks the collector to delete every recording
+   * this browser keeps a code of; consenting again starts a new recording.
+   */
+  #mountRecording() {
+    const start = () => this.#startRecording();
+    const whenIdle = () =>
+      'requestIdleCallback' in window
+        ? requestIdleCallback(start, { timeout: MEASUREMENT_IDLE_TIMEOUT_MS })
+        : setTimeout(start, 0);
+    if (document.readyState === 'complete') whenIdle();
+    else addEventListener('load', whenIdle, { once: true });
+    this.#privacy.onChange(({ recording }) => {
+      if (recording) {
+        this.#recordingDeleted = false;
+        start();
+      } else
+        this.#deleteRecordings().catch(() => {
+          /* offline: the codes stay, and "Delete my recordings" can try again */
+        });
+    });
+  }
+
+  async #startRecording() {
+    const allowed = () => this.#privacy.recordingAllowed && !this.#recordingDeleted;
+    if (!allowed() || this.#recording || this.#recordingLoading) return;
+    this.#recordingLoading = true;
+    try {
+      const { SessionRecording } = await import('./field-report/session-recording.js');
+      if (allowed() && !this.#recording)
+        this.#recording = new SessionRecording({
+          window,
+          codes: this.#recordingCodes,
+          language: () => this.#translator.locale,
+          regions: CLICK_REGIONS,
+        }).start();
+    } catch {
+      /* the code did not arrive (offline, or blocked): the page goes on without recording */
+    } finally {
+      this.#recordingLoading = false;
+    }
+  }
+
+  /**
+   * Stops the recording of this page, waits for its chunks on their way, and has every recording this browser keeps a code
+   * of deleted. The page records again only when consent is given again or on the next load.
+   */
+  async #deleteRecordings() {
+    this.#recordingDeleted = true;
+    const recording = this.#recording;
+    this.#recording = null;
+    await recording?.stop();
+    await this.#recordingCodes.deleteAll();
   }
 
   /** An engagement event for the measurement, when it runs; `name` and `detail` come from the collector's fixed lists. */
@@ -631,6 +711,7 @@ class App {
       translator: this.#translator,
       privacy: this.#privacy,
       measurement: () => this.#measurement,
+      recording: () => this.#recording,
       setLocale: (tag) => this.setLocale(tag),
     };
   }

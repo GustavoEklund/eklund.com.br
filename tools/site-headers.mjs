@@ -3,7 +3,7 @@
 // (development, Playwright, Cucumber) and tools/production-server.mjs (Lighthouse) set the same ones from this class, and
 // tests/contract/security-headers.contract.test.js fails when they differ.
 import { createHash } from 'node:crypto';
-import { ReportEndpoint } from '../source/js/field-report/report-endpoint.js';
+import { ReportEndpoint } from '../source/js/shared/report-endpoint.js';
 
 /**
  * The policy, as ordered directives. Everything comes from this origin. The two relaxations are deliberate:

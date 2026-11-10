@@ -162,23 +162,33 @@ describe('index.html', () => {
       expect(preloaded).toStrictEqual([...preloaded].sort());
     });
 
-    it('leaves out only the worker and its engine, which the page never imports, and the measurement, which loads later', () => {
+    it('leaves out only the worker and its engine, which the page never imports, and the measurement and the recording, which load later', () => {
       const unreachable = SiteSource.files('js').filter(
         (file) => !SiteSource.reachableFrom('js/main.js').includes(file),
       );
-      expect(unreachable).toStrictEqual([
-        ...SiteSource.reachableFrom('js/field-report/field-report.js')
-          .filter((file) => file.startsWith('js/field-report/'))
-          .sort(),
-        'js/load-test/pix-engine.js',
-        'js/load-test/pix-engine.worker.js',
-        'js/vendor/record.js',
-        'js/vendor/record.js.map',
-        'js/vendor/rrweb-LICENSE.txt',
-        'js/vendor/web-vitals-LICENSE.txt',
-        'js/vendor/web-vitals.attribution.js',
-        'js/vendor/web-vitals.attribution.js.map',
-      ]);
+      expect(unreachable).toStrictEqual(
+        [
+          ...new Set(
+            ['js/field-report/field-report.js', 'js/field-report/session-recording.js'].flatMap(
+              (entry) =>
+                SiteSource.reachableFrom(entry).filter((file) =>
+                  file.startsWith('js/field-report/'),
+                ),
+            ),
+          ),
+        ]
+          .sort()
+          .concat([
+            'js/load-test/pix-engine.js',
+            'js/load-test/pix-engine.worker.js',
+            'js/vendor/record.js',
+            'js/vendor/record.js.map',
+            'js/vendor/rrweb-LICENSE.txt',
+            'js/vendor/web-vitals-LICENSE.txt',
+            'js/vendor/web-vitals.attribution.js',
+            'js/vendor/web-vitals.attribution.js.map',
+          ]),
+      );
     });
   });
 

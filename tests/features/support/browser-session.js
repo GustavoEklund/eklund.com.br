@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process';
-import { ReportEndpoint } from '../../../source/js/field-report/report-endpoint.js';
+import { ReportEndpoint } from '../../../source/js/shared/report-endpoint.js';
 import { SiteSource } from './site-source.js';
 
 const PORT = 8736;
