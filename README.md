@@ -122,6 +122,7 @@ pnpm test                     # everything, browser tests included
 source/       the site: index.html, en/index.html, css/, js/<feature>/, fonts/, assets/, .htaccess
 tests/        js/ mirrors source/js; integration, contract, architecture, build, features (BDD), e2e
 tools/        the build, the dev server, the audits, and the commit and changelog gates
+edge/         the collector of visits and my private panel, two Cloudflare Workers that are not part of the site
 docs/         architecture, testing, build and deploy, CI, releasing, decisions, accessibility
 .github/      workflows, issue forms, pull request template, code owners, rulesets, Dependabot
 ```

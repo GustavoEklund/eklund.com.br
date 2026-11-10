@@ -137,9 +137,17 @@ edge/                      the collector of real visits, a Cloudflare Worker on 
   migrations/              the D1 schema, applied by wrangler before each deploy
   wrangler.jsonc           the Worker: D1 and R2 in the EU jurisdiction, KV for the OAuth provider, the Cron Triggers, the origins
                            that may send, the GitHub logins that may read, no request logs
+  panel/                   my private panel, a second Worker behind Cloudflare Access (docs/decisions/0015): AccessCheck and
+                           AccessKeys (its own check of the Access token: RS256 against the team's keys, AUD, issuer, expiry, email),
+                           ReadOnlyBindings (the collector's D1 and R2, only to read), PanelRouter, one page class per section
+                           (OverviewPage, VitalsPage, EventsPage, LabPage, RecordingsPage, ReplayPage, HeatMapPage) over
+                           ReadingQueries, PanelLayout and PanelHtml (the page, its headers and escaping), SvgChart (inline SVG),
+                           PanelQuery, PanelFormat, ReleaseOrder; browser/ holds its stylesheet and ReplayPlayer, the one script,
+                           and vendor/ rrweb's replayer as npm ships it, which only the panel serves
+  panel.wrangler.jsonc     the panel's Worker: the same D1 and R2, the Access team, the rules that import its files as text
 tests/
   js/<feature>/<module>.<kind>.test.js   unit, property and component tests, beside the module they test
-  edge/<module>.edge.test.js             the collector's tests, beside its modules; the Worker runs in workerd through wrangler
+  edge/<module>.edge.test.js             the tests of the collector and the panel, beside their modules; each Worker runs in workerd
   integration/ contract/ architecture/ features/ e2e/   cross-cutting suites (see Tests)
   support/                 helpers shared by the suites (fake WebGL context, recording canvas, dictionary text, site reader)
 tools/

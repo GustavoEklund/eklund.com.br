@@ -1,6 +1,6 @@
 # 0009. Measurement goes to a Cloudflare Worker of my own, outside the site's host
 
-Status: accepted, 2026-10-28.
+Status: accepted, 2026-10-28. Amended by [0015](0015-the-panel-behind-cloudflare-access.md): the dashboard is a second Worker behind Cloudflare Access, which checks the Access token itself.
 
 ## Context
 
@@ -16,7 +16,7 @@ The site stays static, so that any host can serve it, and everything has to fit 
 - **Every release online.** Release folders stay online ([0008](0008-deploy-each-release-over-ftps.md)), so the Worker accepts every payload version a release has sent, and a contract test proves it. `/1.2.0/en/` counts as `/en/` with its release, and the mirror counts as its own host.
 - **The lab.** Lighthouse CI asserts on the median of five runs against the build served as production serves it, with HTTP/2 and brotli. Script and font sizes, the request count and the back/forward cache fail a pull request, and LCP and TBT warn. A nightly job runs PageSpeed Insights on `/` and `/en/`, mobile and desktop, median of five, reads CrUX, Search Console and Bing Webmaster Tools, and sends it all to the Worker, with the full reports in R2. A change is judged with statistics: a Mann-Whitney U test between runs, and change-point detection on the nightly series. Each release pings IndexNow.
 - **Uptime.** A Cron Trigger checks `/`, `/en/`, `gustavo.eklund.com.br` and the current release's folder every five minutes, and opens an issue in a private operations repository when the site goes down and when it comes back.
-- **Reading the data.** The Worker serves a read-only MCP server, and the same data as JSON, behind OAuth with GitHub that admits only my account. A private dashboard, with the recordings and the heat map, sits behind Cloudflare Access. A weekly Claude Code routine compares the current release with the previous one and opens an issue in the operations repository. A comparison needs a minimum sample, and the report says when there is none.
+- **Reading the data.** The Worker serves a read-only MCP server, and the same data as JSON, behind OAuth with GitHub that admits only my account. A private dashboard, with the recordings and the heat map, sits behind Cloudflare Access ([0015](0015-the-panel-behind-cloudflare-access.md)). A weekly Claude Code routine compares the current release with the previous one and opens an issue in the operations repository. A comparison needs a minimum sample, and the report says when there is none.
 - **Code and deploy.** The Worker lives in `edge/`, under the rules of [0001](0001-no-framework-everything-is-a-class.md) and [0007](0007-supply-chain-policy.md), with JSON Schemas in `tests/contract/` for what the pages send and a test on each side. It deploys from `main` through a GitHub environment, apart from the site's releases.
 
 The alternatives:

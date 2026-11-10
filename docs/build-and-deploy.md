@@ -95,13 +95,13 @@ Caching is set by `.htaccess`: hashed files for a year with `immutable`, HTML fo
 
 ## The collector
 
-The collector of real visits is a Cloudflare Worker on `workers.dev`, in [`edge/`](../edge/) ([0009](decisions/0009-measurement-on-a-cloudflare-worker.md)). It is not part of the site, and it goes online by itself: the [`Edge`](../.github/workflows/edge.yml) workflow runs when a push to `main` changes `edge/`. It tests the collector, applies the D1 migrations that have not run yet, and deploys the Worker. Every release stays online in its folder, so a change to what a page may send keeps the older forms working.
+The collector of real visits is a Cloudflare Worker on `workers.dev`, in [`edge/`](../edge/) ([0009](decisions/0009-measurement-on-a-cloudflare-worker.md)). It is not part of the site, and it goes online by itself: the [`Edge`](../.github/workflows/edge.yml) workflow runs when a push to `main` changes `edge/`. It tests the collector and the panel, applies the D1 migrations that have not run yet, deploys the collector, and then deploys [the panel](#the-panel). Every release stays online in its folder, so a change to what a page may send keeps the older forms working.
 
 The collector has two limits, both answered with 429, a `Retry-After` and nothing stored. One client may send 60 reports and chunks of recordings a minute in each Cloudflare location, through Cloudflare's rate limiting binding (`SEND_LIMIT` in `edge/wrangler.jsonc`); a page sends a few reports per load and a recording about one chunk every ten seconds, so that leaves room for several pages a minute and for several visitors behind one address. And the collector writes at most 40,000 rows a day in D1 (`DailyCeiling`), counted in `daily_writes` in the same batch as each report or chunk, so that the uptime monitor, the lab job and the retention always have room under the free plan's 100,000; the same count holds the bytes of recordings under 250 MB a day, which for the 30 days they are kept stays under the 10 GB of R2's free plan. The binding needs nothing created beforehand: its `namespace_id` is any number unique in the account.
 
 The session recordings, which run only with the visitor's consent ([0010](decisions/0010-privacy-by-the-anpd-guidance.md)), arrive at `POST /v1/session`, one chunk at a time, as gzip or as plain text, at most 512 KiB as sent and 2 MiB as text ([`session-chunk.schema.json`](../tests/contract/schemas/session-chunk.schema.json)). Each chunk goes to the R2 bucket `eklund`, as gzip JSON, at `recordings/<day>/<code>/<seq>`, where `<day>` is the day the recording started, with a row for the recording and one for each click of the heat map in D1 (migration `0005_recordings.sql`, which the `Edge` workflow applies before the deploy, like the others). `POST /v1/session/delete` takes up to 50 codes ([`session-deletion.schema.json`](../tests/contract/schemas/session-deletion.schema.json)) and deletes their chunks and rows at once. The daily retention deletes the recordings and clicks older than 30 days, and lists the R2 days that went past them, a week back, so that a chunk without a row goes too. Nothing more has to be set up: the bucket is the one of the lab reports.
 
-To watch a recording, take its code and day from the `recordings` reading below, download its chunks and inflate them, in order; together they are the rrweb events that `rrweb-player` replays:
+To watch a recording, open it in [the panel](#the-panel), which replays it with rrweb's replayer. Without the panel, take its code and day from the `recordings` reading below and download its chunks, in order; each is gzip JSON whose `events` together are what rrweb replays:
 
 ```sh
 pnpm exec wrangler r2 object get eklund/recordings/<day>/<code>/000 --jurisdiction eu --remote --file 000.json.gz
@@ -224,6 +224,37 @@ claude mcp add --transport http eklund https://eklund.eklund.workers.dev/mcp
 ```
 
 The first use opens the consent page in the browser. The JSON API takes the same tokens, as `Authorization: Bearer <token>`, from any OAuth client that registers itself and signs in the same way. Removing a login from `ALLOWED_GITHUB_LOGINS` and deploying shuts its tokens out at once, because each request checks the login again.
+
+## The panel
+
+The panel is where I read everything at once, in a browser: a second Worker, `eklund-panel`, at `https://eklund-panel.eklund.workers.dev`, behind Cloudflare Access ([0015](decisions/0015-the-panel-behind-cloudflare-access.md)). Its code is in [`edge/panel/`](../edge/panel/) and its configuration in [`edge/panel.wrangler.jsonc`](../edge/panel.wrangler.jsonc). It binds the collector's D1 and R2, only reads them, and never applies a migration; the `Edge` workflow deploys it from `main` right after the collector, with the same token.
+
+Its pages: the overview (views a day, pages, languages, countries and the other columns, the current release beside the previous one), Web Vitals (by page and device, the elements behind LCP, INP and CLS, and two releases compared with a Mann-Whitney U test), events and errors, the lab (the nightly series and where they shifted, CrUX, search, certificates and uptime), the recordings with a replay of each, and the heat map. Every number comes from the same `ReadingQueries` as the MCP tools, with the same sample sizes, and a section whose sample is below the minimum says so.
+
+The Worker checks every request itself, whether Access let it through or not: the `Cf-Access-Jwt-Assertion` token must be signed with RS256 by a key of the team (`https://<ACCESS_TEAM_DOMAIN>/cdn-cgi/access/certs`), be issued by `https://<ACCESS_TEAM_DOMAIN>`, carry the application's AUD tag (`ACCESS_AUD`), not be expired, and name an email of `ALLOWED_EMAILS`. Anything else answers 403. `ACCESS_TEAM_DOMAIN` is a variable of `edge/panel.wrangler.jsonc`, now `eklund-lab.cloudflareaccess.com`; `ACCESS_AUD` and `ALLOWED_EMAILS` are secrets of the Worker, so no address is in the repository.
+
+### Set the panel up once
+
+The first deploy happens before Access is on, and while `ACCESS_AUD` and `ALLOWED_EMAILS` are not set the panel answers 403 to everything, so nothing is open in between. After the first run of the `Edge` workflow that deploys it:
+
+1. In the Cloudflare dashboard, open Workers & Pages, the Worker `eklund-panel`, Settings, Domains & Routes, and on the `workers.dev` row choose Enable Cloudflare Access. This creates a self-hosted Access application for `eklund-panel.eklund.workers.dev` in the Zero Trust team `eklund-lab`. Leave Preview URLs off, as the configuration says.
+2. Choose Manage Cloudflare Access (or Zero Trust, Access, Applications, and the new application) and give it one policy: action Allow, include Emails, with my address alone. Under Login methods, keep only One-time PIN, and turn off accepting every identity provider. A session of 24 hours is enough.
+3. On the application's Overview (or under Additional settings, depending on the dashboard), copy the Application Audience (AUD) Tag.
+4. In my own terminal, from the repository, set the two secrets. Each command asks for the value, and the value goes nowhere else:
+
+   ```sh
+   pnpm exec wrangler login
+   pnpm exec wrangler secret put ACCESS_AUD --config edge/panel.wrangler.jsonc       # paste the AUD tag
+   pnpm exec wrangler secret put ALLOWED_EMAILS --config edge/panel.wrangler.jsonc   # my email; several are separated by spaces
+   ```
+
+5. Open `https://eklund-panel.eklund.workers.dev`: Access asks for the email and sends a PIN, and then the overview loads. Without signing in, `curl -sI https://eklund-panel.eklund.workers.dev/` gets Access's answer, a redirect to the sign-in at `eklund-lab.cloudflareaccess.com`, never the panel.
+
+If the team is renamed, change `ACCESS_TEAM_DOMAIN` in `edge/panel.wrangler.jsonc` and let the workflow deploy it; until then every token fails the issuer check and the panel answers 403. Removing an email from `ALLOWED_EMAILS` (with `wrangler secret put` again) shuts it out at once, even inside a session that Access still holds.
+
+### Run the panel locally
+
+`pnpm run test:edge` runs it in workerd with a local D1 and R2, a key pair made by the test as the team's keys, and the four seeded weeks of [`tests/support/panel-seed.js`](../tests/support/panel-seed.js). `wrangler dev --config edge/panel.wrangler.jsonc` starts it too, but without a token of Access every request answers 403, which is the point.
 
 ## Lighthouse
 

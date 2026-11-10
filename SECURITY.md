@@ -35,6 +35,7 @@ In scope:
 - A secret committed to the repository.
 - A flaw in the load test worker that reaches outside the page.
 - A way to make the collector in [`edge/`](edge/) store something outside the contract of what a page sends, to read its data without the owner's GitHub account, or to delete a session recording without its code.
+- A way to read the private panel in [`edge/panel/`](edge/panel/) without a Cloudflare Access token for the owner's email, or to make it write anything ([0015](docs/decisions/0015-the-panel-behind-cloudflare-access.md)).
 - A way to make a recording keep what a visitor typed, or anything inside the parts of the page it blocks.
 
 Out of scope:

@@ -139,6 +139,7 @@ describe('the documents', () => {
         'docs/decisions/0012-no-redirect-by-browser-language.md',
         'docs/decisions/0013-reading-the-data-without-the-agents-sdk.md',
         'docs/decisions/0014-legal-pages-written-in-html.md',
+        'docs/decisions/0015-the-panel-behind-cloudflare-access.md',
         'docs/decisions/README.md',
         'docs/internationalization.md',
         'docs/privacy.md',
