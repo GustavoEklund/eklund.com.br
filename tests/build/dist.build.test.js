@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { LegalPages } from '../../tools/legal-pages.mjs';
+import { NotFoundPages } from '../../tools/not-found-pages.mjs';
 import { SiteHeaders } from '../../tools/site-headers.mjs';
 import { HtaccessHeaders } from '../contract/support/htaccess-headers.js';
 import { BuiltSite } from '../support/built-site.js';
@@ -43,6 +44,8 @@ const HASHED_ASSETS = [
   'site-HASH.webmanifest',
   'site-version-HASH.js',
 ];
+/** The pages written by hand in HTML, each with its own text: the legal pages (0014) and the 404 pages (0016). */
+const STATIC_PAGES = [...LegalPages.PAGES, ...NotFoundPages.PAGES].map(({ file }) => file);
 const PAGES = [
   ['index.html', 'index.html'],
   ['en/index.html', 'en/index.html'],
@@ -91,7 +94,7 @@ describe('the production build', () => {
   afterAll(() => site?.remove());
 
   describe('what is in it', () => {
-    it('is the two pages, the legal pages, the hashed assets, and the few files that keep their name', () => {
+    it('is the two pages, the legal and 404 pages, the hashed assets, and the few files that keep their name', () => {
       expect([
         site.list(),
         site.list('en'),
@@ -104,6 +107,7 @@ describe('the production build', () => {
         [
           '.htaccess',
           '.well-known',
+          '404.html',
           'assets',
           'cookies',
           'dae891d401f577ebb14b9f13900c6235.txt',
@@ -115,7 +119,7 @@ describe('the production build', () => {
           'sitemap.xml',
           'termos',
         ],
-        ['.htaccess', 'cookies', 'index.html', 'privacy', 'terms'],
+        ['.htaccess', '404.html', 'cookies', 'index.html', 'privacy', 'terms'],
         ...Array(6).fill(['index.html']),
         ['gpc.json', 'security.txt'],
         ['.htaccess', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'social-card.png'],
@@ -240,7 +244,7 @@ describe('the production build', () => {
     });
   });
 
-  describe.each(LegalPages.PAGES.map(({ file }) => file))('the legal page %s', (path) => {
+  describe.each(STATIC_PAGES)('the legal or 404 page %s', (path) => {
     let built, written;
     beforeAll(() => {
       built = parse(site.read(path));
@@ -287,7 +291,7 @@ describe('the production build', () => {
   });
 
   describe('the headers the files go with', () => {
-    it.each([...PAGES, ...LegalPages.PAGES.map(({ file }) => [file])])(
+    it.each([...PAGES, ...STATIC_PAGES.map((file) => [file])])(
       'allow the inline script of %s by the hash its page has',
       (path) => {
         expect(HtaccessHeaders.global(site.read('.htaccess'))).toStrictEqual(
@@ -295,6 +299,12 @@ describe('the production build', () => {
         );
       },
     );
+
+    it('name the 404 page of each language by a local path, as the source does', () => {
+      expect(
+        ['.htaccess', 'en/.htaccess'].map((file) => site.read(file).match(/^ErrorDocument .*$/gm)),
+      ).toStrictEqual([['ErrorDocument 404 /404.html'], ['ErrorDocument 404 /en/404.html']]);
+    });
 
     it('say the English page is English, in the folder of the English page', () => {
       expect(

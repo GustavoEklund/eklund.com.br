@@ -7,6 +7,12 @@ AddType font/woff2 .woff2
 AddType application/manifest+json .webmanifest
 AddType application/json .json
 
+# A missing address answers with the site's own page, in Portuguese (0016). The path is local, so Apache serves the page by an
+# internal redirect and the status stays 404: a full URL here would send the browser away with a 302 instead. The .htaccess of
+# en/ names the English page for every address under it. A copy of a version (/1.1.0/) carries these files too, and both name
+# the pages of the root.
+ErrorDocument 404 /404.html
+
 # Always HTTPS
 RewriteEngine On
 RewriteCond %{HTTPS} !=on
@@ -39,6 +45,13 @@ RewriteRule ^$ /en/? [R=301,L]
   </FilesMatch>
   <FilesMatch "^(robots\.txt|sitemap\.xml|favicon\.ico|security\.txt|gpc\.json)$">
     Header set Cache-Control "public, max-age=86400, stale-while-revalidate=604800"
+  </FilesMatch>
+  # The 404 page answers for every missing address: kept ten minutes like a page, with no stale copy after that, so a page
+  # published at an address that was missing shows up soon. `always`, so that it goes out with the 404 status too:
+  # the plain `Header set` of the rule for pages may be left out of an error response, and is unset here so it is never doubled.
+  <FilesMatch "^404\.html$">
+    Header unset Cache-Control
+    Header always set Cache-Control "public, max-age=600"
   </FilesMatch>
   # Security headers. tools/site-headers.mjs is the source of truth: the development server sends the same ones, and
   # tests/contract/security-headers.contract.test.js fails when they differ. The script hash in the policy is the

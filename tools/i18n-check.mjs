@@ -4,12 +4,14 @@
 // matches the dictionary. Exit code 1 when something is wrong.
 // usage: node tools/i18n-check.mjs [--fix-html]   --fix-html rewrites the index.html defaults from the pt-BR dictionary and
 // writes en/index.html, the English version of the page, from index.html and the en-US dictionary, and copies the inline script
-// of the head of index.html into the legal pages (tools/legal-pages.mjs), which the Content-Security-Policy allows by one hash.
+// of the head of index.html into the legal pages (tools/legal-pages.mjs) and the 404 pages (tools/not-found-pages.mjs), which
+// the Content-Security-Policy allows by one hash.
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { DictionaryLoader, HtmlDefaults, KeyFlattener, SOURCE_ROOT } from './html-defaults.mjs';
 import { EnglishPage } from './english-page.mjs';
 import { LegalPages } from './legal-pages.mjs';
+import { NotFoundPages } from './not-found-pages.mjs';
 
 const ROOT = SOURCE_ROOT;
 
@@ -95,7 +97,7 @@ const englishPath = join(ROOT, 'en', 'index.html');
 const synced = HtmlDefaults.sync(readFileSync(indexPath, 'utf8'), portuguese);
 const englishPage = EnglishPage.render(synced.html, english);
 const headScript = LegalPages.headScript(synced.html);
-const legalPages = LegalPages.PAGES.map(({ file }) => {
+const legalPages = [...LegalPages.PAGES, ...NotFoundPages.PAGES].map(({ file }) => {
   const path = join(ROOT, file);
   const html = readFileSync(path, 'utf8');
   return { file, path, html, synced: LegalPages.withHeadScript(html, headScript) };
@@ -107,7 +109,9 @@ if (process.argv.includes('--fix-html')) {
   for (const page of legalPages) writeFileSync(page.path, page.synced);
   console.log(`index.html: ${synced.differences.length} default texts rewritten from pt-BR`);
   console.log('en/index.html: written from index.html and en-US');
-  console.log(`legal pages: the head script of index.html copied into ${legalPages.length} pages`);
+  console.log(
+    `legal and 404 pages: the head script of index.html copied into ${legalPages.length} pages`,
+  );
 }
 const references = KeyReferences.scan(
   new Set([...portuguese.keys()].map((key) => key.split('.')[0])),

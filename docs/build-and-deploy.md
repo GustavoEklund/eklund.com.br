@@ -17,6 +17,7 @@ What the build does:
 - Fonts, images and the icon sprite are hashed too and never inlined, because the CSP only allows `data:` for images.
 - The markup, the JSON-LD and the web manifest are minified. The inline script in the head stays byte for byte, since the CSP allows it by its hash; the manifest icons point at the built addresses.
 - The hand-written `modulepreload` list is dropped, one bundle needs none.
+- The legal pages and the two 404 pages ([0016](decisions/0016-a-404-page-of-our-own.md)) are built like the home pages, each with `assets/legal-<hash>.css` and no script but the inline one of the head.
 - `.htaccess` (root and `/en/`), `robots.txt`, `sitemap.xml`, `favicon.ico`, `security.txt` and `assets/brand/` are copied as they are.
 - The same site is built a second time for the folder named after the version in `package.json`, into `dist/1.1.0/`, which a release leaves online at `eklund.com.br/1.1.0/`. Every address in that copy starts with `/1.1.0/`: its files, the links between its two pages and the addresses of its web manifest, so it loads nothing from the live site and keeps working after the next release. Its canonical, alternate and social addresses still name the pages at the root, and the head script sends no reader of English anywhere from a folder.
 
@@ -91,7 +92,7 @@ gh attestation verify eklund.com.br-vX.Y.Z.zip --repo GustavoEklund/eklund.com.b
 
 The second command proves that the zip was built by this repository's release workflow from the tagged commit. Then, in hPanel's File Manager, upload its contents to `public_html` and to `public_html/gustavo/`, hidden files included (`.htaccess`, `en/.htaccess`, `.well-known/`). The `assets/` folders go first and the pages last. The File Manager can extract a zip. The CI job `build` also keeps `dist/` of every run as the artifact `site`.
 
-Caching is set by `.htaccess`: hashed files for a year with `immutable`, HTML for ten minutes, and `robots.txt`, `sitemap.xml`, `favicon.ico` and `security.txt` for one day. Check compression with `curl -sI -H 'Accept-Encoding: br' https://eklund.com.br/ | grep -i content-encoding`.
+Caching is set by `.htaccess`: hashed files for a year with `immutable`, HTML for ten minutes, the 404 page ten minutes with no stale copy, and `robots.txt`, `sitemap.xml`, `favicon.ico` and `security.txt` for one day. A missing address answers 404 with the page of its language: check it with `curl -sI https://eklund.com.br/nao-existe` and `curl -sI https://eklund.com.br/en/nao-existe`. Check compression with `curl -sI -H 'Accept-Encoding: br' https://eklund.com.br/ | grep -i content-encoding`.
 
 ## The collector
 

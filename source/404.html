@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Esta página não existe | eklund.com.br</title>
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#111318">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+<!-- The page every missing address answers with, status 404 (docs/decisions/0016). Every address in it starts at the root, because it is served at any depth. The inline script of the head of index.html, byte for byte, so the Content-Security-Policy allows it by the same hash: here it only applies the theme, hue and motion the visitor chose. tools/i18n-check.mjs copies it, with its fix-html option. -->
+<script>document.documentElement.classList.add('js');
+let motion, language, privacy;
+try {
+  const theme = localStorage.getItem('theme');
+  if (theme) document.documentElement.dataset.theme = theme;
+  const hue = localStorage.getItem('hue');
+  if (hue) document.documentElement.style.setProperty('--hue', hue);
+  motion = localStorage.getItem('motion');
+  language = localStorage.getItem('lang');
+  privacy = JSON.parse(localStorage.getItem('privacy'));
+} catch {}
+document.documentElement.dataset.motion = motion === 'paused' || motion === 'full' ? motion : matchMedia('(prefers-reduced-motion: reduce)').matches ? 'paused' : 'full';
+if (navigator.globalPrivacyControl !== true && !(privacy?.version === 1 && privacy.expires > Date.now())) document.documentElement.dataset.privacy = 'ask';
+if (location.pathname === '/' || location.pathname === '/index.html') {
+  const query = new URLSearchParams(location.search);
+  const translated = (tag) => {
+    const language = String(tag || '').toLowerCase().split(/[-_]/)[0];
+    return language === 'en' || language === 'pt' ? language : '';
+  };
+  if ((translated(query.get('lang')) || translated(language)) === 'en') {
+    query.delete('lang');
+    location.replace('/en/' + (query.toString() ? '?' + query : '') + location.hash);
+  }
+}</script>
+
+<link rel="preload" as="font" type="font/woff2" href="/fonts/bricolage-grotesque-latin.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/fonts/jetbrains-mono-latin.woff2" crossorigin>
+<link rel="stylesheet" href="/css/legal.css">
+</head>
+<body>
+<div class="legal-page">
+<header class="legal-header">
+  <a class="logo" translate="no" href="/" aria-label="eklund.com.br, início">eklund<i>.</i></a>
+</header>
+
+<main class="legal-text not-found">
+<p class="status-code">Erro 404</p>
+<h1>Esta página não existe</h1>
+<p>Não há nada neste endereço. Pode ser um erro de digitação, ou o link que trouxe você até aqui é de uma página que mudou de lugar.</p>
+
+<h2>Por onde seguir</h2>
+<ul>
+<li><a href="/">Página inicial</a>: quem eu sou e o que eu faço</li>
+<li><a href="/#status">Status</a>: o monitoramento desta visita, medido no seu navegador</li>
+<li><a href="/#perfil">Perfil</a>: onde eu trabalho e com o quê</li>
+<li><a href="/#arquitetura">Arquitetura</a>: como um Pix vai do app ao Banco Central</li>
+<li><a href="/#carga">Teste de carga</a>: um motor de Pix testado no seu navegador</li>
+<li><a href="/#historico">Histórico</a>: as empresas onde trabalhei</li>
+<li><a href="/#contato">Contato</a>: como falar comigo</li>
+<li><a href="https://github.com/GustavoEklund/eklund.com.br" hreflang="en">Código-fonte no GitHub</a>: o código deste site</li>
+</ul>
+
+<p>Se um link deste site trouxe você até aqui, me avise em <a href="mailto:gustavo@eklund.com.br">gustavo@eklund.com.br</a> que eu corrijo.</p>
+<p lang="en-US">Looking for the English version? It starts at the <a href="/en/" hreflang="en">English home page</a>.</p>
+</main>
+
+<footer class="legal-footer">
+  <p>© 2026 Gustavo Eklund · Taubaté, SP</p>
+  <nav aria-label="Páginas legais">
+    <ul>
+      <li><a href="/privacidade/">Política de Privacidade</a></li>
+      <li><a href="/cookies/">Política de Cookies</a></li>
+      <li><a href="/termos/">Termos de Uso</a></li>
+      <li><a href="/?preferencias">Preferências de privacidade</a></li>
+    </ul>
+  </nav>
+</footer>
+</div>
+</body>
+</html>

@@ -218,6 +218,7 @@ describe('cache rules', () => {
   const PAGE = 'public, max-age=600, stale-while-revalidate=86400';
   const HASHED = 'public, max-age=31536000, immutable';
   const NAMED = 'public, max-age=86400, stale-while-revalidate=604800';
+  const ERROR = 'public, max-age=600';
 
   it('are the rules of the root .htaccess, in its order', () => {
     expect(sourcesOf(SiteHeaders.CACHE_RULES)).toStrictEqual(cacheRulesOf(HTACCESS));
@@ -245,6 +246,9 @@ describe('cache rules', () => {
         '/1.1.0/assets/brand/social-card.png',
         '/assets/brands-AbC123.png',
         '/.well-known/gpc.json',
+        '/404.html',
+        '/en/404.html',
+        '/1.1.0/404.html',
       ].map((pathname) => SiteHeaders.cacheControl(pathname)),
     ).toStrictEqual([
       PAGE,
@@ -262,6 +266,9 @@ describe('cache rules', () => {
       NAMED,
       HASHED,
       NAMED,
+      ERROR,
+      ERROR,
+      ERROR,
     ]);
   });
 });

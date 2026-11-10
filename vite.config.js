@@ -61,7 +61,7 @@ const WEAK_MATCHERS = {
 
 export default defineConfig({
   // Oxfmt, which follows Prettier's style. The generated land data and the HTML that tools/i18n-check.mjs rewrites (index.html,
-  // en/index.html and the head script of the legal pages, which has to stay byte for byte) stay as they are.
+  // en/index.html and the head script of the legal and 404 pages, which has to stay byte for byte) stay as they are.
   fmt: {
     singleQuote: true,
     printWidth: 100,
@@ -70,6 +70,8 @@ export default defineConfig({
       'source/en/index.html',
       'source/{privacidade,cookies,termos}/index.html',
       'source/en/{privacy,cookies,terms}/index.html',
+      'source/404.html',
+      'source/en/404.html',
       'dist/**',
       'source/js/globe/land-bitset.js',
       // The libraries the browser runs, byte for byte as npm ships them (0011), and rrweb's replayer that the panel serves.

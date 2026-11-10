@@ -6,9 +6,10 @@ import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs';
 import { createSecureServer } from 'node:http2';
 import { tmpdir } from 'node:os';
-import { extname, join, normalize, relative, resolve, sep } from 'node:path';
+import { dirname, extname, join, normalize, relative, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { brotliCompressSync, constants } from 'node:zlib';
+import { NotFoundPages } from './not-found-pages.mjs';
 import { SiteHeaders } from './site-headers.mjs';
 
 const PROJECT = resolve(fileURLToPath(new URL('..', import.meta.url)));
@@ -104,7 +105,9 @@ export class ProductionServer {
   }
 
   #answer(request, response) {
-    const file = this.#fileFor(request.url);
+    const found = this.#fileFor(request.url);
+    // A missing address gets the 404 page the .htaccess files name for it (0016), with the status 404.
+    const file = found ?? this.#notFoundPage(request.url);
     if (!file) {
       response.writeHead(404, {
         'content-type': 'text/plain; charset=utf-8',
@@ -119,7 +122,7 @@ export class ProductionServer {
     const { body, html } = this.#read(file, brotli);
     const pathname = `/${relative(this.#root, file).split(sep).join('/')}`;
     const cacheControl = SiteHeaders.cacheControl(pathname);
-    response.writeHead(200, {
+    response.writeHead(found ? 200 : 404, {
       'content-type': MIME[extension] ?? 'application/octet-stream',
       ...(cacheControl ? { 'cache-control': cacheControl } : {}),
       ...(brotli ? { 'content-encoding': 'br', vary: 'Accept-Encoding' } : {}),
@@ -141,6 +144,31 @@ export class ProductionServer {
       return statSync(file).isFile() ? file : null;
     } catch {
       return null;
+    }
+  }
+
+  /** The 404 page for an address inside the root, from the deepest folder of it that exists, or null when the root has none. */
+  #notFoundPage(url) {
+    try {
+      const pathname = decodeURIComponent(new URL(url, 'https://127.0.0.1').pathname);
+      let folder = join(this.#root, normalize(pathname));
+      if (folder !== this.#root && !folder.startsWith(this.#root + sep)) return null;
+      while (folder !== this.#root && !ProductionServer.#isFolder(folder)) folder = dirname(folder);
+      const page = join(
+        this.#root,
+        NotFoundPages.fileFor(relative(this.#root, folder).split(sep).join('/')),
+      );
+      return statSync(page).isFile() ? page : null;
+    } catch {
+      return null;
+    }
+  }
+
+  static #isFolder(path) {
+    try {
+      return statSync(path).isDirectory();
+    } catch {
+      return false;
     }
   }
 

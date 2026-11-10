@@ -2,8 +2,9 @@
 // usage: node tools/serve.mjs [--port 8734] [--root source]
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
-import { extname, join, normalize, resolve, sep } from 'node:path';
+import { dirname, extname, join, normalize, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { NotFoundPages } from './not-found-pages.mjs';
 import { SiteHeaders } from './site-headers.mjs';
 
 const MIME_TYPES = {
@@ -46,7 +47,7 @@ class StaticServer {
       if (requested !== this.#root && !requested.startsWith(this.#root + sep))
         return this.#send(response, 403, 'Forbidden');
       const file = await this.#resolveFile(requested);
-      if (!file) return this.#send(response, 404, 'Not found');
+      if (!file) return await this.#notFound(response, requested);
       const content = await readFile(file); // read first: a failure here must still be able to answer 500
       const isDocument = extname(file) === '.html';
       const headers = SiteHeaders.development({
@@ -100,6 +101,44 @@ class StaticServer {
     } catch {
       return null;
     }
+  }
+
+  /**
+   * A missing address answers 404 with the page the .htaccess files name for it (0016), English under an en/ folder, as Apache
+   * does with ErrorDocument; a folder without those pages gets the plain text answer.
+   */
+  async #notFound(response, requested) {
+    const file = NotFoundPages.fileFor(await this.#deepestFolder(requested));
+    let content;
+    try {
+      content = await readFile(join(this.#root, file));
+    } catch {
+      return this.#send(response, 404, 'Not found');
+    }
+    response.writeHead(404, {
+      'Content-Type': MIME_TYPES['.html'],
+      'Cache-Control': 'no-store',
+      ...SiteHeaders.development({
+        html: content.toString('utf8'),
+        isDocument: true,
+        pathname: `/${file}`,
+      }),
+    });
+    response.end(content);
+  }
+
+  /** The deepest folder of a path inside the root that exists, relative to the root with slashes ('' for the root itself). */
+  async #deepestFolder(path) {
+    for (let folder = path; folder.startsWith(this.#root); folder = dirname(folder)) {
+      try {
+        if ((await stat(folder)).isDirectory())
+          return relative(this.#root, folder).split(sep).join('/');
+      } catch {
+        // missing: try the folder above
+      }
+      if (folder === this.#root) break;
+    }
+    return '';
   }
 
   #send(response, status, message) {

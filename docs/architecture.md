@@ -122,6 +122,8 @@ source/                    everything that is deployed
   <key>.txt                the IndexNow key, a file named after its content (tools/index-now.mjs)
   privacidade/ cookies/ termos/   the legal pages in Portuguese, and en/privacy/, en/cookies/, en/terms/ in English: static HTML with
                            one stylesheet, css/legal.css, and the head script of index.html (docs/decisions/0014)
+  404.html en/404.html     the pages a missing address answers with, status 404, named by ErrorDocument in the root .htaccess and
+                           in en/.htaccess; built like the legal pages, with noindex and every address from the root (docs/decisions/0016)
 edge/                      the collector of real visits, a Cloudflare Worker on workers.dev (docs/decisions/0009); no site code
   src/                     Router, Collector, PageReport and ReportVocabulary (the contract it reads), VisitorAgent, SendLimit and
                            DailyCeiling (how much one client may send in a minute, and how many rows and bytes a day), ReportStore (D1),
@@ -151,13 +153,15 @@ tests/
   integration/ contract/ architecture/ features/ e2e/   cross-cutting suites (see Tests)
   support/                 helpers shared by the suites (fake WebGL context, recording canvas, dictionary text, site reader)
 tools/
-  serve.mjs                static server for source/ (dev and E2E), no dependencies; sends the same security headers as .htaccess
+  serve.mjs                static server for source/ (dev and E2E), no dependencies; sends the same security headers as .htaccess,
+                           and answers a missing address with the 404 page of its language, as the ErrorDocument lines do
   site-headers.mjs         SiteHeaders: the Content-Security-Policy, the other headers and the cache rules, shared by .htaccess (checked by a test), serve.mjs and production-server.mjs
   production-server.mjs    serves a folder as the hosting does (HTTP/2 over TLS, brotli, the production headers and cache rules); Lighthouse CI and measure-build.mjs load the build through it
   render-brand-assets.mjs  renders favicon.ico, the touch and manifest icons and the social card from icon.svg and the fonts
   schema-org-subset.mjs    extracts the schema.org types and properties the JSON-LD uses into a test fixture
   i18n-check.mjs           audits the dictionaries (same keys and placeholders in both languages, every referenced key defined, none unused) and writes or checks index.html's defaults and en/index.html
   legal-pages.mjs          the six legal pages, and the head script that i18n-check.mjs copies into them from index.html
+  not-found-pages.mjs      the two 404 pages, and which one answers for a missing address (serve.mjs and production-server.mjs)
   html-defaults.mjs        reads the dictionaries and writes the default text of a page from them; english-page.mjs turns index.html into en/index.html
   land.py                  rasterizes Natural Earth land polygons into the latitude-ring bitset (source/js/globe/land-bitset.js)
   preview.mjs              screenshots, clicks, drags and runtime exceptions through the Chrome DevTools Protocol
