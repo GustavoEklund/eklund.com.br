@@ -1,5 +1,6 @@
 # Puts the collector of edge/ online (docs/decisions/0009-measurement-on-a-cloudflare-worker.md): its tests first, then the D1
-# migrations that have not run yet, then the Worker itself, on workers.dev. It runs when a push to main changes edge/, apart
+# migrations that have not run yet, then the Worker itself, on workers.dev, and last the owner's panel, the second Worker that
+# reads the same data behind Cloudflare Access (docs/decisions/0015-the-panel-behind-cloudflare-access.md). It runs when a push to main changes edge/, apart
 # from the releases of the site, because the Worker accepts every report a release has ever sent. Run it by hand to deploy
 # main again.
 name: Edge
@@ -20,7 +21,7 @@ env:
 
 jobs:
   deploy:
-    name: Put the collector online
+    name: Put the collector and the panel online
     runs-on: ubuntu-latest
     timeout-minutes: 15
     # One deploy at a time, and none is cancelled halfway.
@@ -37,7 +38,7 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup
-      - name: Test the collector
+      - name: Test the collector and the panel
         run: vp test run --project edge
       - name: Apply the D1 migrations
         env:
@@ -49,3 +50,9 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: vp exec wrangler deploy --config edge/wrangler.jsonc
+      # The panel binds the same D1 and R2 and never migrates them. It answers 403 until Access and its secrets are set.
+      - name: Deploy the panel
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: vp exec wrangler deploy --config edge/panel.wrangler.jsonc

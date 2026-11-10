@@ -60,12 +60,12 @@ describe('ReadingQueries, against D1 in workerd', () => {
     ]);
     await insert(
       'vital',
-      vitals.map(([name, value, rating]) => ({
+      vitals.map(([name, value, rating, attribution = {}]) => ({
         view_id: id,
         name,
         value,
         rating,
-        attribution: '{}',
+        attribution: JSON.stringify(attribution),
       })),
     );
   };
@@ -158,6 +158,10 @@ describe('ReadingQueries, against D1 in workerd', () => {
       ...WEEK,
       views: 20,
       days_with_views: 2,
+      per_day: [
+        { day: '2026-11-01', views: 12 },
+        { day: '2026-11-02', views: 8 },
+      ],
       top: {
         page: top(['/', 15], ['/en/', 5]),
         language: top(['pt-BR', 15], ['en-US', 5]),
@@ -188,6 +192,7 @@ describe('ReadingQueries, against D1 in workerd', () => {
       good,
       needs_improvement: middle,
       poor,
+      targets: [],
       sample: { size: loads, minimum: 20, enough: false },
     });
     expect([
@@ -207,6 +212,7 @@ describe('ReadingQueries, against D1 in workerd', () => {
             good: 1,
             needs_improvement: 0,
             poor: 0,
+            targets: [],
             sample: { size: 1, minimum: 20, enough: false },
           },
           lcp(3_000, [0.5, 0.25, 0.25], 4),
@@ -215,6 +221,34 @@ describe('ReadingQueries, against D1 in workerd', () => {
       lcp(3_000, [0.6, 0.2, 0.2], 5),
       [lcp(1_500, [1, 0, 0], 1)],
     ]);
+  });
+
+  it('names the elements LCP, INP and CLS point at most, the five commonest of each, with their poor loads', async () => {
+    for (let index = 0; index < 7; index += 1)
+      await load({}, [
+        ['LCP', 1_000, index < 2 ? 'poor' : 'good', { target: `#part-${Math.min(index, 5)}` }],
+        ['INP', 100, 'good', { interactionTarget: index % 2 ? 'button.theme' : '' }],
+        ['CLS', 0.01, 'good', { largestShiftTarget: 'section#status' }],
+        ['TTFB', 100, 'good', { waitingDuration: 10 }],
+      ]);
+    await load({ page: '/en/' }, [['LCP', 900, 'good', { target: '#part-9' }]]);
+    const targets = Object.fromEntries(
+      (await queries.run('vitals', { ...WEEK, page: '/' })).metrics.map(
+        ({ metric, targets: found }) => [metric, found],
+      ),
+    );
+    expect(targets).toStrictEqual({
+      CLS: [{ target: 'section#status', loads: 7, poor: 0 }],
+      INP: [{ target: 'button.theme', loads: 3, poor: 0 }],
+      LCP: [
+        { target: '#part-5', loads: 2, poor: 0 },
+        { target: '#part-0', loads: 1, poor: 1 },
+        { target: '#part-1', loads: 1, poor: 1 },
+        { target: '#part-2', loads: 1, poor: 0 },
+        { target: '#part-3', loads: 1, poor: 0 },
+      ],
+      TTFB: [],
+    });
   });
 
   it('compares a vital between two releases, and says when a release has too few loads', async () => {
@@ -829,6 +863,28 @@ describe('ReadingQueries, against D1 in workerd', () => {
           sample: { size: 2, minimum: 1, enough: true },
         },
         [B],
+      ]);
+    });
+
+    it('gives one recording by its code, with the day and last sequence that name its chunks, and null for another code', async () => {
+      expect([
+        await queries.recording(B),
+        await queries.recording('11111111-1111-4111-8111-111111111111'),
+      ]).toStrictEqual([
+        {
+          code: B,
+          day: '2026-11-05',
+          page: '/en/',
+          language: 'en-US',
+          version: '1.2.0',
+          started: '2026-11-05T12:00:00.000Z',
+          duration_ms: 60_000,
+          chunks: 6,
+          last_seq: 5,
+          bytes: 120_000,
+          clicks: 1,
+        },
+        null,
       ]);
     });
 

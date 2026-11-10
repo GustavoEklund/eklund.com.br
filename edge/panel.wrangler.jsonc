@@ -1,0 +1,40 @@
+// The owner's panel (docs/decisions/0015-the-panel-behind-cloudflare-access.md): a second Worker, on its own workers.dev
+// address, which Cloudflare Access guards as a whole. It binds the collector's D1 and R2 and only reads them; the
+// collector's deploy owns the migrations. .github/workflows/edge.yml deploys it from main after the collector.
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "eklund-panel",
+  "main": "panel/index.js",
+  "compatibility_date": "2026-10-20",
+  "workers_dev": true,
+  "preview_urls": false,
+  // No Workers Logs, as for the collector: they would keep each request and its address.
+  "observability": { "enabled": false },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "eklund",
+      "database_id": "8dd0a071-e6e3-459e-868f-9ba8d116f692",
+      // Only for the tests, which build a local database: the deploy of the panel never applies a migration.
+      "migrations_dir": "migrations",
+    },
+  ],
+  "r2_buckets": [{ "binding": "REPORTS", "bucket_name": "eklund", "jurisdiction": "eu" }],
+  // The panel's stylesheet and script, and rrweb's replayer, are imported as text and served by the Worker itself, after
+  // the check of the Access token.
+  "rules": [
+    {
+      "type": "Text",
+      "globs": ["**/browser/*.js", "**/browser/*.css", "**/vendor/*.js", "**/vendor/*.css"],
+      "fallthrough": false,
+    },
+  ],
+  "vars": {
+    // The Zero Trust team whose Access application guards the panel: its tokens are issued by https://<this> and signed with
+    // the keys at https://<this>/cdn-cgi/access/certs.
+    "ACCESS_TEAM_DOMAIN": "eklund-lab.cloudflareaccess.com",
+    // ACCESS_AUD, the application's audience tag, and ALLOWED_EMAILS, the addresses that may read (separated by spaces),
+    // are secrets of the Worker that the owner sets (docs/build-and-deploy.md#the-panel). Without either, every request
+    // answers 403.
+  },
+}

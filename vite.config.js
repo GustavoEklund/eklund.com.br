@@ -72,8 +72,9 @@ export default defineConfig({
       'source/en/{privacy,cookies,terms}/index.html',
       'dist/**',
       'source/js/globe/land-bitset.js',
-      // The libraries the browser runs, byte for byte as npm ships them (0011).
+      // The libraries the browser runs, byte for byte as npm ships them (0011), and rrweb's replayer that the panel serves.
       'source/js/vendor/**',
+      'edge/panel/vendor/**',
       'tools/land.json',
       'pnpm-lock.yaml',
       'reports/**',
@@ -99,6 +100,7 @@ export default defineConfig({
     ignorePatterns: [
       'source/js/globe/land-bitset.js',
       'source/js/vendor/**',
+      'edge/panel/vendor/**',
       'dist/**',
       'reports/**',
       'node_modules/**',

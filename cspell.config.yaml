@@ -27,6 +27,7 @@ ignorePaths:
   - tools/land.json
   - source/js/globe/land-bitset.js
   - source/js/vendor/**
+  - edge/panel/vendor/**
   - source/fonts/**
   - source/assets/**/*.svg
   - tests/contract/fixtures/**
