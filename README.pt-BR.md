@@ -37,7 +37,7 @@
 
 Este é o código de [eklund.com.br](https://eklund.com.br). Eu desenvolvo sistemas de pagamento, principalmente com Pix, e queria que o site mostrasse como eu trabalho. Por isso a página mede a si mesma, roda um pequeno motor de Pix no seu navegador e explica a arquitetura de um participante direto do Pix, e o código por trás dela é testado, acessível, protegido e público.
 
-Ele não tem framework, e tem uma biblioteca: a web-vitals, que mede como a página carrega para os visitantes reais e só é baixada por quem não recusou a medição. Cada um dos seus 75 módulos JavaScript é uma classe, a organização das pastas diz o que o site faz, e os padrões que ele afirma cumprir são verificados por testes que falham quando deixam de ser verdade.
+Ele não tem framework, e tem duas bibliotecas, para medir o site: a web-vitals, que mede como a página carrega para os visitantes reais e só é baixada por quem não recusou a medição, e a rrweb, que grava a sessão e só é baixada por quem consentiu com isso. Cada um dos seus 80 módulos JavaScript é uma classe, a organização das pastas diz o que o site faz, e os padrões que ele afirma cumprir são verificados por testes que falham quando deixam de ser verdade.
 
 ## Um passeio pela página
 
@@ -72,7 +72,7 @@ Cada número pode ser conferido com o comando ao lado.
 
 | O quê                             | Valor                                                                                                                                                                                                           | Como conferir                                                  |
 | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| Dependências em tempo de execução | **1**: a web-vitals, para medir o site; sem framework, sem cookies, e um outro domínio, o coletor da medição                                                                                                    | `pnpm run build` e abra `dist/`                                |
+| Dependências em tempo de execução | **2**: a web-vitals e a rrweb, para medir o site; sem framework, sem cookies, e um outro domínio, o coletor da medição                                                                                          | `pnpm run build` e abra `dist/`                                |
 | Carga a frio, build de produção   | **7** requisições, **282 kB** na rede (brotli), 185 kB deles de fontes                                                                                                                                          | `pnpm run measure:build`                                       |
 | Mudança de layout                 | **0**, nos dois idiomas e no celular                                                                                                                                                                            | `pnpm run test:e2e`                                            |
 | Lighthouse, perfil mobile         | **100** acessibilidade, **100** SEO, **96** boas práticas, **80** desempenho, mediana de cinco                                                                                                                  | o job `Lighthouse` do CI                                       |

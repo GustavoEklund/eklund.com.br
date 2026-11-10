@@ -1,6 +1,6 @@
 # Architecture
 
-The site is plain HTML, CSS and JavaScript with no framework. The one library it runs is web-vitals, to measure it ([0011](decisions/0011-two-libraries-to-measure.md)). This page explains how the code is organized and why. For the decisions behind it, see [`decisions/`](decisions/).
+The site is plain HTML, CSS and JavaScript with no framework. The two libraries it runs are web-vitals and rrweb, both to measure it ([0011](decisions/0011-two-libraries-to-measure.md)). This page explains how the code is organized and why. For the decisions behind it, see [`decisions/`](decisions/).
 
 ## How the pieces fit
 
@@ -24,8 +24,8 @@ flowchart LR
       report["field-report"]
       more["history, contact, theme,<br/>cursor, marquee, scrollbar, navigation"]
     end
-    vendor["vendor<br/>web-vitals, as npm ships it"]
-    shared["shared<br/>Dom, Formatter, Environment, Preferences,<br/>ThemeColors, RenderLoop, PageReadings"]
+    vendor["vendor<br/>web-vitals and rrweb, as npm ships them"]
+    shared["shared<br/>Dom, Formatter, Environment, Preferences,<br/>ThemeColors, RenderLoop, PageReadings, ReportEndpoint"]
     i18n["i18n<br/>Locale, Translator, dictionaries"]
   end
   main --> features
@@ -33,7 +33,7 @@ flowchart LR
   features --> i18n
   report --> vendor
   load -. "messages" .-> worker["pix-engine.worker.js<br/>Web Workers"]
-  main -. "import() when allowed" .-> report
+  main -. "import() when allowed or consented" .-> report
 ```
 
 The arrows are rules, and `tests/architecture` fails when code breaks them: a feature imports only `shared/`, `i18n/` and the libraries of `vendor/`, `shared/` imports nothing of the site, and only `main.js` composes features.
@@ -46,17 +46,27 @@ The arrows are rules, and `tests/architecture` fails when code breaks them: a fe
 - The inline script in the head of `index.html` makes the same decision before the first paint and sets `data-privacy="ask"` on the root element, which is what shows the notice, so the notice never moves the layout. `tests/contract/head-script.contract.test.js` checks that the script and `PrivacyChoice` agree in every case.
 - `PrivacyNotice` is the card fixed at the bottom: three buttons of the same size and style and no close button. While it shows, it writes its height to `--privacy-notice-height`, which `privacy.css` turns into `scroll-padding-bottom` on the root and room under the footer, so the focused control and the last link stay above it.
 - `PrivacyDialog` is the second layer, a modal `<dialog>`. The footer link "Privacy preferences" and the command palette open it, and so does the address `/?preferencias` or `/en/?preferences`, which the legal pages link to; the app opens it and takes the query out of the address. Without scripts, the footer link leads to the part of the privacy policy about the choice, and nothing measures.
-- What measures or records asks `PrivacyChoice` first (`measurementAllowed`, `recordingAllowed`) and follows `onChange`: the measurement below does. "Delete my recordings" calls the `recordings` that `App` gives the dialog, `{ held(), deleteAll() }`; until recordings exist, `PrivacyDialog.NO_RECORDINGS` holds none, and the button stays disabled.
+- What measures or records asks `PrivacyChoice` first (`measurementAllowed`, `recordingAllowed`) and follows `onChange`: the measurement and the recording below do. "Delete my recordings" calls the `recordings` that `App` gives the dialog, `{ held(), deleteAll() }`, backed by `RecordingCodes`: the button is enabled while the browser keeps a code, the note beside it says whether it does, and a deletion that fails says so and keeps the codes for another try. `PrivacyDialog.NO_RECORDINGS`, which holds none, is the default for a dialog without them.
 
 ## What the page sends about itself
 
 The anonymous measurement of [0009](decisions/0009-measurement-on-a-cloudflare-worker.md) and [0010](decisions/0010-privacy-by-the-anpd-guidance.md) lives in `field-report/`. What a page may send is `tests/contract/schemas/page-report.schema.json`: a contract test on the collector's side (`page-report.provider`) and one on the page's side (`page-report.consumer`) hold both to it.
 
-- `App` loads `field-report/field-report.js`, and with it web-vitals, through a dynamic import, once the page has loaded and the main thread is idle (`requestIdleCallback`, four seconds at most), and only while `PrivacyChoice.measurementAllowed`. A visitor who refused, or whose browser sends Global Privacy Control, downloads none of it. A refusal later stops it at once (`stop()`), and allowing it again starts it again. The production build turns the module and web-vitals into one chunk of its own, which no page preloads.
+- `App` loads `field-report/field-report.js`, and with it web-vitals, through a dynamic import, once the page has loaded and the main thread is idle (`requestIdleCallback`, four seconds at most), and only while `PrivacyChoice.measurementAllowed`. A visitor who refused, or whose browser sends Global Privacy Control, downloads none of it. A refusal later stops it at once (`stop()`), and allowing it again starts it again. The production build turns the module and web-vitals into one chunk of its own, and the helpers it shares with the recording (`SiteVersion`, `PageAddress`, `DeviceRanges`) into a small one, which no page preloads.
 - `FieldReport` puts the parts together: web-vitals' `onLCP`, `onINP`, `onCLS`, `onFCP` and `onTTFB` with attribution, reduced by `VitalSummary` to the fields the contract allows; `PageErrors` for uncaught errors in the site's own files, unhandled rejections, Content-Security-Policy violations, deprecations and interventions; `PageActivity` for the sections reached, the links that leave the site, the first touch of the globe, the map, the trace and the history, and rage clicks; and `record(name, detail, value)`, which `App` calls for what the features do (the palette, its commands, the theme, the color, the language, the pause button, copying the address, the load test). `DeviceRanges` turns the device into ranges, and `ReportText` puts every text and number in the form the collector accepts.
 - `LoadReport` is one page load: a random UUID made in memory (`crypto.randomUUID()`), never stored, and the report that grows as the load goes on, with `seq` counting up. It goes out with `fetch`, as `text/plain` with `keepalive`, no credentials and no referrer, each time the page hides (`visibilitychange`, then `pagehide`), and only when there is something new. Events and errors go once; each metric goes with its latest value. A load restored from the back/forward cache is a new load.
 - `ReportEndpoint` says where: from eklund.com.br and gustavo.eklund.com.br, the collector on workers.dev; from a development server on this machine (plain HTTP on 127.0.0.1), the one `pnpm run edge:dev` runs; from anywhere else, such as the build Lighthouse loads over HTTPS, nowhere, though everything else runs. `tools/site-headers.mjs` reads the same origins for `connect-src`. The end-to-end and BDD suites answer for the local collector and cut off the one online.
 - `SiteVersion` is the release the reports name; `pnpm run changelog release` writes it with `package.json`, and a contract test keeps them equal.
+
+## What the page records, with consent
+
+The session recording and the heat map of [0010](decisions/0010-privacy-by-the-anpd-guidance.md) also live in `field-report/`, in a chunk of their own. What a chunk may carry is `tests/contract/schemas/session-chunk.schema.json`, and what a deletion may carry is `session-deletion.schema.json`, each held by a test on the collector's side (`session-recording.provider`) and one on the page's side (`session-recording.consumer`).
+
+- `App` loads `field-report/session-recording.js`, and with it rrweb's recorder (`vendor/record.js`), through a dynamic import once the page is idle, and only while `PrivacyChoice.recordingAllowed`. Withdrawing consent stops it at once and has every recording of the browser deleted; consenting again starts a new one. "Delete my recordings" does the same and leaves the page without a recording until the next load or a new consent.
+- `SessionRecording` is one page load: a new code (`crypto.randomUUID()`), which `RecordingCodes` (in `privacy/`) keeps in `localStorage` under `recordings` for 30 days, and rrweb recording with every field masked to an empty text, so neither what was typed nor its length is kept, the custom cursor, the command palette and the shaders' code blocked, no canvas drawn, the pointer sampled every 100 ms and scrolling every 150 ms. `RecordingBatch` writes each event as JSON once, takes the query and fragment out of the page's address, and cuts what waits into chunks numbered from 0 within the collector's limits. A chunk goes as gzip (`CompressionStream`) every ten seconds, or at once past 256 kB of text, which the first one with the whole page always is, and what is left goes as plain text with keepalive when the page hides. No content type, so no preflight; no credentials and no referrer.
+- `ClickPlaces` says where a pointer click landed for the heat map: the part of the page from a closed list (the privacy notice and dialog, the header, each section by its id, the footer, or `other`, against the window), the range of the window's width from `DeviceRanges`, and the position inside that part as a share of its width and height, to a thousandth. A click of the keyboard, or one a script made, is not placed.
+- `stop()` drops what was not sent and resolves once the chunks on their way have arrived, so the deletion that follows reaches all of them. `RecordingCodes.deleteAll()` sends the codes, 50 a request, to `/v1/session/delete`, and forgets each code once the collector answers.
+- `ReportEndpoint` (in `shared/`, since the privacy preferences use it too) gives the address of each route, and `PageAddress` the page, without the folder of its release.
 
 ## What the page measures about itself
 
@@ -91,7 +101,7 @@ source/                    everything that is deployed
   js/
     main.js                App: composition root, wires every feature
     shared/                Dom, Numbers, SeededRandom, Formatter, Environment, Preferences,
-                           ThemeColors, RenderLoop, PageReadings, ChartScales, SvgPaths
+                           ThemeColors, RenderLoop, PageReadings, ChartScales, SvgPaths, ReportEndpoint
     globe/                 Globe, GlobeShaders, LandDecoder, GlobeGeometry, WebGlProgram, GlobeControls, ShaderDialog
     status-page/           HealthCheck subclasses, StatusPage
     trace-viewer/          TraceBuilder, TraceViewer
@@ -100,11 +110,12 @@ source/                    everything that is deployed
     load-test/             PixEngine, pix-engine.worker.js (the Web Worker shell), RampScenario, SeriesResampler,
                            LoadTestCharts, TerminalLog, WorkerPool, LoadTest
     i18n/                  Locale, Translator, LocaleSwitcher, Dictionaries, locales/pt-br.js, locales/en-us.js
-    privacy/               PrivacyChoice, PrivacyNotice, PrivacyDialog (see The privacy choice)
+    privacy/               PrivacyChoice, PrivacyNotice, PrivacyDialog, RecordingCodes (see The privacy choice)
     field-report/          FieldReport, LoadReport, VitalSummary, PageErrors, PageActivity, DeviceRanges, ReportText,
-                           ReportEndpoint, SiteVersion (see What the page sends about itself)
-    vendor/                web-vitals.attribution.js and its map and license, npm's files as they are, outside the class
-                           rule, the formatter and the rule of a test per module (docs/decisions/0011)
+                           PageAddress, SiteVersion (see What the page sends about itself); SessionRecording, RecordingBatch,
+                           ClickPlaces (see What the page records, with consent)
+    vendor/                web-vitals.attribution.js and rrweb's record.js, each with its map and license, npm's files as
+                           they are, outside the class rule, the formatter and the rule of a test per module (docs/decisions/0011)
     history/ contact/ command-palette/ theme/ cursor/ hero/ marquee/ scrollbar/ navigation/
   .htaccess                security headers, cache and compression rules for Hostinger
   robots.txt sitemap.xml site.webmanifest icon.svg favicon.ico apple-touch-icon.png .well-known/security.txt .well-known/gpc.json
@@ -113,7 +124,9 @@ source/                    everything that is deployed
                            one stylesheet, css/legal.css, and the head script of index.html (docs/decisions/0014)
 edge/                      the collector of real visits, a Cloudflare Worker on workers.dev (docs/decisions/0009); no site code
   src/                     Router, Collector, PageReport and ReportVocabulary (the contract it reads), VisitorAgent, SendLimit and
-                           DailyCeiling (how much one client may send in a minute, and how many rows a day), ReportStore (D1),
+                           DailyCeiling (how much one client may send in a minute, and how many rows and bytes a day), ReportStore (D1),
+                           RecordingInbox, SessionChunk, DeletionRequest, Gzip and RecordingStore (the recordings, with consent:
+                           chunks into R2, a row for each recording and click into D1, deletion by code),
                            Retention (daily totals and deletions), UptimeMonitor and IncidentIssues (the site checked every five
                            minutes, an issue when a page is down), LabInbox, LabBatch and LabStore (what the nightly lab job sends,
                            behind LAB_TOKEN: rows into D1, full reports into R2), Replies, Calendar; the readings (docs/decisions/0013):
