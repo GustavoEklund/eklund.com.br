@@ -75,6 +75,11 @@
       scale: 1;
     }
 
+    /* The controls stay centered over the globe. */
+    :root:not([data-motion]) .globe .globe-controls.chip {
+      translate: -50% 0;
+    }
+
     :root:not([data-motion]) :is(.reveal, .hero.is-revealed .hero-name, .globe.is-revealed) {
       animation: none;
     }

@@ -28,11 +28,13 @@
     justify-content: flex-end;
   }
 
+  /* One line whenever it fits over the globe: positioned at left 50%, it would otherwise shrink to half of the globe and wrap. */
   .globe-controls {
     flex-wrap: wrap;
     justify-content: center;
     white-space: normal;
-    max-width: calc(100vw - 2 * var(--gutter));
+    width: max-content;
+    max-width: min(100%, calc(100vw - 2 * var(--gutter)));
   }
 
   /* Focus that script moves to a section or to main after a link (no control there to outline). */
@@ -71,6 +73,11 @@
     opacity: 1;
     translate: 0;
     scale: 1;
+  }
+
+  /* The controls stay centered over the globe. */
+  :root[data-motion='paused'] .globe .globe-controls.chip {
+    translate: -50% 0;
   }
 
   /* Ambient loops stop outright: shortening a running loop is not reliable in every browser, and no end state matters for them. */
