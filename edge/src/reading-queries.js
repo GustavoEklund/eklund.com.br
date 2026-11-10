@@ -44,6 +44,8 @@ export class ReadingQueries {
    */
   static VALUES = 2_000;
   static LAB_COLUMNS = LAB_COLUMNS;
+  /** The cells of each side of the grid the heat map lays over a part of the page. */
+  static HEAT_MAP_CELLS = 10;
 
   #db;
   #clock;
@@ -80,6 +82,10 @@ export class ReadingQueries {
         return this.#search(input);
       case 'certificates':
         return this.#certificates();
+      case 'recordings':
+        return this.#recordings(input);
+      case 'heat_map':
+        return this.#heatMap(input);
       default:
         throw new Error(`no reading is called ${tool}`);
     }
@@ -378,6 +384,77 @@ export class ReadingQueries {
         days_left: validTo === null ? null : Math.floor((validTo - now) / DAY_MS),
       })),
       sample: Sample.of(hosts.length, 1),
+    };
+  }
+
+  async #recordings({ from, to, page = null }) {
+    const where = 'FROM recording WHERE day BETWEEN ?1 AND ?2 AND (?3 IS NULL OR page = ?3)';
+    const [[totals], recordings] = await this.#batch(
+      [
+        `SELECT count(*) AS recordings ${where}`,
+        `SELECT code, day, page, language, version, started_at, first_event_ms, last_event_ms, chunks, bytes, clicks
+         ${where} ORDER BY started_at DESC, code LIMIT ${ReadingQueries.LONG_TOP}`,
+      ],
+      from,
+      to,
+      page,
+    );
+    return {
+      from,
+      to,
+      page,
+      recordings: recordings.map(
+        ({ started_at: started, first_event_ms: first, last_event_ms: last, ...recording }) => {
+          const { chunks, bytes, clicks, ...about } = recording;
+          return {
+            ...about,
+            started: new Date(started).toISOString(),
+            duration_ms: last - first,
+            chunks,
+            bytes,
+            clicks,
+          };
+        },
+      ),
+      sample: Sample.of(totals.recordings, 1),
+    };
+  }
+
+  async #heatMap({ from, to, page = null, region = null, viewport = null }) {
+    const cells = ReadingQueries.HEAT_MAP_CELLS;
+    const found = await this.#all(
+      `SELECT c.region, c.viewport, min(CAST(c.x * ${cells} AS INTEGER), ${cells - 1}) AS x_cell,
+         min(CAST(c.y * ${cells} AS INTEGER), ${cells - 1}) AS y_cell, count(*) AS clicks
+       FROM recording_click c JOIN recording r ON r.code = c.code
+       WHERE r.day BETWEEN ?1 AND ?2 AND (?3 IS NULL OR r.page = ?3) AND (?4 IS NULL OR c.region = ?4)
+         AND (?5 IS NULL OR c.viewport = ?5)
+       GROUP BY c.region, c.viewport, x_cell, y_cell
+       ORDER BY c.region, c.viewport, y_cell, x_cell`,
+      from,
+      to,
+      page,
+      region,
+      viewport,
+    );
+    const parts = new Map();
+    for (const { region: part, viewport: width, x_cell: x, y_cell: y, clicks } of found) {
+      const key = `${part} ${width}`;
+      if (!parts.has(key)) parts.set(key, { region: part, viewport: width, clicks: 0, cells: [] });
+      const entry = parts.get(key);
+      entry.clicks += clicks;
+      entry.cells.push({ x, y, clicks });
+    }
+    const total = found.reduce((sum, { clicks }) => sum + clicks, 0);
+    return {
+      from,
+      to,
+      page,
+      region,
+      viewport,
+      grid: cells,
+      clicks: total,
+      parts: [...parts.values()],
+      sample: Sample.of(total),
     };
   }
 

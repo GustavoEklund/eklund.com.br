@@ -1,6 +1,7 @@
 /**
- * The closed lists a page report may use: a value outside them is refused, so nothing the visitor typed or chose freely can
- * reach the database. tests/contract/schemas/page-report.schema.json says the same, and a contract test keeps them equal.
+ * The closed lists a page report and a chunk of a recording may use: a value outside them is refused, so nothing the visitor
+ * typed or chose freely can reach the database. tests/contract/schemas/page-report.schema.json and
+ * session-chunk.schema.json say the same, and contract tests keep them equal.
  */
 export class ReportVocabulary {
   static PAGES = [
@@ -150,4 +151,10 @@ export class ReportVocabulary {
   };
 
   static ERROR_KINDS = ['error', 'rejection', 'worker', 'csp', 'deprecation', 'intervention'];
+
+  /** The pages that record a session, with consent: the legal pages run no script. */
+  static RECORDED_PAGES = ['/', '/en/'];
+
+  /** The parts of a page a click of the heat map lands in: its sections, its header and footer, the privacy notice and dialog. */
+  static REGIONS = ['header', 'hero', ...ReportVocabulary.SECTIONS, 'footer', 'privacy', 'other'];
 }

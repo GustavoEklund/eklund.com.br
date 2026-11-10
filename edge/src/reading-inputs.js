@@ -56,6 +56,10 @@ export class ReadingInputs {
       ['score', 'lcp', 'fcp', 'cls', 'tbt', 'speed_index', 'ttfb'],
       'The number of each run: the performance score (0 to 1), or a metric in milliseconds (CLS has no unit).',
     );
+    const recordedPage = ReadingInputs.#choice(
+      ReportVocabulary.RECORDED_PAGES,
+      'Only this page of the site.',
+    );
     const period = ReadingInputs.#period();
     const tool = ReadingInputs.#tool;
     return {
@@ -132,6 +136,26 @@ export class ReadingInputs {
       ),
       certificates: tool(
         'The certificate each host presented to the lab job on its latest night, and how many days it has left.',
+      ),
+      recordings: tool(
+        'The session recordings of a period, the latest first: the code that names each one in R2, its page, language and release, how long it lasted, its chunks and bytes, and its clicks. Only visitors who consented are recorded, and recordings are kept 30 days.',
+        { page: recordedPage.optional() },
+        period,
+      ),
+      heat_map: tool(
+        'Where the recorded visitors clicked in a period: for each part of the page and range of window width, the clicks in a grid of ten by ten cells laid over that part, from the top left. Clicks are kept 30 days.',
+        {
+          page: recordedPage.optional(),
+          region: ReadingInputs.#choice(
+            ReportVocabulary.REGIONS,
+            'Only this part of the page: a section by its id, the header, the footer, the privacy notice and dialog, or anything else.',
+          ).optional(),
+          viewport: ReadingInputs.#choice(
+            ReportVocabulary.VIEWPORT_WIDTHS,
+            'Only this range of window width, in CSS pixels.',
+          ).optional(),
+        },
+        period,
       ),
     };
   }

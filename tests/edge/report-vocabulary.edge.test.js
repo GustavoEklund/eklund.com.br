@@ -14,6 +14,8 @@ describe('ReportVocabulary', () => {
         ReportVocabulary.METRICS,
         ReportVocabulary.PALETTE_COMMANDS,
         ReportVocabulary.ERROR_KINDS,
+        ReportVocabulary.RECORDED_PAGES,
+        ReportVocabulary.REGIONS,
         Object.keys(ReportVocabulary.EVENTS),
         ...Object.values(ReportVocabulary.EVENTS),
       ].flatMap(repeated),
@@ -37,5 +39,16 @@ describe('ReportVocabulary', () => {
       sections,
       Object.keys(PT_BR.palette.commands),
     ]);
+  });
+
+  it('records only pages it reports on, and places clicks in every section of the page, the hero included', () => {
+    const sections = [
+      ...SiteSource.read('index.html').matchAll(/<section[^>]*\sid="([^"]+)"/g),
+    ].map(([, id]) => id);
+    expect([
+      ReportVocabulary.RECORDED_PAGES.every((page) => ReportVocabulary.PAGES.includes(page)),
+      ReportVocabulary.REGIONS.filter((region) => sections.includes(region)),
+      ReportVocabulary.REGIONS.filter((region) => !sections.includes(region)),
+    ]).toStrictEqual([true, sections, ['header', 'footer', 'privacy', 'other']]);
   });
 });

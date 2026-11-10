@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
+import { RecordingStore } from '../../edge/src/recording-store.js';
 import { Retention } from '../../edge/src/retention.js';
 import { EdgeWorker } from '../support/edge-worker.js';
+import { SessionChunks } from '../support/session-chunks.js';
 
 /** The run of 29 October 2026: totals for the 27th to the 29th, rows kept from 29 September 2025, errors from 31 July 2026. */
 const NOW = new Date('2026-10-29T06:17:00Z');
@@ -273,6 +275,49 @@ describe('Retention.run, against D1 in workerd', () => {
       { day: '2026-10-27', rows: 6 },
       { day: '2026-10-28', rows: 7 },
       { day: '2026-10-29', rows: 8 },
+    ]);
+  });
+
+  it('has the recordings past their 30 days expired by their store, after the rows, with the day of the run', async () => {
+    const days = [];
+    await new Retention(database, { expire: async (today) => days.push(today) }).run(NOW);
+    expect(days).toStrictEqual(['2026-10-29']);
+  });
+
+  it('deletes the recordings older than 30 days from the daily Cron Trigger, chunks and rows', async () => {
+    const store = new RecordingStore({ db: database, bucket: await worker.reports() });
+    const save = async (chunk, day) =>
+      store.save(
+        {
+          code: chunk.code,
+          seq: 0,
+          version: '1.2.0',
+          page: '/',
+          language: 'pt-BR',
+          events: 0,
+          first: null,
+          last: null,
+          clicks: [],
+        },
+        await SessionChunks.gzip(chunk),
+        {
+          receivedAt: 0,
+          day,
+          host: 'eklund.com.br',
+        },
+      );
+    await save(SessionChunks.complete(), '2026-09-28');
+    await save(
+      SessionChunks.with((chunk) => (chunk.code = SessionChunks.OTHER)),
+      '2026-09-29',
+    );
+    await worker.scheduled(NOW);
+    expect([
+      await worker.keys('recordings/'),
+      await worker.rows('SELECT code, day FROM recording'),
+    ]).toStrictEqual([
+      [`recordings/2026-09-29/${SessionChunks.OTHER}/000`],
+      [{ code: SessionChunks.OTHER, day: '2026-09-29' }],
     ]);
   });
 

@@ -50,7 +50,7 @@ describe('ReadingServer, served by the stateless handler of the MCP SDK', () => 
       '2025-11-25',
       { name: 'eklund.com.br', version: '1.0.0' },
       ['tools'],
-      'and Bing. Every answer says how large its sample is; when it is too small, say so instead of drawing a conclusion. Days are UTC.',
+      'when it is too small, say so instead of drawing a conclusion. Days are UTC.',
     ]);
   });
 

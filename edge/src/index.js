@@ -12,6 +12,8 @@ import { LabInbox } from './lab-inbox.js';
 import { LabStore } from './lab-store.js';
 import { ReadingHandler } from './reading-handler.js';
 import { ReadingQueries } from './reading-queries.js';
+import { RecordingInbox } from './recording-inbox.js';
+import { RecordingStore } from './recording-store.js';
 import { ReportStore } from './report-store.js';
 import { Retention } from './retention.js';
 import { Router } from './router.js';
@@ -20,7 +22,10 @@ import { UptimeMonitor } from './uptime-monitor.js';
 
 /** The Cron Trigger of the uptime monitor. The other one, once a day, runs the retention. */
 const EVERY_FIVE_MINUTES = '*/5 * * * *';
-/** The routes anyone may reach: what the Worker is, what pages send and what the lab job sends. They never meet OAuth. */
+/**
+ * The routes anyone may reach: what the Worker is, what pages send (reports, recordings and the deletion of recordings) and
+ * what the lab job sends. They never meet OAuth.
+ */
 const PUBLIC = /^\/(?:$|robots\.txt$|v1\/)/;
 /** How long an access token lives, and a refresh token: an hour, and thirty days. */
 const ACCESS_TOKEN_SECONDS = 3_600;
@@ -28,22 +33,31 @@ const REFRESH_TOKEN_SECONDS = 2_592_000;
 
 /**
  * The Worker: the public routes go through the Router, and everything else through the OAuth provider, which serves the
- * readings at /mcp and /api/v1 to a token of the owner's GitHub account. The Cron Triggers check the site and run the retention.
+ * readings at /mcp and /api/v1 to a token of the owner's GitHub account. The Cron Triggers check the site and run the retention,
+ * which also deletes the recordings past their 30 days.
  */
 export default {
   fetch(request, env, context) {
     const origins = env.ORIGINS.split(' ');
     if (PUBLIC.test(new URL(request.url).pathname)) {
+      const limit = new SendLimit(env.SEND_LIMIT);
+      const ceiling = new DailyCeiling(env.DB);
       const collector = new Collector({
         origins,
         store: new ReportStore(env.DB),
-        limit: new SendLimit(env.SEND_LIMIT),
-        ceiling: new DailyCeiling(env.DB),
+        limit,
+        ceiling,
+      });
+      const recordings = new RecordingInbox({
+        origins,
+        store: new RecordingStore({ db: env.DB, bucket: env.REPORTS }),
+        limit,
+        ceiling,
       });
       const lab = env.LAB_TOKEN
         ? new LabInbox({ token: env.LAB_TOKEN, store: new LabStore(env.DB), reports: env.REPORTS })
         : null;
-      return new Router({ origins, collector, lab }).handle(request);
+      return new Router({ origins, collector, recordings, lab }).handle(request);
     }
     const allowedLogins = (env.ALLOWED_GITHUB_LOGINS ?? '')
       .toLowerCase()
@@ -98,7 +112,9 @@ export default {
               fetch,
             }),
           }).run(env.UPTIME_TARGETS.split(' '))
-        : new Retention(env.DB).run(new Date(controller.scheduledTime)),
+        : new Retention(env.DB, new RecordingStore({ db: env.DB, bucket: env.REPORTS })).run(
+            new Date(controller.scheduledTime),
+          ),
     );
   },
 };

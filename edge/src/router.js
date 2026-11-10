@@ -4,6 +4,8 @@ import { Replies } from './replies.js';
 const ABOUT = `Este é o coletor de eklund.com.br. Ele recebe medições anônimas do site (como ele carrega, o que quebra e que partes são usadas), não guarda endereço IP nem nada que ligue uma visita a outra, e o código dele é público:
 This is the collector of eklund.com.br. It receives anonymous measurements of the site (how it loads, what breaks and which parts are used), stores no IP address and nothing that links one visit to another, and its code is public:
 https://github.com/GustavoEklund/eklund.com.br/tree/main/edge
+Com o consentimento do visitante, ele também recebe a gravação da sessão, sem nada do que foi digitado, guardada por 30 dias, e o navegador que a fez pode mandar apagá-la.
+With the visitor's consent, it also receives the recording of the session, without anything typed, kept for 30 days, and the browser that made it can have it deleted.
 `;
 
 /** Where the lab job keeps the full report of a median run. */
@@ -13,11 +15,13 @@ const LAB_REPORT = '/v1/lab/report/';
 export class Router {
   #origins;
   #collector;
+  #recordings;
   #lab;
 
-  constructor({ origins, collector, lab = null }) {
+  constructor({ origins, collector, recordings, lab = null }) {
     this.#origins = origins;
     this.#collector = collector;
+    this.#recordings = recordings;
     this.#lab = lab;
   }
 
@@ -36,6 +40,14 @@ export class Router {
       case '/v1/page':
         return method === 'POST'
           ? this.#collector.take(request)
+          : Replies.methodNotAllowed('POST, OPTIONS');
+      case '/v1/session':
+        return method === 'POST'
+          ? this.#recordings.take(request)
+          : Replies.methodNotAllowed('POST, OPTIONS');
+      case '/v1/session/delete':
+        return method === 'POST'
+          ? this.#recordings.forget(request)
           : Replies.methodNotAllowed('POST, OPTIONS');
       case '/v1/lab':
         if (!this.#lab) return Replies.notFound();

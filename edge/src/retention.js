@@ -3,7 +3,7 @@ import { Calendar } from './calendar.js';
 /**
  * Once a day: the daily totals of the last three days, which late reports can still change, then the deletion of every row
  * past its retention (docs/decisions/0010-privacy-by-the-anpd-guidance.md). The checks of the uptime monitor follow the
- * retention of errors.
+ * retention of errors. The session recordings, their chunks in R2 and their clicks go after 30 days, through their store.
  */
 export class Retention {
   static RECENT_DAYS = 3;
@@ -13,9 +13,12 @@ export class Retention {
   static TOTAL_MONTHS = 25;
 
   #db;
+  #recordings;
 
-  constructor(db) {
+  /** `recordings` is the RecordingStore whose recordings expire; without one, only the rows of D1 are deleted. */
+  constructor(db, recordings = null) {
     this.#db = db;
+    this.#recordings = recordings;
   }
 
   /**
@@ -89,6 +92,7 @@ export class Retention {
         writes: Retention.firstRecentDay(today),
       }),
     );
+    await this.#recordings?.expire(today);
   }
 
   /** The totals of one day, written over the ones an earlier run left. */

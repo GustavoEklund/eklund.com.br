@@ -1,0 +1,108 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://eklund.com.br/contracts/edge/session-chunk.json",
+  "title": "session recording chunk",
+  "description": "One chunk of the session recording of one page load, which a page sends to the collector (POST /v1/session) only while the visitor consents to recording. The body is this JSON as gzip, or as plain text for the last chunk of a page that closes, without a content type, at most 512 KiB as sent and 2 MiB as text. The events are rrweb's, with typed text masked and nothing recorded inside the parts the page blocks; the clicks say where a click landed for the heat map, as a share of the part of the page it landed in. The collector refuses a chunk with anything else (edge/src/session-chunk.js).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["v", "code", "seq", "version", "page", "language", "events", "clicks"],
+  "properties": {
+    "v": {
+      "const": 1
+    },
+    "code": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "description": "A random UUID made for one recording, the same in each of its chunks. The browser keeps it 30 days to delete the recording."
+    },
+    "seq": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 999,
+      "description": "The order of the chunk in its recording, from 0."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}(?:-[0-9a-z.]{1,20})?$"
+    },
+    "page": {
+      "enum": ["/", "/en/"]
+    },
+    "language": {
+      "enum": ["pt-BR", "en-US"]
+    },
+    "events": {
+      "type": "array",
+      "maxItems": 10000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "data", "timestamp"],
+        "properties": {
+          "type": {
+            "enum": [0, 1, 2, 3, 4, 5, 6],
+            "description": "rrweb's event type: DomContentLoaded, Load, FullSnapshot, IncrementalSnapshot, Meta, Custom or Plugin."
+          },
+          "data": {
+            "type": "object",
+            "description": "What rrweb recorded, as it wrote it."
+          },
+          "timestamp": {
+            "type": "integer",
+            "minimum": 1577836800000,
+            "maximum": 4102444800000
+          }
+        }
+      }
+    },
+    "clicks": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["region", "viewport", "x", "y", "at"],
+        "properties": {
+          "region": {
+            "enum": [
+              "header",
+              "hero",
+              "status",
+              "perfil",
+              "arquitetura",
+              "carga",
+              "historico",
+              "contato",
+              "footer",
+              "privacy",
+              "other"
+            ],
+            "description": "The part of the page the click landed in: a section by its id, the header, the footer, the privacy notice or dialog, or anything else, measured against the window."
+          },
+          "viewport": {
+            "enum": ["0-359", "360-413", "414-767", "768-1023", "1024-1279", "1280-1535", "1536+"],
+            "description": "The range of the window's width, in CSS pixels, when the click happened."
+          },
+          "x": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "How far across its part the click landed, from the left."
+          },
+          "y": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "How far down its part the click landed, from the top."
+          },
+          "at": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 86400000,
+            "description": "Milliseconds from the start of the recording."
+          }
+        }
+      }
+    }
+  }
+}

@@ -736,6 +736,146 @@ describe('ReadingQueries, against D1 in workerd', () => {
     });
   });
 
+  describe('the recordings', () => {
+    const A = '3f2b8c1e-9a4d-4e6f-8b7a-1c2d3e4f5a6b';
+    const B = '7c9e6679-7425-40de-944b-e07fc1f90ae7';
+    const C = '00000000-0000-4000-8000-000000000000';
+    /** A recording of the home page in Portuguese, unless `changes` says otherwise. */
+    const recording = (code, day, changes = {}) => ({
+      code,
+      day,
+      started_at: Date.parse(`${day}T12:00:00Z`),
+      last_at: Date.parse(`${day}T12:05:00Z`),
+      host: 'eklund.com.br',
+      page: '/',
+      version: '1.2.0',
+      language: 'pt-BR',
+      first_event_ms: 1_000,
+      last_event_ms: 301_000,
+      chunks: 6,
+      last_seq: 5,
+      bytes: 120_000,
+      clicks: 0,
+      ...changes,
+    });
+    const click = (code, position, region, x, y, viewport = '360-413') => ({
+      code,
+      seq: 0,
+      position,
+      region,
+      viewport,
+      x,
+      y,
+      at_ms: position * 1_000,
+    });
+
+    beforeEach(async () => {
+      await insert('recording', [
+        recording(A, '2026-11-03', { clicks: 4 }),
+        recording(B, '2026-11-05', {
+          page: '/en/',
+          language: 'en-US',
+          last_event_ms: 61_000,
+          clicks: 1,
+        }),
+        recording(C, '2026-10-20'),
+      ]);
+      await insert('recording_click', [
+        click(A, 0, 'status', 0.05, 0.05),
+        click(A, 1, 'status', 0.09, 0.01),
+        click(A, 2, 'status', 1, 1),
+        click(A, 3, 'contato', 0.5, 0.25),
+        click(B, 0, 'status', 0.05, 0.05, '1280-1535'),
+        click(C, 0, 'status', 0.05, 0.05),
+      ]);
+    });
+
+    it('lists the recordings of a period, the latest first, with how long each lasted', async () => {
+      expect([
+        await queries.run('recordings', WEEK),
+        (await queries.run('recordings', { ...WEEK, page: '/en/' })).recordings.map(
+          ({ code }) => code,
+        ),
+      ]).toStrictEqual([
+        {
+          ...WEEK,
+          page: null,
+          recordings: [
+            {
+              code: B,
+              day: '2026-11-05',
+              page: '/en/',
+              language: 'en-US',
+              version: '1.2.0',
+              started: '2026-11-05T12:00:00.000Z',
+              duration_ms: 60_000,
+              chunks: 6,
+              bytes: 120_000,
+              clicks: 1,
+            },
+            {
+              code: A,
+              day: '2026-11-03',
+              page: '/',
+              language: 'pt-BR',
+              version: '1.2.0',
+              started: '2026-11-03T12:00:00.000Z',
+              duration_ms: 300_000,
+              chunks: 6,
+              bytes: 120_000,
+              clicks: 4,
+            },
+          ],
+          sample: { size: 2, minimum: 1, enough: true },
+        },
+        [B],
+      ]);
+    });
+
+    it('adds the clicks of a period up in a grid of ten by ten over each part, for each range of width', async () => {
+      expect([
+        await queries.run('heat_map', WEEK),
+        (await queries.run('heat_map', { ...WEEK, page: '/', region: 'contato' })).parts,
+        (await queries.run('heat_map', { ...WEEK, viewport: '1280-1535' })).clicks,
+      ]).toStrictEqual([
+        {
+          ...WEEK,
+          page: null,
+          region: null,
+          viewport: null,
+          grid: 10,
+          clicks: 5,
+          parts: [
+            {
+              region: 'contato',
+              viewport: '360-413',
+              clicks: 1,
+              cells: [{ x: 5, y: 2, clicks: 1 }],
+            },
+            {
+              region: 'status',
+              viewport: '1280-1535',
+              clicks: 1,
+              cells: [{ x: 0, y: 0, clicks: 1 }],
+            },
+            {
+              region: 'status',
+              viewport: '360-413',
+              clicks: 3,
+              cells: [
+                { x: 0, y: 0, clicks: 2 },
+                { x: 9, y: 9, clicks: 1 },
+              ],
+            },
+          ],
+          sample: { size: 5, minimum: 20, enough: false },
+        },
+        [{ region: 'contato', viewport: '360-413', clicks: 1, cells: [{ x: 5, y: 2, clicks: 1 }] }],
+        1,
+      ]);
+    });
+  });
+
   it('refuses a reading it does not have', () => {
     expect(() => queries.run('tables', {})).toThrow('no reading is called tables');
   });

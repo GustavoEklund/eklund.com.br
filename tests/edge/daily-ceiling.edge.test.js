@@ -28,6 +28,20 @@ describe('DailyCeiling, against D1 in workerd', () => {
     ]).toStrictEqual([true, false, true, false]);
   });
 
+  it('lets the bytes of recordings in while the day stays at or under 250 MB, and counts nothing for a report', async () => {
+    await database
+      .prepare('INSERT INTO daily_writes (day, rows, bytes) VALUES (?1, ?2, ?3)')
+      .bind('2026-10-29', 10, 249_999_000)
+      .run();
+    const ceiling = new DailyCeiling(database);
+    expect([
+      await ceiling.allows('2026-10-29', 3, 1_000),
+      await ceiling.allows('2026-10-29', 3, 1_001),
+      await ceiling.allows('2026-10-29', 3),
+      await ceiling.allows('2026-10-30', 3, 250_000_000),
+    ]).toStrictEqual([true, false, true, true]);
+  });
+
   it('counts the seconds to the next midnight in UTC', () => {
     expect([
       DailyCeiling.secondsLeft(Date.parse('2026-10-29T02:30:00Z')),
