@@ -4,6 +4,8 @@ All notable changes to this project are written here. The format follows [Keep a
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-11-10
+
 ### Added
 
 - A collector of my own for the visits to the site: a Cloudflare Worker on workers.dev, with its database in the EU, whose code lives in `edge/`. It stores no IP address and nothing that links one visit to another.
@@ -23,6 +25,8 @@ All notable changes to this project are written here. The format follows [Keep a
 
 - A browser in English that opens `eklund.com.br` for the first time stays on the Portuguese page, which offers the English one in a small note under the header, instead of being sent to `/en/`. The redirect made it download the fonts, the stylesheet and the script twice, about 180 kB more ([#19](https://github.com/GustavoEklund/eklund.com.br/issues/19)). A visitor who chose English is still sent to `/en/`.
 - The readings of the AI agent count today and the two days before it from the stored rows, so the uptime, the visits, the events and the errors of the last days show up at once instead of two days later.
+- The controls of the globe stay on one line whenever they fit over it, instead of always wrapping to two, and stay centered when motion is paused or reduced.
+- The note under the size of the page says "no frameworks" instead of "0 dependencies", now that two libraries measure the site apart from it.
 
 ## [1.1.0] - 2026-10-27
 
@@ -95,6 +99,7 @@ The first public version of the site and of its repository.
 - Documentation in [`docs/`](docs/): architecture, internationalization, web standards, testing, build and deploy, continuous integration, releasing and repository settings, and the decisions behind them.
 - A guide for coding agents in [`AGENTS.md`](AGENTS.md), which Claude Code reads through `CLAUDE.md`: the commands, the architecture and the rules that the tests enforce. [ai-memory](https://github.com/akitaonrails/ai-memory) keeps their sessions and handoffs across agents, with its workspace and project in [`.ai-memory.toml`](.ai-memory.toml).
 
-[Unreleased]: https://github.com/GustavoEklund/eklund.com.br/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/GustavoEklund/eklund.com.br/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/GustavoEklund/eklund.com.br/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/GustavoEklund/eklund.com.br/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/GustavoEklund/eklund.com.br/releases/tag/v1.0.0

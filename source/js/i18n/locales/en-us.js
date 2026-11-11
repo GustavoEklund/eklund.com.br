@@ -112,7 +112,7 @@ export const EN_US = {
     scrollCue: 'scroll',
     chips: {
       network: 'KB over the wire',
-      networkNote: '0 dependencies',
+      networkNote: 'no frameworks',
       points: 'points',
       pointsNote: 'WebGL2 · drawn point by point',
       fpsNote: 'measured now, in your browser',

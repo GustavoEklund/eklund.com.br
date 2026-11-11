@@ -3,5 +3,5 @@
  * last. `pnpm run changelog release` writes it with package.json, and a contract test keeps the two equal.
  */
 export class SiteVersion {
-  static NUMBER = '1.1.0';
+  static NUMBER = '1.2.0';
 }
