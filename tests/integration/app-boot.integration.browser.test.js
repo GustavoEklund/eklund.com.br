@@ -188,6 +188,9 @@ describe('the whole page, booted by importing main.js into the real markup', () 
 
   describe('theme', () => {
     it('toggles between dark and light and saves the choice', async () => {
+      // A view transition inside the test runner's iframe makes Chromium close the page, so this one runs with motion paused.
+      const motion = document.documentElement.dataset.motion;
+      document.documentElement.dataset.motion = 'paused';
       const toggle = document.getElementById('theme-toggle');
       const before = document.documentElement.dataset.theme;
       toggle.click();
@@ -202,6 +205,8 @@ describe('the whole page, booted by importing main.js into the real markup', () 
       expect([document.documentElement.dataset.theme, localStorage.getItem('theme')]).toStrictEqual(
         ['dark', 'dark'],
       );
+      if (motion === undefined) delete document.documentElement.dataset.motion;
+      else document.documentElement.dataset.motion = motion;
     });
   });
 
