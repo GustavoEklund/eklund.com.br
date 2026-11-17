@@ -1,6 +1,6 @@
 # 0009. Measurement goes to a Cloudflare Worker of my own, outside the site's host
 
-Status: accepted, 2026-10-28. Amended by [0015](0015-the-panel-behind-cloudflare-access.md): the dashboard is a second Worker behind Cloudflare Access, which checks the Access token itself.
+Status: accepted, 2026-10-28. Amended by [0015](0015-the-panel-behind-cloudflare-access.md): the dashboard is a second Worker behind Cloudflare Access, which checks the Access token itself. Amended by [0017](0017-the-pages-go-through-cloudflare.md): the DNS zone is on Cloudflare, and the pages go through its proxy.
 
 ## Context
 

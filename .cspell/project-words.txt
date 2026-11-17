@@ -54,6 +54,7 @@ cyclonedx
 depcruise
 describedby
 direta
+dnssec
 domcontentloaded
 duckduckgo
 easylist
