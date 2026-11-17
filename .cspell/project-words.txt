@@ -66,6 +66,7 @@ esatto
 esbuild
 etdjw
 etec
+extglob
 facebookexternalhit
 fatec
 fetc
@@ -156,6 +157,7 @@ parsererror
 participação
 peucker
 pibr
+picomatch
 pkce
 playhead
 portugues
