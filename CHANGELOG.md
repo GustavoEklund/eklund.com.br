@@ -4,6 +4,10 @@ All notable changes to this project are written here. The format follows [Keep a
 
 ## [Unreleased]
 
+### Changed
+
+- The pages reach visitors through Cloudflare's network instead of Hostinger's CDN, still served by the same hosting, and the privacy policy, in both languages, says so.
+
 ## [1.2.0] - 2026-11-10
 
 ### Added
