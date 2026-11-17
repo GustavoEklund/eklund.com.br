@@ -22,11 +22,16 @@ allowBuilds:
   esbuild: false
   workerd: false
 
-# `pnpm audit` fails the build on a high or critical advisory. This one has no fixed version yet: braces, which stylelint
-# reaches through fast-glob and micromatch, can exhaust the stack on a malicious brace pattern. Stylelint runs on this
-# repository's own globs, in CI and on the developer's machine, and nothing here passes it a pattern from outside. Remove
-# the line when braces has a fix.
+# `pnpm audit` fails the build on a high or critical advisory. These two have no fixed version yet, and only development
+# tools reach them, never the site:
+# - GHSA-vfj7-8cjw-p6xm: braces, which stylelint reaches through fast-glob and micromatch, can exhaust the stack on a
+#   malicious brace pattern.
+# - GHSA-fc5q-39xc-vjpf: picomatch, which stylelint, cspell, dependency-cruiser and Vitest reach, can spend a very long
+#   time matching a malicious extglob pattern.
+# These tools run on this repository's own globs, in CI and on the developer's machine, and nothing here passes them a
+# pattern from outside. Remove a line when its package has a fix.
 audit:
   level: high
   ignore:
     - GHSA-vfj7-8cjw-p6xm
+    - GHSA-fc5q-39xc-vjpf
