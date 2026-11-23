@@ -4,6 +4,8 @@ All notable changes to this project are written here. The format follows [Keep a
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-11-23
+
 ### Changed
 
 - The pages reach visitors through Cloudflare's network instead of Hostinger's CDN, still served by the same hosting, and the privacy policy, in both languages, says so.
@@ -103,7 +105,8 @@ The first public version of the site and of its repository.
 - Documentation in [`docs/`](docs/): architecture, internationalization, web standards, testing, build and deploy, continuous integration, releasing and repository settings, and the decisions behind them.
 - A guide for coding agents in [`AGENTS.md`](AGENTS.md), which Claude Code reads through `CLAUDE.md`: the commands, the architecture and the rules that the tests enforce. [ai-memory](https://github.com/akitaonrails/ai-memory) keeps their sessions and handoffs across agents, with its workspace and project in [`.ai-memory.toml`](.ai-memory.toml).
 
-[Unreleased]: https://github.com/GustavoEklund/eklund.com.br/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/GustavoEklund/eklund.com.br/compare/v1.2.1...HEAD
+[1.2.1]: https://github.com/GustavoEklund/eklund.com.br/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/GustavoEklund/eklund.com.br/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/GustavoEklund/eklund.com.br/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/GustavoEklund/eklund.com.br/releases/tag/v1.0.0
