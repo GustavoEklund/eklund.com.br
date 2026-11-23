@@ -61,7 +61,7 @@ describe('tools/validate-html.mjs --only-static', () => {
   );
 
   it(
-    'lets the ARIA 1.2 combobox point at an option of its listbox, which the checker still warns about',
+    'lets the ARIA 1.2 combobox point at an option of the listbox it controls',
     () => {
       const body =
         '<input type="text" role="combobox" aria-label="Search" aria-controls="list" aria-expanded="true" aria-activedescendant="o1"><ul id="list" role="listbox" aria-label="Results"><li id="o1" role="option" aria-selected="true">One</li></ul>';
@@ -75,7 +75,7 @@ describe('tools/validate-html.mjs --only-static', () => {
   );
 
   it(
-    'still reports that warning for any other element, and counts a warning as a failure',
+    'reports aria-activedescendant on any other element, and counts a warning as a failure',
     () => {
       expect(
         check(
@@ -85,7 +85,7 @@ describe('tools/validate-html.mjs --only-static', () => {
       ).toStrictEqual({
         status: 1,
         stdout: [
-          '  other.html:3:7 warning: Attribute “aria-activedescendant” value should either refer to a descendant element, or should be accompanied by attribute “aria-owns”.',
+          '  other.html:3:7 warning: Attribute “aria-activedescendant” value should either refer to a descendant element, or refer to a descendant of an element referenced by attribute “aria-controls”, or be accompanied by attribute “aria-owns”.',
           '    ad> <body><input type="text" aria-label="Other" aria-activedescendant="o1"><p id=',
           'FAIL other.html: 1 finding',
           '',

@@ -25,17 +25,9 @@ const LANGUAGES = [
 ];
 
 /**
- * Messages the checker may report without failing the run, each limited to the element it is about and saying why.
  * The CSS checker of vnu is not used: it predates animation-timeline, @starting-style, rx and min() with var(),
  * which this site uses on purpose (stylelint checks the CSS instead).
  */
-const ALLOWED = [
-  {
-    message: /^Attribute “aria-activedescendant” value should either refer to a descendant element/,
-    extract: /role="combobox"/,
-    why: 'ARIA 1.2 combobox pattern (APG): the input keeps the focus and points at an option of the listbox it controls, which is not its descendant. The checker still expects the ARIA 1.1 container pattern.',
-  },
-];
 
 /** vnu as a child process: one JVM start for every file. */
 class NuChecker {
@@ -162,9 +154,9 @@ class Report {
 
   /** Prints what the checker found in one document and returns how many messages count against it. */
   document(name, messages) {
-    const findings = messages
-      .filter((message) => message.type === 'error' || message.subType === 'warning')
-      .filter((message) => !Report.#isAllowed(message));
+    const findings = messages.filter(
+      (message) => message.type === 'error' || message.subType === 'warning',
+    );
     for (const finding of findings) {
       const kind = finding.type === 'error' ? 'error' : 'warning';
       console.log(
@@ -179,12 +171,6 @@ class Report {
 
   get failed() {
     return this.#failures > 0;
-  }
-
-  static #isAllowed(message) {
-    return ALLOWED.some(
-      (rule) => rule.message.test(message.message) && rule.extract.test(message.extract ?? ''),
-    );
   }
 }
 
