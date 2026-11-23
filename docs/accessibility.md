@@ -90,5 +90,4 @@ Not in scope at AA: 2.4.13 focus appearance and 2.5.5 target size (AAA). The foc
 
 - No screen reader speech was tested. Roles, names and states are checked through the accessibility tree.
 - The `mailto:` links copy the address when clicked, and open the mail client with Ctrl or Cmd held.
-- `vnu` reports one warning that is allowed on purpose: the ARIA 1.2 combobox points `aria-activedescendant` at an option that is not its descendant. The tool lists the reason.
 - The CSS validator inside `vnu` is not used because it predates `animation-timeline`, `@starting-style` and other features the site uses; Stylelint checks the CSS.

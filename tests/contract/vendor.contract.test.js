@@ -22,7 +22,7 @@ const COPIES = [
 ];
 /**
  * @rrweb/record ships without its license text, so the copy beside it is the LICENSE of rrweb's repository at the tag of the
- * pinned version (https://github.com/rrweb-io/rrweb/blob/@rrweb/record@2.2.1/LICENSE).
+ * pinned version (https://github.com/rrweb-io/rrweb/blob/@rrweb/record@2.2.2/LICENSE).
  */
 const RRWEB_LICENSE = 'js/vendor/rrweb-LICENSE.txt';
 const PACKAGES = ['@rrweb/record', 'web-vitals'];
