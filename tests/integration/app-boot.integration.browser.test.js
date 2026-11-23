@@ -36,6 +36,12 @@ describe('the whole page, booted by importing main.js into the real markup', () 
       problems.warnings.push(args.map(String).join(' '));
       originalWarn(...args);
     };
+    // A view transition inside the test runner's iframe makes Chromium close the page, so the app takes
+    // the path it takes in a browser without them.
+    Object.defineProperty(document, 'startViewTransition', {
+      value: undefined,
+      configurable: true,
+    });
     localStorage.clear();
     history.replaceState(null, '', '/');
     const page = new DOMParser().parseFromString(
