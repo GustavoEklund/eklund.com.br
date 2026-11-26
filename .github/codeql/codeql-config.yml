@@ -1,6 +1,12 @@
 # What CodeQL analyzes. The tests are left out: they read this repository's own files with regular expressions (HTML,
 # URLs, headers), and nothing in them ships or runs on a visitor's machine. The code that ships (source/) and the code that
 # builds, serves, audits and releases it (tools/, the workflows) is analyzed.
+#
+# The vendored copies are left out too. They are the published builds of web-vitals and rrweb, byte for byte (a contract test
+# compares them with the packages), so a finding in them is a finding upstream, reported there, and never a line to edit here.
+# Dependabot and the dependency review still watch the packages they come from.
 name: CodeQL configuration
 paths-ignore:
   - tests
+  - source/js/vendor
+  - edge/panel/vendor
