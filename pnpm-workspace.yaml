@@ -5,6 +5,9 @@ overrides:
   # Stryker's HTTP client asks for a qs that has denial-of-service advisories (GHSA-q8mj-m7cp-5q26, GHSA-x5fp-wj9c-mxmx,
   # GHSA-4mjr-xmp4-gh2g); the fixed line is a drop-in.
   qs@<6.16.0: ^6.16.0
+  # Stryker asks for minimatch 10, which has a denial-of-service advisory (GHSA-g3hv-75wg-m249); 11 keeps the same
+  # minimatch and Minimatch exports.
+  minimatch@>=7.0.0 <11.0.1: ^11.0.1
 
 # Supply chain: a version is installed only when it has been public for two days, which is about how long the registry and the
 # community need to pull a compromised release (Dependabot waits longer, see .github/dependabot.yml). A package may not lose the

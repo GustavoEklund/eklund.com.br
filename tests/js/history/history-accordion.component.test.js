@@ -366,8 +366,21 @@ describe('HistoryAccordion', () => {
     it('stops the timer when it leaves the screen', async () => {
       accordion.install();
       await untilTrue(() => open()[0] && vi.getTimerCount() === 1);
+      // A second observer on the same element hears about the change after the accordion's own, because observers are
+      // notified in the order they were created, so the test waits for the same callback the code does, however late it comes.
+      const offScreen = new Promise((resolve) => {
+        const observer = new IntersectionObserver(
+          ([entry]) => {
+            if (entry.isIntersecting) return;
+            observer.disconnect();
+            resolve();
+          },
+          { threshold: 0.3 },
+        );
+        observer.observe(root);
+      });
       root.style.cssText = 'position:absolute;top:-5000px;height:200px';
-      await untilTrue(() => vi.getTimerCount() === 0);
+      await offScreen;
       expect(vi.getTimerCount()).toBe(0);
     });
   });

@@ -11,9 +11,8 @@ on:
 
 permissions: {}
 
-concurrency:
-  group: conventions-${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
-  cancel-in-progress: true
+# No concurrency group: Dependabot opens a pull request and labels it in the same second, and GitHub does not keep the order
+# of those runs, so cancelling the older one sometimes cancelled the newest, whose checks are the ones the ruleset reads.
 
 env:
   CI: 'true'

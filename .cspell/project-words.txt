@@ -133,6 +133,7 @@ mediump
 mensageria
 microsservicos
 milhões
+minimatch
 mobi
 modelcontextprotocol
 monday
