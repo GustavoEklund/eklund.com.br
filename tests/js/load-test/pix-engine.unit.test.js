@@ -185,7 +185,9 @@ describe('PixEngine.handle: rejections leave the ledger alone', () => {
   });
 });
 
-describe('PixEngine.handle: idempotency by EndToEndId', () => {
+// Three of these tests fill the set with 300,000 ids, which takes under a second alone and several times that while the
+// mutation run or the pre-push hook keeps every core busy.
+describe('PixEngine.handle: idempotency by EndToEndId', { timeout: 30_000 }, () => {
   let engine;
   beforeEach(() => {
     engine = new PixEngine();
