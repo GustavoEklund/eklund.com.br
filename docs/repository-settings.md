@@ -67,7 +67,7 @@ The ruleset asks for no approving review, because there is a single maintainer a
 
 ## Deploy
 
-The [`Deploy`](../.github/workflows/deploy.yml) workflow reads the FTP account from the secrets of the `production` environment. Only `main`, for a run by hand, and the release tags, when `Release` calls it, can deploy from that environment:
+The [`Deploy`](../.github/workflows/deploy.yml) workflow reads the FTP account and the token that purges Cloudflare's cache from the secrets of the `production` environment. Only `main`, for a run by hand, and the release tags, when `Release` calls it, can deploy from that environment:
 
 ```sh
 gh api --method PUT repos/GustavoEklund/eklund.com.br/environments/production \
@@ -79,9 +79,12 @@ gh api --method POST repos/GustavoEklund/eklund.com.br/environments/production/d
 gh secret set FTP_HOST --env production --repo GustavoEklund/eklund.com.br
 gh secret set FTP_USER --env production --repo GustavoEklund/eklund.com.br
 gh secret set FTP_PASSWORD --env production --repo GustavoEklund/eklund.com.br
+gh secret set CLOUDFLARE_PURGE_TOKEN --env production --repo GustavoEklund/eklund.com.br
 ```
 
 The values come from the FTP account made for the deploy, whose folder is `/public_html` ([`build-and-deploy.md`](build-and-deploy.md#set-it-up-once)). `FTP_HOST` is the IP address that hPanel shows as the FTP host under Files, FTP Accounts, without `ftp://`. It is a secret because it is the address of the server behind the CDN, and for the same reason the deploy does not use the `ftp.` name that the list of accounts offers to activate: that name would publish the address in the DNS. `FTP_USER` is the user name as that list shows it, with its prefix, like `u123456789.deploy`. The environment asks for no approval: a release goes online as soon as it is published.
+
+`CLOUDFLARE_PURGE_TOKEN` drops Cloudflare's copies of the pages after each upload ([0018](decisions/0018-the-pages-cached-at-the-edge.md)). It is an API token made in the Cloudflare dashboard, under My Profile, API Tokens, from a custom template with one permission, Zone, Cache Purge, Purge, and one zone, eklund.com.br. It can do nothing else, so a leak would only empty the cache.
 
 ### The collector
 

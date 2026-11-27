@@ -2,7 +2,8 @@
 # Release workflow signed for it, goes to the hosting over FTP with TLS (tools/deploy.mjs): into public_html, and into
 # public_html/gustavo/, the folder of gustavo.eklund.com.br, which mirrors the site. The zip carries the copy of the version
 # for its own folder, which stays online at eklund.com.br/X.Y.Z/ after later releases. A pre-release goes only to its own
-# folder. Then every page online is compared with the page of the release.
+# folder. Then Cloudflare, which keeps a copy of each page at its edge (ADR 0018), drops every copy, and every page online is
+# compared with the page of the release.
 # The Release workflow calls this one once it publishes a release. Run it by hand to put an older release back online, or with
 # dry-run (the default by hand) to see what a deploy would change (docs/build-and-deploy.md).
 name: Deploy
@@ -30,6 +31,9 @@ on:
         required: true
       FTP_PASSWORD:
         description: The password of that account
+        required: true
+      CLOUDFLARE_PURGE_TOKEN:
+        description: A Cloudflare API token that can only purge the cache of the eklund.com.br zone
         required: true
   workflow_dispatch:
     inputs:
@@ -122,6 +126,26 @@ jobs:
           fi
           if [ "$DRY_RUN" = 'true' ]; then arguments+=(--dry-run); fi
           node tools/deploy.mjs "${arguments[@]}"
+      # Cloudflare keeps each page for as long as the origin's Cache-Control says (ten minutes, then stale while it
+      # revalidates). One purge of the whole zone makes the new pages the ones it serves at once, the check below included.
+      - name: Drop Cloudflare's copies of the pages
+        if: ${{ !inputs.dry-run }}
+        env:
+          CLOUDFLARE_PURGE_TOKEN: ${{ secrets.CLOUDFLARE_PURGE_TOKEN }}
+          ZONE_ID: c439641c4f308f447d5c01172534302d # eklund.com.br; an identifier, not a secret
+        run: |
+          if [ -z "$CLOUDFLARE_PURGE_TOKEN" ]; then
+            echo '::error::CLOUDFLARE_PURGE_TOKEN is not in the production environment (docs/repository-settings.md).'
+            exit 1
+          fi
+          # The token goes through curl's config on stdin, so it is not in the arguments of a process.
+          printf 'header = "Authorization: Bearer %s"\n' "$CLOUDFLARE_PURGE_TOKEN" |
+            curl --fail-with-body --silent --show-error --config - \
+              --header 'Content-Type: application/json' --data '{"purge_everything":true}' \
+              "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/purge_cache" |
+            jq --exit-status '.success' > /dev/null
+          # Cloudflare answers once it has the request; the copies are gone everywhere a few seconds later.
+          sleep 10
       - name: Check the pages online
         if: ${{ !inputs.dry-run }}
         env:

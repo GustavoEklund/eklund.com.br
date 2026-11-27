@@ -681,10 +681,10 @@ describe('the steps of the Deploy workflow', () => {
 });
 
 describe('the Deploy workflow, when Release calls it', () => {
-  it('gets each secret of the FTP account by name, and requires all three', () => {
+  it('gets each secret of the FTP account and the purge token by name, and requires all four', () => {
     // A workflow that another one calls gets a secret of its environment only when the caller passes it, and an empty
     // string otherwise, with no error.
-    const account = ['FTP_HOST', 'FTP_USER', 'FTP_PASSWORD'];
+    const account = ['FTP_HOST', 'FTP_USER', 'FTP_PASSWORD', 'CLOUDFLARE_PURGE_TOKEN'];
     const deploy = RepositoryFiles.read('.github/workflows/deploy.yml');
     const secretsOf = (text) => /^ {4}secrets:\n((?: {6}.*\n)+)/m.exec(text)?.[1] ?? '';
     expect([

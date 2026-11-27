@@ -52,7 +52,8 @@ Every release goes online by itself. Once the [`Release`](../.github/workflows/r
 
 1. downloads the zip of the release, and checks it against its checksum and against the provenance attestation that `Release` signed for it from the tag;
 2. sends it over FTP with TLS ([`tools/deploy.mjs`](../tools/deploy.mjs)) to `public_html/gustavo/`, the folder of `gustavo.eklund.com.br`, which mirrors the site, and then to `public_html`;
-3. compares every page online with the page of the release, byte for byte, and checks its Content-Security-Policy, which allows its script.
+3. purges Cloudflare's cache of the zone, which keeps a copy of each page at the edge ([0018](decisions/0018-the-pages-cached-at-the-edge.md)), so the new pages are served at once;
+4. compares every page online with the page of the release, byte for byte, and checks its Content-Security-Policy, which allows its script.
 
 The zip carries the copy of the version for its own folder. So each release stays online at `eklund.com.br/1.1.0/` and `gustavo.eklund.com.br/1.1.0/` after the next ones. A pre-release (`v1.2.0-rc.1`) goes only to its own folder, never to the root. The plan of the hosting has FTP and no SSH: [ADR 0008](decisions/0008-deploy-each-release-over-ftps.md) says why the deploy works this way.
 
