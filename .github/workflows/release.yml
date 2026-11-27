@@ -114,12 +114,13 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     with:
       tag: ${{ github.ref_name }}
-    # The FTP account, which the job of Deploy reads from the production environment. Passed by name, so Deploy gets these
-    # three and no other secret.
+    # The FTP account and the token that purges Cloudflare's cache, which the job of Deploy reads from the production
+    # environment. Passed by name, so Deploy gets these four and no other secret.
     secrets:
       FTP_HOST: ${{ secrets.FTP_HOST }}
       FTP_USER: ${{ secrets.FTP_USER }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      CLOUDFLARE_PURGE_TOKEN: ${{ secrets.CLOUDFLARE_PURGE_TOKEN }}
 
   index-now:
     name: Tell the search engines the pages changed
